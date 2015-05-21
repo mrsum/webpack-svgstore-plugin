@@ -14,6 +14,9 @@ var cheerio = require('cheerio');
 var beautify = require('js-beautify').html;
 var multiline = require('multiline');
 var handlebars = require('handlebars');
+var SVGO = require('svgo');
+var mkdirp = require('mkdirp');
+var ncp = require('ncp').ncp;
 
 // Matching an url() reference. To correct references broken by making ids unique to the source svg
 var urlPattern = /url\(\s*#([^ ]+?)\s*\)/g;
@@ -48,7 +51,7 @@ var defaultTemplate = multiline.stripIndent(function() { /*
  * @param string output  Output path
  * @param object options Object of options
  */
-var SvgStore = function(input, output, options) {
+var SvgStore = function(options) {
 
   // Default function used to extract an id from a name
   var defaultConvertNameToId = function(name) {
@@ -67,6 +70,10 @@ var SvgStore = function(input, output, options) {
     },
     symbol: {},
     formatting: false,
+    minDir: '',
+    originalDir: '',
+    output: '',
+    pubDir: '',
     inheritviewbox: false,
     cleanupdefs: false,
     convertNameToId: defaultConvertNameToId,
@@ -75,10 +82,12 @@ var SvgStore = function(input, output, options) {
     preserveDescElement: true
   };
 
-  this.input = input;
-  this.output = output;
   this.files = [];
   this.options = _.extend(_default, options);
+  this.input = options.minDir;
+  this.originalDir = options.originalDir;
+  this.pubDir = options.pubDir;
+  this.output = options.output;
 
   var cleanupAttributes = [];
   if (options.cleanup && typeof options.cleanup === 'boolean') {
@@ -88,6 +97,44 @@ var SvgStore = function(input, output, options) {
     cleanupAttributes = options.cleanup;
   }
 
+};
+
+/**
+ * svgMin
+ * @param string dirpath   Destination path
+ * @param string pubpath  Output path
+ */
+SvgStore.prototype.svgMin = function (dirpath, pubpath) {
+  var svgo = new SVGO();
+  //read dirpath
+  fs.readdir(dirpath,function(err,files){
+    if (err) {
+      return console.log(err);
+    }
+    //make svg folder
+    mkdirp(pubpath, function(err) { 
+      //loop files
+      files.forEach(function(file){
+        // only svg's
+        if (file.match(/\.svg$/) !== null) {
+          //full path to file
+          var filepath = dirpath + '/' + file;
+          //read data from current file          
+          var data = fs.readFileSync(filepath, 'utf-8');
+          //optimize cur svg
+          svgo.optimize(data, function(result) {
+            //save to public path
+            fs.writeFile(pubpath + '/' + file, result.data, function(err) {
+              if(err) {
+                return console.log(err);
+              }
+              // console.log('The file ' + file + ' was saved!');
+            }); 
+          });
+        }
+      });
+    });
+  });
 };
 
 /**
@@ -130,7 +177,6 @@ SvgStore.prototype.parseFiles = function(files) {
   var content = null
   var options = this.options;
   var cleanupAttributes = [];
-
   if (options.cleanup && typeof options.cleanup === 'boolean') {
     cleanupAttributes = ['style'];
   } else if (Array.isArray(options.cleanup)) {
@@ -416,10 +462,20 @@ SvgStore.prototype.apply = function(compiler) {
 
   var _this = this;
 
-  //get filename map into folder
-  this.filesMap(this.input, function(files) {
-    _this.parseFiles(files, function(content) {});
+  // min svg's and save them to pubDir
+  _this.svgMin(this.input, this.pubDir);
+
+  //copy files from folder to folder by ncp
+  ncp(this.originalDir, this.pubDir, function (err) {
+   if (err) {
+     return console.error(err);
+   }
+   //get filename map into folder
+    _this.filesMap(_this.pubDir, function(files) {
+      _this.parseFiles(files, function(content) {});
+    });
   });
+
 }
 
 module.exports = SvgStore;
