@@ -16,6 +16,14 @@
     "multiline": "^1.0.2",
     "path": "^0.11.14",
     "underscore": "^1.8.3",
-    "walk": "^2.3.9"
+    "walk": "^2.3.9",
+    "mkdirp": "^0.5.1",
+    "svgo": "^0.5.1",
+    "wrench": "^1.5.8"
+  },
+  "devDependencies": {
+    "mkdirp": "^0.5.1",
+    "ncp": "^2.0.0",
+    "svgo": "^0.5.1"
   }
 }

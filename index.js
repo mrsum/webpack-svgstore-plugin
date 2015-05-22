@@ -14,6 +14,9 @@ var cheerio = require('cheerio');
 var beautify = require('js-beautify').html;
 var multiline = require('multiline');
 var handlebars = require('handlebars');
+var SVGO = require('svgo');
+var mkdirp = require('mkdirp');
+var wrench = require('wrench');
 
 // Matching an url() reference. To correct references broken by making ids unique to the source svg
 var urlPattern = /url\(\s*#([^ ]+?)\s*\)/g;
@@ -48,7 +51,7 @@ var defaultTemplate = multiline.stripIndent(function() { /*
  * @param string output  Output path
  * @param object options Object of options
  */
-var SvgStore = function(input, output, options) {
+var SvgStore = function(input, output, temp, options) {
 
   // Default function used to extract an id from a name
   var defaultConvertNameToId = function(name) {
@@ -67,6 +70,9 @@ var SvgStore = function(input, output, options) {
     },
     symbol: {},
     formatting: false,
+    loop: 1,
+    min: false,
+    minDir: 'min',
     inheritviewbox: false,
     cleanupdefs: false,
     convertNameToId: defaultConvertNameToId,
@@ -75,10 +81,16 @@ var SvgStore = function(input, output, options) {
     preserveDescElement: true
   };
 
-  this.input = input;
-  this.output = output;
   this.files = [];
   this.options = _.extend(_default, options);
+
+  this.input = input;
+  this.output = output;
+  this.temp = temp;
+
+  this.loop = this.options.loop;
+  this.min = this.options.min;
+  this.minDir = this.options.minDir;
 
   var cleanupAttributes = [];
   if (options.cleanup && typeof options.cleanup === 'boolean') {
@@ -88,6 +100,56 @@ var SvgStore = function(input, output, options) {
     cleanupAttributes = options.cleanup;
   }
 
+};
+
+/**
+ * svgMin
+ * @param string input   Destination path
+ * @param string output  Output path
+ * @param string minDir  SVG path for optimization
+ * @param string temp    Temp svg's path
+ * @param string loop    Optimize loop times
+ */
+SvgStore.prototype.svgMin = function (input, output, minDir, temp, loop) {
+  var svgo = new SVGO();
+  var minTemp = path.join(temp, 'min');
+
+  if (minDir === 'min') {
+    var minDir = path.join(input, minDir);
+  }
+
+  fs.readdir(minDir,function(err,files){
+    if (err) {
+      return console.log(err);
+    }
+    //make svg folder
+    mkdirp(minTemp, function(err) { 
+      //loop files
+      files.forEach(function(file){
+        // only svg's
+        if (file.match(/\.svg$/) !== null) {
+          //full path to file
+          var filepath = minDir + '/' + file;
+          //read data from current file          
+          var data = fs.readFileSync(filepath, 'utf-8');
+          //optimize cur svg
+          for (var i = 1; i <= loop; i++) {
+            svgo.optimize(data, function(result) {
+              //save to public path
+              data = result.data;
+              if (i === loop) {
+                fs.writeFile(minTemp + '/' + file, result.data, function(err) {
+                  if(err) {
+                    return console.log(err);
+                  }
+                }); 
+              }
+            });
+          }
+        }
+      });
+    });
+  });
 };
 
 /**
@@ -116,6 +178,7 @@ SvgStore.prototype.filesMap = function(input, cb) {
   });
 
   return walker.on('end', function() {
+    // console.log(files);
     cb(files);
   });
 
@@ -130,7 +193,6 @@ SvgStore.prototype.parseFiles = function(files) {
   var content = null
   var options = this.options;
   var cleanupAttributes = [];
-
   if (options.cleanup && typeof options.cleanup === 'boolean') {
     cleanupAttributes = ['style'];
   } else if (Array.isArray(options.cleanup)) {
@@ -416,10 +478,19 @@ SvgStore.prototype.apply = function(compiler) {
 
   var _this = this;
 
-  //get filename map into folder
-  this.filesMap(this.input, function(files) {
+  if (this.min) {
+    // min svg's and save them to pubDir
+    _this.svgMin(this.input, this.output, this.minDir, this.temp, this.loop);
+  }
+
+  //copy files from folder to folder
+  wrench.copyDirSyncRecursive(this.input, this.temp);
+
+  //make sprite
+  _this.filesMap(_this.temp, function(files) {
     _this.parseFiles(files, function(content) {});
   });
+
 }
 
 module.exports = SvgStore;
