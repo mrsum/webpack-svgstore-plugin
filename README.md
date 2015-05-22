@@ -3,7 +3,7 @@
 ...
 //load plugins
 plugins: [
-  //create svg spirte from /path/to/*.svg
+  //create svg sprite from /path/to/*.svg
   new SvgStore('/path/to/folder/svg', '/path/to/output/sprite.svg'), {
     prefix: 'icon-',
     svg: {
