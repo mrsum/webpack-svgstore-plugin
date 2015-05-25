@@ -471,7 +471,7 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
     if (err) {
       return console.log(err);
     }
-    console.log('The file was saved!');asd
+    console.log('The file was saved!');
   });
 }
 
@@ -500,9 +500,7 @@ SvgStore.prototype.apply = function(compiler) {
         _this.parseFiles(files, _this.options.min, key.sprite, function(content) {});
       });
     });
-
   }
-
 }
 
 module.exports = SvgStore;
