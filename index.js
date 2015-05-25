@@ -16,7 +16,8 @@ var multiline = require('multiline');
 var handlebars = require('handlebars');
 var SVGO = require('svgo');
 var mkdirp = require('mkdirp');
-var wrench = require('wrench');
+var getDirName = path.dirname;
+var other_files = [];
 
 // Matching an url() reference. To correct references broken by making ids unique to the source svg
 var urlPattern = /url\(\s*#([^ ]+?)\s*\)/g;
@@ -51,7 +52,10 @@ var defaultTemplate = multiline.stripIndent(function() { /*
  * @param string output  Output path
  * @param object options Object of options
  */
-var SvgStore = function(input, output, temp, options) {
+var SvgStore = function(input, options) {
+
+  var _input = input;
+  var that = this;
 
   // Default function used to extract an id from a name
   var defaultConvertNameToId = function(name) {
@@ -70,6 +74,12 @@ var SvgStore = function(input, output, temp, options) {
     },
     symbol: {},
     formatting: false,
+    output: [
+      {
+        svg: 'all', // 'all', 'others', 'logo-' (prefix)
+        sprite: 'sprite.html' // path to sprite with full name
+      }
+    ],
     loop: 1,
     min: false,
     minDir: 'min',
@@ -85,12 +95,6 @@ var SvgStore = function(input, output, temp, options) {
   this.options = _.extend(_default, options);
 
   this.input = input;
-  this.output = output;
-  this.temp = temp;
-
-  this.loop = this.options.loop;
-  this.min = this.options.min;
-  this.minDir = this.options.minDir;
 
   var cleanupAttributes = [];
   if (options.cleanup && typeof options.cleanup === 'boolean') {
@@ -110,46 +114,15 @@ var SvgStore = function(input, output, temp, options) {
  * @param string temp    Temp svg's path
  * @param string loop    Optimize loop times
  */
-SvgStore.prototype.svgMin = function (input, output, minDir, temp, loop) {
+SvgStore.prototype.svgMin = function (file, loop) {
   var svgo = new SVGO();
-  var minTemp = path.join(temp, 'min');
-
-  if (minDir === 'min') {
-    var minDir = path.join(input, minDir);
-  }
-
-  fs.readdir(minDir,function(err,files){
-    if (err) {
-      return console.log(err);
-    }
-    //make svg folder
-    mkdirp(minTemp, function(err) { 
-      //loop files
-      files.forEach(function(file){
-        // only svg's
-        if (file.match(/\.svg$/) !== null) {
-          //full path to file
-          var filepath = minDir + '/' + file;
-          //read data from current file          
-          var data = fs.readFileSync(filepath, 'utf-8');
-          //optimize cur svg
-          for (var i = 1; i <= loop; i++) {
-            svgo.optimize(data, function(result) {
-              //save to public path
-              data = result.data;
-              if (i === loop) {
-                fs.writeFile(minTemp + '/' + file, result.data, function(err) {
-                  if(err) {
-                    return console.log(err);
-                  }
-                }); 
-              }
-            });
-          }
-        }
-      });
+  // optimize loop
+  for (var i = 1; i <= loop; i++) {
+    svgo.optimize(file, function(result) {
+      file = result.data;
     });
-  });
+  }
+  return file;
 };
 
 /**
@@ -157,7 +130,7 @@ SvgStore.prototype.svgMin = function (input, output, minDir, temp, loop) {
  * @param  {string} input Destination path
  * @return {array}        Array of paths
  */
-SvgStore.prototype.filesMap = function(input, cb) {
+SvgStore.prototype.filesMap = function(input, prefix ,cb) {
 
   //files
   var files = [];
@@ -170,15 +143,25 @@ SvgStore.prototype.filesMap = function(input, cb) {
 
   //walker event
   walker.on('file', function(root, stat, next) {
-    // Add this file to the list of files
-    files.push(root + '/' + stat.name);
+
+    var curItem = root + '/' + stat.name;
+
+    if (prefix != '' && stat.name.indexOf(prefix) != -1) {
+      files.push(curItem);
+    } else if (prefix != '' && prefix != 'others') {
+      other_files.push(curItem);
+    } else if (!prefix) {
+      files.push(curItem);
+    }
 
     //goto next file
     next();
+      
   });
-
+  if (prefix == 'others') {
+    files = other_files;
+  }
   return walker.on('end', function() {
-    // console.log(files);
     cb(files);
   });
 
@@ -189,10 +172,13 @@ SvgStore.prototype.filesMap = function(input, cb) {
  * @param  {[type]} arguments [description]
  * @return {[type]}           [description]
  */
-SvgStore.prototype.parseFiles = function(files) {
-  var content = null
+SvgStore.prototype.parseFiles = function(files, min, sprite) {
+
+  var content = null;
+  var _this = this;
   var options = this.options;
   var cleanupAttributes = [];
+
   if (options.cleanup && typeof options.cleanup === 'boolean') {
     cleanupAttributes = ['style'];
   } else if (Array.isArray(options.cleanup)) {
@@ -210,10 +196,18 @@ SvgStore.prototype.parseFiles = function(files) {
   }
 
   files.forEach(function(file) {
-
     var filename = path.basename(file, '.svg');
     var id = options.convertNameToId(filename);
+
     var contentStr = fs.readFileSync(file, 'utf8');
+
+    if (path.extname(file) == '.svg') {
+      if (min) {
+        // min svg's 
+        contentStr = _this.svgMin(contentStr, _this.options.loop);
+      } 
+    }
+
     var $ = cheerio.load(contentStr, {
       normalizeWhitespace: true,
       xmlMode: true
@@ -450,6 +444,7 @@ SvgStore.prototype.parseFiles = function(files) {
 
       $resultSvg.append($resFixed.html());
     }
+
   });
 
   // Remove defs block if empty
@@ -457,15 +452,26 @@ SvgStore.prototype.parseFiles = function(files) {
     $resultDefs.remove();
   }
 
+  // for write file to non-exist dir
+  function writeFile (path, contents, cb) {
+    mkdirp(getDirName(path), function (err) {
+      if (err) return cb(err)
+      fs.writeFile(path, contents, cb)
+    })
+  }
+
   //get result file
   var result = options.formatting
     ? beautify($resultDocument.html(), options.formatting)
     : $resultDocument.html();
-
+  
   //save file
-  fs.writeFile(this.output, result, function(err) {
-    if (err) return console.log(err);
-    console.log('The file was saved!');
+
+  writeFile(sprite, result, function(err) {
+    if (err) {
+      return console.log(err);
+    }
+    console.log('The file was saved!');asd
   });
 }
 
@@ -477,19 +483,25 @@ SvgStore.prototype.parseFiles = function(files) {
 SvgStore.prototype.apply = function(compiler) {
 
   var _this = this;
+  var output = this.options.output;
+  var name_prefix = false;
 
-  if (this.min) {
-    // min svg's and save them to pubDir
-    _this.svgMin(this.input, this.output, this.minDir, this.temp, this.loop);
+  // 1 sprite for all svgs
+  if ((output.length == 1)&&(output[0].svg == 'all')) {
+    _this.filesMap(_this.input, name_prefix, function(files) {
+      _this.parseFiles(files, _this.options.min, output[0].sprite, function(content) {});
+    });
+
+  } else {
+
+  // multiply sprites
+    output.forEach(function(key) {
+      _this.filesMap(_this.input, key.svg, function(files) {
+        _this.parseFiles(files, _this.options.min, key.sprite, function(content) {});
+      });
+    });
+
   }
-
-  //copy files from folder to folder
-  wrench.copyDirSyncRecursive(this.input, this.temp);
-
-  //make sprite
-  _this.filesMap(_this.temp, function(files) {
-    _this.parseFiles(files, function(content) {});
-  });
 
 }
 

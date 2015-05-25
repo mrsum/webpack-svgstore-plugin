@@ -18,12 +18,8 @@
     "underscore": "^1.8.3",
     "walk": "^2.3.9",
     "mkdirp": "^0.5.1",
-    "svgo": "^0.5.1",
-    "wrench": "^1.5.8"
+    "svgo": "^0.5.1"
   },
   "devDependencies": {
-    "mkdirp": "^0.5.1",
-    "ncp": "^2.0.0",
-    "svgo": "^0.5.1"
   }
 }

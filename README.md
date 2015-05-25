@@ -9,7 +9,27 @@ plugins: [
     svg: {
       style: 'position:absolute; width:0; height:0',
       xmlns: 'http://www.w3.org/2000/svg'
-    }
+    },
+    output: [
+    	// multiply sprites
+      {
+        svg: 'Logo-',
+        sprite: path.join(_path + '/public/assets/svg/_logo_sprite.html')
+      },
+      {
+        svg: 'others',
+        sprite: path.join(_path + '/public/assets/svg/_sprite.html')
+      }
+
+       // 1 sprite
+	  {
+        svg: 'all',
+        sprite: path.join(_path + '/public/assets/svg/_sprite.html')
+      }
+
+    ],
+    loop: 2,
+    min: true
   })
 ]
 
