@@ -1,8 +1,16 @@
-```javascript
+```bash
+npm i webpack-svgstore-plugin --save-dev
+```
 
+
+```javascript
+//webpack.config.js
+
+var SvgStore = require('webpack-svgstore-plugin');
 ...
 //load plugins
 plugins: [
+
   //create svg sprite from /path/to/*.svg
   new SvgStore('/path/to/folder/svg', {
     prefix: 'icon-',

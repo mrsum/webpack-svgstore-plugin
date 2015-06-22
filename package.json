@@ -1,6 +1,6 @@
 {
   "name": "webpack-svgstore-plugin",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Webpack svgstore plugin",
   "main": "index.js",
   "scripts": {
