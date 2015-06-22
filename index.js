@@ -76,7 +76,7 @@ var SvgStore = function(input, options) {
     formatting: false,
     output: [
       {
-        svg: 'all', // 'all', 'others', 'logo-' (prefix)
+        svg: 'all', // 'all', 'except Logo-' (except prefix), 'logo-' (prefix)
         sprite: 'sprite.html' // path to sprite with full name
       }
     ],
@@ -141,28 +141,35 @@ SvgStore.prototype.filesMap = function(input, prefix ,cb) {
   // Walker options
   var walker  = walk.walk(input, walkOptions);
 
+  if (prefix.indexOf('except') != -1) {
+    var exceptedPrefix = prefix.replace('except-',''),
+        except = true;
+  }
+
   //walker event
   walker.on('file', function(root, stat, next) {
 
     var curItem = root + '/' + stat.name;
 
-    if (prefix != '' && stat.name.indexOf(prefix) != -1) {
+    // prefix
+    if (prefix && stat.name.indexOf(prefix) != -1) {
       files.push(curItem);
-    } else if (prefix != '' && prefix != 'others') {
+
+    // except prefix
+    } else if (prefix.indexOf('except') != -1 && stat.name.indexOf(exceptedPrefix) == -1) {
       other_files.push(curItem);
+
+    // no prefix or except
     } else if (!prefix) {
       files.push(curItem);
     }
 
     //goto next file
     next();
-      
+
   });
-  if (prefix == 'others') {
-    files = other_files;
-  }
   return walker.on('end', function() {
-    cb(files);
+    cb(except ? other_files : files);
   });
 
 };
@@ -471,7 +478,7 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
     if (err) {
       return console.log(err);
     }
-    console.log('The file was saved!');asd
+    console.log('The file was saved!');
   });
 }
 
@@ -500,9 +507,7 @@ SvgStore.prototype.apply = function(compiler) {
         _this.parseFiles(files, _this.options.min, key.sprite, function(content) {});
       });
     });
-
   }
-
 }
 
 module.exports = SvgStore;
