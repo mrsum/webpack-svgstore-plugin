@@ -80,9 +80,8 @@ var SvgStore = function(input, options) {
         sprite: 'sprite.svg' // path to sprite with full name
       }
     ],
-    append: {
-      path: ''
-    },
+    append: false,
+    appendPath: '',
     loop: 1,
     min: false,
     minDir: 'min',
@@ -503,15 +502,17 @@ SvgStore.prototype.apply = function(compiler) {
         }
         callback();
       });
-      sprites += '\tsvgXHR("assets/' + key.sprite + '");\n';
+      sprites += '\tsvgXHR("/assets/' + key.sprite + '");\n';
     });
   });
 
-  compiler.plugin('done', function(compilation, callback) {
-    fs.writeFile(_this.options.append.path, sprites, 'utf8', function(err) {
-      if (err) return console.log(err);
+  if (_this.options.append) {
+    compiler.plugin('done', function(compilation, callback) {
+      fs.writeFile(_this.options.appendPath, sprites, 'utf8', function(err) {
+        if (err) return console.log(err);
+      });
     });
-  });
+  }
 
 }
 
