@@ -77,9 +77,12 @@ var SvgStore = function(input, options) {
     output: [
       {
         filter: 'all', // 'all', 'except Logo-' (except prefix), 'logo-' (prefix)
-        sprite: 'sprite.html' // path to sprite with full name
+        sprite: 'sprite.svg' // path to sprite with full name
       }
     ],
+    append: {
+      path: ''
+    },
     loop: 1,
     min: false,
     minDir: 'min',
@@ -163,7 +166,7 @@ SvgStore.prototype.filesMap = function(input, filter, cb) {
     } else if (filter && filter.indexOf('except') != -1 && stat.name.indexOf(exceptedPrefix) == -1) {
       others.push(curItem);
 
-    // no prefix or except
+    // all
     } else if (!filter) {
       files.push(curItem);
     }
@@ -473,7 +476,6 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
   return result = options.formatting
     ? beautify($resultDocument.html(), options.formatting)
     : $resultDocument.html();
-
 }
 
 /**
@@ -486,6 +488,7 @@ SvgStore.prototype.apply = function(compiler) {
   var _this = this;
   var output = this.options.output;
   var oneForAll = output.length === 1 && output[0].filter === 'all';
+  var sprites = 'javascript:\n';
 
   output.forEach(function(key) {
     _this.filesMap(_this.input, oneForAll ? false : key.filter, function(files) {
@@ -500,6 +503,13 @@ SvgStore.prototype.apply = function(compiler) {
         }
         callback();
       });
+      sprites += '\tsvgXHR("assets/' + key.sprite + '");\n';
+    });
+  });
+
+  compiler.plugin('done', function(compilation, callback) {
+    fs.writeFile(_this.options.append.path, sprites, 'utf8', function(err) {
+      if (err) return console.log(err);
     });
   });
 
