@@ -10,6 +10,7 @@ var _ = require('underscore');
 var fs = require('fs');
 var path = require('path');
 var walk = require('walk');
+var crypto = require('crypto');
 var cheerio = require('cheerio');
 var beautify = require('js-beautify').html;
 var multiline = require('multiline');
@@ -17,7 +18,8 @@ var handlebars = require('handlebars');
 var SVGO = require('svgo');
 var mkdirp = require('mkdirp');
 var getDirName = path.dirname;
-var other_files = [];
+var Format = require('./format');
+var others = [];
 
 // Matching an url() reference. To correct references broken by making ids unique to the source svg
 var urlPattern = /url\(\s*#([^ ]+?)\s*\)/g;
@@ -55,7 +57,6 @@ var defaultTemplate = multiline.stripIndent(function() { /*
 var SvgStore = function(input, options) {
 
   var _input = input;
-  var that = this;
 
   // Default function used to extract an id from a name
   var defaultConvertNameToId = function(name) {
@@ -76,10 +77,13 @@ var SvgStore = function(input, options) {
     formatting: false,
     output: [
       {
-        svg: 'all', // 'all', 'except Logo-' (except prefix), 'logo-' (prefix)
-        sprite: 'sprite.html' // path to sprite with full name
+        filter: 'all', // 'all', 'except Logo-' (except prefix), 'logo-' (prefix)
+        sprite: 'sprite.svg' // path to sprite with full name
       }
     ],
+    format: 'slim',
+    append: false,
+    appendPath: '',
     loop: 1,
     min: false,
     minDir: 'min',
@@ -114,14 +118,16 @@ var SvgStore = function(input, options) {
  * @param string temp    Temp svg's path
  * @param string loop    Optimize loop times
  */
-SvgStore.prototype.svgMin = function (file, loop) {
+SvgStore.prototype.svgMin = function(file, loop) {
   var svgo = new SVGO();
+
   // optimize loop
   for (var i = 1; i <= loop; i++) {
     svgo.optimize(file, function(result) {
       file = result.data;
     });
   }
+
   return file;
 };
 
@@ -130,10 +136,12 @@ SvgStore.prototype.svgMin = function (file, loop) {
  * @param  {string} input Destination path
  * @return {array}        Array of paths
  */
-SvgStore.prototype.filesMap = function(input, prefix ,cb) {
+SvgStore.prototype.filesMap = function(input, filter, cb) {
 
   //files
   var files = [];
+  var exceptedPrefix = '';
+  var except = false;
 
   //options
   var walkOptions = { followLinks: false };
@@ -141,9 +149,9 @@ SvgStore.prototype.filesMap = function(input, prefix ,cb) {
   // Walker options
   var walker  = walk.walk(input, walkOptions);
 
-  if (prefix.indexOf('except') != -1) {
-    var exceptedPrefix = prefix.replace('except-',''),
-        except = true;
+  if (filter && filter.indexOf('except') != -1) {
+    exceptedPrefix = filter.replace('except-', '');
+    except = true;
   }
 
   //walker event
@@ -152,15 +160,15 @@ SvgStore.prototype.filesMap = function(input, prefix ,cb) {
     var curItem = root + '/' + stat.name;
 
     // prefix
-    if (prefix && stat.name.indexOf(prefix) != -1) {
+    if (filter && stat.name.indexOf(filter) != -1) {
       files.push(curItem);
 
     // except prefix
-    } else if (prefix.indexOf('except') != -1 && stat.name.indexOf(exceptedPrefix) == -1) {
-      other_files.push(curItem);
+    } else if (filter && filter.indexOf('except') != -1 && stat.name.indexOf(exceptedPrefix) == -1) {
+      others.push(curItem);
 
-    // no prefix or except
-    } else if (!prefix) {
+    // all
+    } else if (!filter) {
       files.push(curItem);
     }
 
@@ -168,10 +176,15 @@ SvgStore.prototype.filesMap = function(input, prefix ,cb) {
     next();
 
   });
+
   return walker.on('end', function() {
-    cb(except ? other_files : files);
+    cb(except ? others : files);
   });
 
+};
+
+SvgStore.prototype.hash = function(buffer) {
+  return crypto.createHash('md5').update(buffer).digest('hex');
 };
 
 /**
@@ -182,6 +195,7 @@ SvgStore.prototype.filesMap = function(input, prefix ,cb) {
 SvgStore.prototype.parseFiles = function(files, min, sprite) {
 
   var content = null;
+  var result = '';
   var _this = this;
   var options = this.options;
   var cleanupAttributes = [];
@@ -210,9 +224,9 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
 
     if (path.extname(file) == '.svg') {
       if (min) {
-        // min svg's 
+        // min svg's
         contentStr = _this.svgMin(contentStr, _this.options.loop);
-      } 
+      }
     }
 
     var $ = cheerio.load(contentStr, {
@@ -459,27 +473,10 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
     $resultDefs.remove();
   }
 
-  // for write file to non-exist dir
-  function writeFile (path, contents, cb) {
-    mkdirp(getDirName(path), function (err) {
-      if (err) return cb(err)
-      fs.writeFile(path, contents, cb)
-    })
-  }
-
   //get result file
-  var result = options.formatting
+  return result = options.formatting
     ? beautify($resultDocument.html(), options.formatting)
     : $resultDocument.html();
-  
-  //save file
-
-  writeFile(sprite, result, function(err) {
-    if (err) {
-      return console.log(err);
-    }
-    console.log('The file was saved!');
-  });
 }
 
 /**
@@ -491,23 +488,47 @@ SvgStore.prototype.apply = function(compiler) {
 
   var _this = this;
   var output = this.options.output;
-  var name_prefix = false;
+  var oneForAll = output.length === 1 && output[0].filter === 'all';
 
-  // 1 sprite for all svgs
-  if ((output.length == 1)&&(output[0].svg == 'all')) {
-    _this.filesMap(_this.input, name_prefix, function(files) {
-      _this.parseFiles(files, _this.options.min, output[0].sprite, function(content) {});
-    });
+  var outputData;
 
+  if (typeof _this.options.format === 'string' || _this.options.format instanceof String) {
+    var format = new Format();
+    outputData = format[_this.options.format]();
   } else {
+    outputData = _this.options.format();
+  }
 
-  // multiply sprites
-    output.forEach(function(key) {
-      _this.filesMap(_this.input, key.svg, function(files) {
-        _this.parseFiles(files, _this.options.min, key.sprite, function(content) {});
+  var sprites = outputData.start;
+
+  output.forEach(function(key) {
+    _this.filesMap(_this.input, oneForAll ? false : key.filter, function(files) {
+
+      if (key.sprite.indexOf('[hash]') >= 0) {
+        key.sprite = key.sprite.replace('[hash]', _this.hash(key.sprite));
+      }
+
+      var source = _this.parseFiles(files, _this.options.min, key.sprite);
+      compiler.plugin('emit', function(compilation, callback) {
+        compilation.assets[key.sprite] = {
+          source: function() { return new Buffer(source) },
+          size: function() { return Buffer.byteLength(this.source(), 'utf8'); }
+        }
+        callback();
+      });
+
+      sprites += outputData.each(key.sprite);
+    });
+  });
+
+  if (_this.options.append) {
+    compiler.plugin('done', function(compilation, callback) {
+      fs.writeFile(_this.options.appendPath, sprites, 'utf8', function(err) {
+        if (err) return console.log(err);
       });
     });
   }
+
 }
 
 module.exports = SvgStore;
