@@ -18,6 +18,7 @@ var handlebars = require('handlebars');
 var SVGO = require('svgo');
 var mkdirp = require('mkdirp');
 var getDirName = path.dirname;
+var Format = require('./format');
 var others = [];
 
 // Matching an url() reference. To correct references broken by making ids unique to the source svg
@@ -80,6 +81,7 @@ var SvgStore = function(input, options) {
         sprite: 'sprite.svg' // path to sprite with full name
       }
     ],
+    format: 'slim',
     append: false,
     appendPath: '',
     loop: 1,
@@ -487,13 +489,25 @@ SvgStore.prototype.apply = function(compiler) {
   var _this = this;
   var output = this.options.output;
   var oneForAll = output.length === 1 && output[0].filter === 'all';
-  var sprites = 'javascript:\n';
+
+  var outputData;
+
+  if (typeof _this.options.format === 'string' || _this.options.format instanceof String) {
+    var format = new Format();
+    outputData = format[_this.options.format]();
+  } else {
+    outputData = _this.options.format();
+  }
+
+  var sprites = outputData.start;
 
   output.forEach(function(key) {
     _this.filesMap(_this.input, oneForAll ? false : key.filter, function(files) {
+
       if (key.sprite.indexOf('[hash]') >= 0) {
         key.sprite = key.sprite.replace('[hash]', _this.hash(key.sprite));
       }
+
       var source = _this.parseFiles(files, _this.options.min, key.sprite);
       compiler.plugin('emit', function(compilation, callback) {
         compilation.assets[key.sprite] = {
@@ -502,7 +516,8 @@ SvgStore.prototype.apply = function(compiler) {
         }
         callback();
       });
-      sprites += '\tsvgXHR("/assets/' + key.sprite + '");\n';
+
+      sprites += outputData.each(key.sprite);
     });
   });
 
