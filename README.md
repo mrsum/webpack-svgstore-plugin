@@ -239,7 +239,8 @@ javascript:
 ```
 ##### 2) You should write your own format function script, e.g. `customFormat.js`:
 #
-```javascript sdf
+```javascript
+
 'use strict';
 
 module.exports = function() {
