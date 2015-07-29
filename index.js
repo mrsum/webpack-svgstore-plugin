@@ -84,6 +84,10 @@ var SvgStore = function(input, options) {
     append: false,
     appendPath: '',
     ajaxFunc: '',
+    manifest: {
+      update: false,
+      path: ''
+    },
     loop: 1,
     min: false,
     minDir: 'min',
@@ -184,9 +188,7 @@ SvgStore.prototype.filesMap = function(input, filter, cb) {
 };
 
 SvgStore.prototype.hash = function(buffer, name) {
-  if (name.indexOf('[hash]') >= 0) {
-    return name = name.replace('[hash]', crypto.createHash('md5').update(buffer).digest('hex'));
-  }
+  return name.indexOf('[hash]') >= 0 ? name.replace('[hash]', crypto.createHash('md5').update(buffer).digest('hex')) : name
 };
 
 /**
@@ -526,17 +528,24 @@ SvgStore.prototype.apply = function(compiler) {
     compiler.plugin('done', function(compilation, callback) {
       var path = _this.hash(spriteAjax, _this.options.appendPath);
       var filename = path.split("/").pop()
-      var manifest = JSON.parse(fs.readFileSync('config/manifest.json', 'utf-8'));
-      manifest.assetsByChunkName.sprite = filename;
-      var newManifest = JSON.stringify(manifest)
 
-      fs.writeFile('config/manifest.json', newManifest, 'utf8', function(err) {
-        if (err) return console.log(err);
-      });
+      if (_this.options.manifest.update) {
+        // update manifest with sprite js
+        var manifest = JSON.parse(fs.readFileSync('config/manifest.json', 'utf-8'));
+        manifest.assetsByChunkName.sprite = filename;
+        var newManifest = JSON.stringify(manifest)
 
+        // rewrite manifest
+        fs.writeFile(_this.options.manifest.path, newManifest, 'utf8', function(err) {
+          if (err) return console.log(err);
+        });
+      }
+
+      // add js to output
       fs.writeFile(path, spriteAjax, 'utf8', function(err) {
         if (err) return console.log(err);
       });
+
     });
   }
 
