@@ -531,7 +531,7 @@ SvgStore.prototype.apply = function(compiler) {
 
       if (_this.options.manifest.update) {
         // update manifest with sprite js
-        var manifest = JSON.parse(fs.readFileSync('config/manifest.json', 'utf-8'));
+        var manifest = JSON.parse(fs.readFileSync(_this.options.manifest.path, 'utf-8'));
         manifest.assetsByChunkName.sprite = filename;
         var newManifest = JSON.stringify(manifest)
 
