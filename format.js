@@ -6,9 +6,8 @@ var Format = function() {
 Format.prototype.slim = function(path) {
   var slim = {};
 
-  slim.start = 'javascript:\n';
   slim.each = function(path) {
-    return '\tsvgXHR("/assets/' + path + '");\n';
+    return 'svgXHR("/assets/' + path + '");\n';
   }
 
   return slim
