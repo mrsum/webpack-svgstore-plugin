@@ -16,7 +16,6 @@ var beautify = require('js-beautify').html;
 var multiline = require('multiline');
 var handlebars = require('handlebars');
 var SVGO = require('svgo');
-var mkdirp = require('mkdirp');
 var getDirName = path.dirname;
 var Format = require('./format');
 var others = [];
@@ -84,6 +83,11 @@ var SvgStore = function(input, options) {
     format: 'slim',
     append: false,
     appendPath: '',
+    ajaxFunc: '',
+    manifest: {
+      update: false,
+      path: ''
+    },
     loop: 1,
     min: false,
     minDir: 'min',
@@ -183,8 +187,8 @@ SvgStore.prototype.filesMap = function(input, filter, cb) {
 
 };
 
-SvgStore.prototype.hash = function(buffer) {
-  return crypto.createHash('md5').update(buffer).digest('hex');
+SvgStore.prototype.hash = function(buffer, name) {
+  return name.indexOf('[hash]') >= 0 ? name.replace('[hash]', crypto.createHash('md5').update(buffer).digest('hex')) : name
 };
 
 /**
@@ -499,16 +503,15 @@ SvgStore.prototype.apply = function(compiler) {
     outputData = _this.options.format();
   }
 
-  var sprites = outputData.start;
+  var spriteAjax = fs.readFileSync(_this.options.ajaxFunc, 'utf-8');
 
   output.forEach(function(key) {
     _this.filesMap(_this.input, oneForAll ? false : key.filter, function(files) {
 
-      if (key.sprite.indexOf('[hash]') >= 0) {
-        key.sprite = key.sprite.replace('[hash]', _this.hash(key.sprite));
-      }
-
       var source = _this.parseFiles(files, _this.options.min, key.sprite);
+
+      key.sprite = _this.hash(source, key.sprite);
+
       compiler.plugin('emit', function(compilation, callback) {
         compilation.assets[key.sprite] = {
           source: function() { return new Buffer(source) },
@@ -517,15 +520,32 @@ SvgStore.prototype.apply = function(compiler) {
         callback();
       });
 
-      sprites += outputData.each(key.sprite);
+      spriteAjax += outputData.each(key.sprite);
     });
   });
 
   if (_this.options.append) {
     compiler.plugin('done', function(compilation, callback) {
-      fs.writeFile(_this.options.appendPath, sprites, 'utf8', function(err) {
+      var path = _this.hash(spriteAjax, _this.options.appendPath);
+      var filename = path.split("/").pop()
+
+      if (_this.options.manifest.update) {
+        // update manifest with sprite js
+        var manifest = JSON.parse(fs.readFileSync(_this.options.manifest.path, 'utf-8'));
+        manifest.assetsByChunkName.sprite = filename;
+        var newManifest = JSON.stringify(manifest)
+
+        // rewrite manifest
+        fs.writeFile(_this.options.manifest.path, newManifest, 'utf8', function(err) {
+          if (err) return console.log(err);
+        });
+      }
+
+      // add js to output
+      fs.writeFile(path, spriteAjax, 'utf8', function(err) {
         if (err) return console.log(err);
       });
+
     });
   }
 
