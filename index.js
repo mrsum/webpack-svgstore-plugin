@@ -532,8 +532,11 @@ SvgStore.prototype.apply = function(compiler) {
       if (_this.options.manifest.update) {
         // update manifest with sprite js
         var manifest = JSON.parse(fs.readFileSync(_this.options.manifest.path, 'utf-8'));
-        manifest.assetsByChunkName.sprite = filename;
-        var newManifest = JSON.stringify(manifest)
+        _this.options.manifest.func = _this.options.manifest.func || function(manifest, filename) {
+          manifest.assetsByChunkName.sprite = filename;
+          return manifest;
+        }
+        var newManifest = JSON.stringify(_this.options.manifest.func(manifest, filename));
 
         // rewrite manifest
         fs.writeFile(_this.options.manifest.path, newManifest, 'utf8', function(err) {
