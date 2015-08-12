@@ -515,7 +515,7 @@ SvgStore.prototype.apply = function(compiler) {
       compiler.plugin('emit', function(compilation, callback) {
         compilation.assets[key.sprite] = {
           source: function() { return new Buffer(source) },
-          size: function() { return Buffer.byteLength(this.source(), 'utf8'); }
+          size: function() { return Buffer.byteLength(source, 'utf8'); }
         }
         callback();
       });
