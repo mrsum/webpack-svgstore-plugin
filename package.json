@@ -4,7 +4,7 @@
   "description": "Webpack svgstore plugin",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha -R spec ./test/index.js"
   },
   "author": "me@mrsum.ru",
   "contributors": [
@@ -23,7 +23,6 @@
     "crypto": "0.0.3",
     "handlebars": "^3.0.3",
     "js-beautify": "^1.5.5",
-    "multiline": "^1.0.2",
     "path": "^0.11.14",
     "underscore": "^1.8.3",
     "walk": "^2.3.9",
@@ -31,6 +30,8 @@
     "svgo": "^0.5.1"
   },
   "devDependencies": {
+    "mocha": "^2.2.5",
+    "eslint-config-rambler": "https://github.com/rambler-digital-solutions/dotfiles.git#master"
   },
   "repository": {
     "type": "git",

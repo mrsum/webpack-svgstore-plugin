@@ -1,11 +1,11 @@
-'use strict'
+'use strict';
 
 /**
  * Webpack SVGstore plugin based on grunt-svg-store
  * @see https://github.com/FWeinb/grunt-svgstore/blob/master/tasks/svgstore.js
  */
 
-//Depends
+// Depends
 var _ = require('underscore');
 var fs = require('fs');
 var path = require('path');
@@ -13,39 +13,12 @@ var walk = require('walk');
 var crypto = require('crypto');
 var cheerio = require('cheerio');
 var beautify = require('js-beautify').html;
-var multiline = require('multiline');
-var handlebars = require('handlebars');
 var SVGO = require('svgo');
-var getDirName = path.dirname;
 var Format = require('./format');
 var others = [];
 
 // Matching an url() reference. To correct references broken by making ids unique to the source svg
 var urlPattern = /url\(\s*#([^ ]+?)\s*\)/g;
-
-// Default Template
-var defaultTemplate = multiline.stripIndent(function() { /*
-  <!doctype html>
-  <html>
-    <head>
-      <style>
-        svg{
-         width:50px;
-         height:50px;
-         fill:black !important;
-        }
-      </style>
-    <head>
-    <body>
-      {{{svg}}}
-      {{#each icons}}
-          <svg>
-            <use xlink:href="#{{name}}" />
-          </svg>
-      {{/each}}
-    </body>
-  </html>
-*/});
 
 /**
  * SvgStore webpack plugin
@@ -54,17 +27,15 @@ var defaultTemplate = multiline.stripIndent(function() { /*
  * @param object options Object of options
  */
 var SvgStore = function(input, options) {
-
-  var _input = input;
-
   // Default function used to extract an id from a name
   var defaultConvertNameToId = function(name) {
+    var _name = name;
     var dotPos = name.indexOf('.');
     if (dotPos > -1) {
-      name = name.substring(0, dotPos);
+      _name = name.substring(0, dotPos);
     }
 
-    return name;
+    return _name;
   };
 
   var _default = {
@@ -98,13 +69,13 @@ var SvgStore = function(input, options) {
     includeTitleElement: true,
     preserveDescElement: true
   };
+  var cleanupAttributes = [];
 
   this.files = [];
   this.options = _.extend(_default, options);
 
   this.input = input;
 
-  var cleanupAttributes = [];
   if (options.cleanup && typeof options.cleanup === 'boolean') {
     // For backwards compatibility (introduced in 0.2.6).
     cleanupAttributes = ['style'];
