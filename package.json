@@ -1,13 +1,23 @@
 {
   "name": "webpack-svgstore-plugin",
-  "version": "1.0.0",
+  "version": "1.0.0-maintainers",
   "description": "Webpack svgstore plugin",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "me@mrsum.ru",
-  "license": "ISC",
+  "contributors": [
+    {
+      "name": "Gordey Levchenko",
+      "email": "g.levchenko@rambler-co.ru"
+    },
+    {
+      "name": "Ivan Potapov",
+      "email": "i.potapov@rambler-co.ru"
+    }
+  ],
+  "license": "MIT",
   "dependencies": {
     "cheerio": "^0.19.0",
     "crypto": "0.0.3",
