@@ -226,11 +226,9 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
 
     var contentStr = fs.readFileSync(file, 'utf8');
 
-    if (path.extname(file) == '.svg') {
-      if (min) {
-        // min svg's
-        contentStr = _this.svgMin(contentStr, _this.options.loop);
-      }
+    if (path.extname(file) === '.svg' && path.dirname(file).indexOf('/min') !== -1 && min) {
+      // min svg's
+      contentStr = _this.svgMin(contentStr, _this.options.loop);
     }
 
     var $ = cheerio.load(contentStr, {
