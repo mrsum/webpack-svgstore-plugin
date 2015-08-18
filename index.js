@@ -434,7 +434,6 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
 
       $resultSvg.append($resFixed.html());
     }
-
   });
 
   // Remove defs block if empty
@@ -442,11 +441,11 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
     $resultDefs.remove();
   }
 
-  //get result file
-  return result = options.formatting
+  // get result file
+  return options.formatting
     ? beautify($resultDocument.html(), options.formatting)
     : $resultDocument.html();
-}
+};
 
 /**
  * Consctructor
