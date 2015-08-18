@@ -69,7 +69,6 @@ var SvgStore = function(input, options) {
     includeTitleElement: true,
     preserveDescElement: true
   };
-  var cleanupAttributes = [];
 
   this.files = [];
   this.options = _.extend(_default, options);
@@ -82,7 +81,6 @@ var SvgStore = function(input, options) {
   } else if (Array.isArray(options.cleanup)) {
     cleanupAttributes = options.cleanup;
   }
-
 };
 
 /**
@@ -113,12 +111,12 @@ SvgStore.prototype.svgMin = function(file, loop) {
  */
 SvgStore.prototype.filesMap = function(input, filter, cb) {
 
-  //files
+  // files
   var files = [];
   var exceptedPrefix = '';
   var except = false;
 
-  //options
+  // options
   var walkOptions = { followLinks: false };
 
   // Walker options
@@ -129,7 +127,7 @@ SvgStore.prototype.filesMap = function(input, filter, cb) {
     except = true;
   }
 
-  //walker event
+  // walker event
   walker.on('file', function(root, stat, next) {
 
     var curItem = root + '/' + stat.name;
@@ -147,7 +145,7 @@ SvgStore.prototype.filesMap = function(input, filter, cb) {
       files.push(curItem);
     }
 
-    //goto next file
+    // goto next file
     next();
 
   });
@@ -169,8 +167,6 @@ SvgStore.prototype.hash = function(buffer, name) {
  */
 SvgStore.prototype.parseFiles = function(files, min, sprite) {
 
-  var content = null;
-  var result = '';
   var _this = this;
   var options = this.options;
   var cleanupAttributes = [];
@@ -503,6 +499,7 @@ SvgStore.prototype.apply = function(compiler) {
 
         // rewrite manifest
         fs.writeFile(_this.options.manifest.path, newManifest, 'utf8', function(err) {
+          Console.log('console tst');
           if (err) return console.log(err);
         });
       }
