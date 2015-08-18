@@ -498,7 +498,6 @@ SvgStore.prototype.apply = function(compiler) {
 
         // rewrite manifest
         fs.writeFile(_this.options.manifest.path, newManifest, 'utf8', function(err) {
-          Console.log('console tst');
           if (err) return console.log(err);
         });
       }
