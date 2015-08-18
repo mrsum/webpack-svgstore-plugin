@@ -458,11 +458,10 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
  * @return {[type]}          [description]
  */
 SvgStore.prototype.apply = function(compiler) {
-
   var _this = this;
+  var spriteAjax = fs.readFileSync(_this.options.ajaxFunc, 'utf-8');
   var output = this.options.output;
   var oneForAll = output.length === 1 && output[0].filter === 'all';
-
   var outputData;
 
   if (typeof _this.options.format === 'string' || _this.options.format instanceof String) {
@@ -471,8 +470,6 @@ SvgStore.prototype.apply = function(compiler) {
   } else {
     outputData = _this.options.format();
   }
-
-  var spriteAjax = fs.readFileSync(_this.options.ajaxFunc, 'utf-8');
 
   output.forEach(function(key) {
     _this.filesMap(_this.input, oneForAll ? false : key.filter, function(files) {
@@ -483,9 +480,9 @@ SvgStore.prototype.apply = function(compiler) {
 
       compiler.plugin('emit', function(compilation, callback) {
         compilation.assets[key.sprite] = {
-          source: function() { return new Buffer(source) },
+          source: function() { return new Buffer(source); },
           size: function() { return Buffer.byteLength(source, 'utf8'); }
-        }
+        };
         callback();
       });
 
@@ -514,10 +511,8 @@ SvgStore.prototype.apply = function(compiler) {
       fs.writeFile(path, spriteAjax, 'utf8', function(err) {
         if (err) return console.log(err);
       });
-
     });
   }
-
-}
+};
 
 module.exports = SvgStore;
