@@ -93,15 +93,19 @@ var SvgStore = function(input, options) {
  */
 SvgStore.prototype.svgMin = function(file, loop) {
   var svgo = new SVGO();
+  var source = file;
+  var i;
 
-  // optimize loop
-  for (var i = 1; i <= loop; i++) {
-    svgo.optimize(file, function(result) {
-      file = result.data;
-    });
+  function svgoCallback(result) {
+    source = result.data;
   }
 
-  return file;
+  // optimize loop
+  for (i = 1; i <= loop; i++) {
+    svgo.optimize(source, svgoCallback);
+  }
+
+  return source;
 };
 
 /**
