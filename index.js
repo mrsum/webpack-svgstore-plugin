@@ -1,11 +1,11 @@
-'use strict'
+'use strict';
 
 /**
  * Webpack SVGstore plugin based on grunt-svg-store
  * @see https://github.com/FWeinb/grunt-svgstore/blob/master/tasks/svgstore.js
  */
 
-//Depends
+// Depends
 var _ = require('underscore');
 var fs = require('fs');
 var path = require('path');
@@ -13,39 +13,12 @@ var walk = require('walk');
 var crypto = require('crypto');
 var cheerio = require('cheerio');
 var beautify = require('js-beautify').html;
-var multiline = require('multiline');
-var handlebars = require('handlebars');
 var SVGO = require('svgo');
-var getDirName = path.dirname;
 var Format = require('./format');
 var others = [];
 
 // Matching an url() reference. To correct references broken by making ids unique to the source svg
 var urlPattern = /url\(\s*#([^ ]+?)\s*\)/g;
-
-// Default Template
-var defaultTemplate = multiline.stripIndent(function() { /*
-  <!doctype html>
-  <html>
-    <head>
-      <style>
-        svg{
-         width:50px;
-         height:50px;
-         fill:black !important;
-        }
-      </style>
-    <head>
-    <body>
-      {{{svg}}}
-      {{#each icons}}
-          <svg>
-            <use xlink:href="#{{name}}" />
-          </svg>
-      {{/each}}
-    </body>
-  </html>
-*/});
 
 /**
  * SvgStore webpack plugin
@@ -54,17 +27,15 @@ var defaultTemplate = multiline.stripIndent(function() { /*
  * @param object options Object of options
  */
 var SvgStore = function(input, options) {
-
-  var _input = input;
-
   // Default function used to extract an id from a name
   var defaultConvertNameToId = function(name) {
+    var _name = name;
     var dotPos = name.indexOf('.');
     if (dotPos > -1) {
-      name = name.substring(0, dotPos);
+      _name = name.substring(0, dotPos);
     }
 
-    return name;
+    return _name;
   };
 
   var _default = {
@@ -104,14 +75,12 @@ var SvgStore = function(input, options) {
 
   this.input = input;
 
-  var cleanupAttributes = [];
   if (options.cleanup && typeof options.cleanup === 'boolean') {
     // For backwards compatibility (introduced in 0.2.6).
     cleanupAttributes = ['style'];
   } else if (Array.isArray(options.cleanup)) {
     cleanupAttributes = options.cleanup;
   }
-
 };
 
 /**
@@ -124,15 +93,19 @@ var SvgStore = function(input, options) {
  */
 SvgStore.prototype.svgMin = function(file, loop) {
   var svgo = new SVGO();
+  var source = file;
+  var i;
 
-  // optimize loop
-  for (var i = 1; i <= loop; i++) {
-    svgo.optimize(file, function(result) {
-      file = result.data;
-    });
+  function svgoCallback(result) {
+    source = result.data;
   }
 
-  return file;
+  // optimize loop
+  for (i = 1; i <= loop; i++) {
+    svgo.optimize(source, svgoCallback);
+  }
+
+  return source;
 };
 
 /**
@@ -142,12 +115,12 @@ SvgStore.prototype.svgMin = function(file, loop) {
  */
 SvgStore.prototype.filesMap = function(input, filter, cb) {
 
-  //files
+  // files
   var files = [];
   var exceptedPrefix = '';
   var except = false;
 
-  //options
+  // options
   var walkOptions = { followLinks: false };
 
   // Walker options
@@ -158,7 +131,7 @@ SvgStore.prototype.filesMap = function(input, filter, cb) {
     except = true;
   }
 
-  //walker event
+  // walker event
   walker.on('file', function(root, stat, next) {
 
     var curItem = root + '/' + stat.name;
@@ -176,7 +149,7 @@ SvgStore.prototype.filesMap = function(input, filter, cb) {
       files.push(curItem);
     }
 
-    //goto next file
+    // goto next file
     next();
 
   });
@@ -198,8 +171,6 @@ SvgStore.prototype.hash = function(buffer, name) {
  */
 SvgStore.prototype.parseFiles = function(files, min, sprite) {
 
-  var content = null;
-  var result = '';
   var _this = this;
   var options = this.options;
   var cleanupAttributes = [];
@@ -467,7 +438,6 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
 
       $resultSvg.append($resFixed.html());
     }
-
   });
 
   // Remove defs block if empty
@@ -475,11 +445,11 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
     $resultDefs.remove();
   }
 
-  //get result file
-  return result = options.formatting
+  // get result file
+  return options.formatting
     ? beautify($resultDocument.html(), options.formatting)
     : $resultDocument.html();
-}
+};
 
 /**
  * Consctructor
@@ -487,11 +457,10 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
  * @return {[type]}          [description]
  */
 SvgStore.prototype.apply = function(compiler) {
-
   var _this = this;
+  var spriteAjax = fs.readFileSync(_this.options.ajaxFunc, 'utf-8');
   var output = this.options.output;
   var oneForAll = output.length === 1 && output[0].filter === 'all';
-
   var outputData;
 
   if (typeof _this.options.format === 'string' || _this.options.format instanceof String) {
@@ -500,8 +469,6 @@ SvgStore.prototype.apply = function(compiler) {
   } else {
     outputData = _this.options.format();
   }
-
-  var spriteAjax = fs.readFileSync(_this.options.ajaxFunc, 'utf-8');
 
   output.forEach(function(key) {
     _this.filesMap(_this.input, oneForAll ? false : key.filter, function(files) {
@@ -512,9 +479,9 @@ SvgStore.prototype.apply = function(compiler) {
 
       compiler.plugin('emit', function(compilation, callback) {
         compilation.assets[key.sprite] = {
-          source: function() { return new Buffer(source) },
+          source: function() { return new Buffer(source); },
           size: function() { return Buffer.byteLength(source, 'utf8'); }
-        }
+        };
         callback();
       });
 
@@ -543,10 +510,8 @@ SvgStore.prototype.apply = function(compiler) {
       fs.writeFile(path, spriteAjax, 'utf8', function(err) {
         if (err) return console.log(err);
       });
-
     });
   }
-
-}
+};
 
 module.exports = SvgStore;
