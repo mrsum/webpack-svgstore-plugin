@@ -45,10 +45,7 @@ plugins: [
         sprite: 'svg/[hash].sprite.svg'
       }
     ],
-    
-    // append svgXHR function to call sprite
-    append: true, // deafult: false
-    appendPath: path.join(_path, 'app', 'views', 'shared', '_sprite.html.slim'), // path to file
+
     loop: 2,
     min: true
   })
