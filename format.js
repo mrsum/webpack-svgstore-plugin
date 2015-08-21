@@ -1,6 +1,6 @@
 
 var Format = function() {
-  var _this = this;
+  var self = this;
 };
 
 Format.prototype.slim = function(path) {

@@ -171,7 +171,7 @@ SvgStore.prototype.hash = function(buffer, name) {
  */
 SvgStore.prototype.parseFiles = function(files, min, sprite) {
 
-  var _this = this;
+  var self = this;
   var options = this.options;
   var cleanupAttributes = [];
 
@@ -199,7 +199,7 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
 
     if (path.extname(file) === '.svg' && path.dirname(file).indexOf('/min') !== -1 && min) {
       // min svg's
-      contentStr = _this.svgMin(contentStr, _this.options.loop);
+      contentStr = self.svgMin(contentStr, self.options.loop);
     }
 
     var $ = cheerio.load(contentStr, {
@@ -457,25 +457,25 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
  * @return {[type]}          [description]
  */
 SvgStore.prototype.apply = function(compiler) {
-  var _this = this;
-  var spriteAjax = fs.readFileSync(_this.options.ajaxFunc, 'utf-8');
+  var self = this;
+  var spriteAjax = fs.readFileSync(self.options.ajaxFunc, 'utf-8');
   var output = this.options.output;
   var oneForAll = output.length === 1 && output[0].filter === 'all';
   var outputData;
 
-  if (typeof _this.options.format === 'string' || _this.options.format instanceof String) {
+  if (typeof self.options.format === 'string' || self.options.format instanceof String) {
     var format = new Format();
-    outputData = format[_this.options.format]();
+    outputData = format[self.options.format]();
   } else {
-    outputData = _this.options.format();
+    outputData = self.options.format();
   }
 
   output.forEach(function(key) {
-    _this.filesMap(_this.input, oneForAll ? false : key.filter, function(files) {
+    self.filesMap(self.input, oneForAll ? false : key.filter, function(files) {
 
-      var source = _this.parseFiles(files, _this.options.min, key.sprite);
+      var source = self.parseFiles(files, self.options.min, key.sprite);
 
-      key.sprite = _this.hash(source, key.sprite);
+      key.sprite = self.hash(source, key.sprite);
 
       compiler.plugin('emit', function(compilation, callback) {
         compilation.assets[key.sprite] = {
@@ -489,19 +489,19 @@ SvgStore.prototype.apply = function(compiler) {
     });
   });
 
-  if (_this.options.append) {
+  if (self.options.append) {
     compiler.plugin('done', function(compilation, callback) {
-      var path = _this.hash(spriteAjax, _this.options.appendPath);
+      var path = self.hash(spriteAjax, self.options.appendPath);
       var filename = path.split("/").pop()
 
-      if (_this.options.manifest.update) {
+      if (self.options.manifest.update) {
         // update manifest with sprite js
-        var manifest = JSON.parse(fs.readFileSync(_this.options.manifest.path, 'utf-8'));
+        var manifest = JSON.parse(fs.readFileSync(self.options.manifest.path, 'utf-8'));
         manifest.assetsByChunkName.sprite = filename;
         var newManifest = JSON.stringify(manifest)
 
         // rewrite manifest
-        fs.writeFile(_this.options.manifest.path, newManifest, 'utf8', function(err) {
+        fs.writeFile(self.options.manifest.path, newManifest, 'utf8', function(err) {
           if (err) return console.log(err);
         });
       }
