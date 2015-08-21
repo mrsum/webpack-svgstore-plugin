@@ -458,7 +458,7 @@ SvgStore.prototype.parseFiles = function(files, min, sprite) {
  */
 SvgStore.prototype.apply = function(compiler) {
   var _this = this;
-  var spriteAjax = fs.readFileSync(_this.options.ajaxFunc, 'utf-8');
+  var spriteAjax = _this.options.ajaxFunc ? fs.readFileSync(_this.options.ajaxFunc, 'utf-8') : null;
   var output = this.options.output;
   var oneForAll = output.length === 1 && output[0].filter === 'all';
   var outputData;
