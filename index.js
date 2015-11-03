@@ -2,10 +2,11 @@
 
 // Defaults
 var _options = {
-  min: false,
   svg: {
-    xmlns: 'http://www.w3.org/2000/svg'
+    xmlns: 'http://www.w3.org/2000/svg',
+    style: 'position:absolute; width: 0; height: 0'
   },
+  data: [],
   loop: 1,
   prefix: 'icon-',
   ajaxWrapper: false
@@ -17,6 +18,34 @@ var fs = require('fs');
 var path = require('path');
 var svgo = require('svgo');
 var walk = require('walk');
+var jade = require('jade');
+var parse = require('htmlparser2');
+
+/**
+ * Binding context to function
+ * @param  {[type]} obj      [description]
+ * @param  {[type]} funcname [description]
+ * @return {[type]}          [description]
+ */
+var bind = function(obj, funcname) {
+  return function() {
+    return obj[funcname].apply(obj, arguments);
+  };
+};
+
+/**
+ * Filename converter
+ * @param  {[type]} name [description]
+ * @return {[type]}      [description]
+ */
+var convertNameToId = function(name) {
+  var _name = name;
+  var dotPos = name.indexOf('.');
+  if (dotPos > -1) {
+    _name = name.substring(0, dotPos);
+  }
+  return _name;
+};
 
 
 /**
@@ -27,10 +56,10 @@ var walk = require('walk');
  * @return {object}
  */
 var WebpackSvgStore = function(input, output, options) {
-
-  this.input = input;
-  this.output = output;
-  this.options = _.merge(_options, options);
+  // set attributes
+  this.input    = input;
+  this.output   = output;
+  this.options  = _.merge(_options, options);
 
   return this;
 };
@@ -78,6 +107,8 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
  * @return {string}        [description]
  */
 WebpackSvgStore.prototype.hash = function(buffer, name) {
+  
+
   console.log(buffer, name);
 };
 
@@ -89,7 +120,7 @@ WebpackSvgStore.prototype.hash = function(buffer, name) {
  */
 WebpackSvgStore.prototype.minify = function (file, loop) {
   var i;
-  var svgo = new svgo();
+  var minify = new svgo();
   var source = file;
 
   function svgoCallback(result) {
@@ -98,19 +129,53 @@ WebpackSvgStore.prototype.minify = function (file, loop) {
 
   // optimize loop
   for (i = 1; i <= loop; i++) {
-    svgo.optimize(source, svgoCallback);
+    minify.optimize(source, svgoCallback);
   }
 
   return source;
 };
 
 /**
- * [parse description]
+ * [parseFiles description]
+ * @return {[type]} [description]
+ */
+WebpackSvgStore.prototype.parseFiles = function(files) {
+  var self = this;
+  // result data
+  var data = {
+    svg: this.options.svg,
+    defs: []
+  };
+
+  files.forEach(function(file) {
+    // load and minifi
+    var buffer = self.minify(fs.readFileSync(file, 'utf8'), self.options.loop);
+    // get filename for id generation
+    var filename = path.basename(file, '.svg');
+    // lets create parser instance
+    var Parser = new parse.Parser({
+      onopentag: function(name, attributes) {
+        self.addTag('open', name, attributes);
+      },
+      onclosetag: function(name, attributes) {
+        self.addTage('close', name, attributes);
+      }
+    }, { decodeEntities: true });
+
+    Parser.write(buffer);
+    Parser.end();
+  });
+
+  return data;
+};
+
+/**
+ * Parse files
  * @param  {[type]} files [description]
  * @return {[type]}       [description]
  */
-WebpackSvgStore.prototype.parse = function (files) {
-  console.log(files);
+WebpackSvgStore.prototype.createSprite = function (data) {
+  return jade.renderFile('templates/layout.jade', data);
 };
 
 /**
@@ -119,16 +184,18 @@ WebpackSvgStore.prototype.parse = function (files) {
  * @return {[type]}          [description]
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
+  var parseFiles = bind(this, 'parseFiles');
+  var createSprite = bind(this, 'createSprite');
+
   // prepare input / output folders
   this.prepareFolder(this.input);
   this.prepareFolder(this.output);
 
   // get files from source path
   this.filesMap(this.input, function(files) {
-    // run to files
-    files.map(function(file) {
-      console.log(file);
-    })
+    var file = createSprite(parseFiles(files));
+
+
   });
 };
 
