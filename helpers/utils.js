@@ -3,6 +3,7 @@
 // Depends
 var _ = require('lodash');
 var fs = require('fs');
+var path = require('path');
 var util = require('util');
 var Svgo = require('svgo');
 var crypto = require('crypto');
@@ -116,7 +117,7 @@ module.exports.minify = function(file, loop) {
  * @return {[type]}         [description]
  */
 module.exports.svgXHR = function(filename) {
-  var wrapper = fs.readFileSync('./templates/svgXHR.js', 'utf-8');
+  var wrapper = fs.readFileSync(path.join(__dirname, 'svgxhr.js'), 'utf-8');
   wrapper += 'svgXHR(\'' + filename + '\');';
   return wrapper;
 };

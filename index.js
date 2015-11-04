@@ -135,7 +135,7 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
  * @return {[type]}       [description]
  */
 WebpackSvgStore.prototype.createSprite = function(data) {
-  return jade.renderFile('templates/layout.jade', data);
+  return jade.renderFile(path.join(__dirname, 'templates', 'layout.jade'), data);
 };
 
 /**
