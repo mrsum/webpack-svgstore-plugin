@@ -1,13 +1,11 @@
 'use strict';
 
-
 // Defaults
 var _options = {
   svg: {
     xmlns: 'http://www.w3.org/2000/svg',
     style: 'position:absolute; width: 0; height: 0'
   },
-  data: [],
   loop: 1,
   prefix: 'icon-',
   name: 'sprite.[hash].svg',
@@ -18,7 +16,6 @@ var _options = {
 var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
-var Svgo = require('svgo');
 var walk = require('walk');
 var jade = require('jade');
 var parse = require('htmlparser2');
@@ -38,11 +35,10 @@ var bind = function(obj, funcname) {
 
 /**
  * Convert filename to id
- * @param  {string} prefix   [description]
  * @param  {string} filename [description]
  * @return {string}          [description]
  */
-var convertFilenameToId = function(prefix, filename) {
+var convertFilenameToId = function(filename) {
   var _name = filename;
   var dotPos = filename.indexOf('.');
   if (dotPos > -1) {
@@ -68,23 +64,6 @@ var WebpackSvgStore = function(input, output, options) {
 };
 
 /**
- * Check folder
- * @param  {[type]} path [description]
- * @return {[type]}      [description]
- */
-WebpackSvgStore.prototype.prepareFolder = function(folder) {
-  try {
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder);
-    }
-
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
-
-/**
  * Build files map
  * @param  {string} input Destination path
  * @return {array}        Array of paths
@@ -104,42 +83,17 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
 };
 
 /**
- * Minify each svg file
- * @param  {[type]} file [description]
- * @param  {[type]} loop [description]
- * @return {[type]}      [description]
- */
-WebpackSvgStore.prototype.minify = function(file, loop) {
-  var i;
-  var minify = new Svgo();
-  var source = file;
-
-  function svgoCallback(result) {
-    source = result.data;
-  }
-
-  // optimize loop
-  for (i = 1; i <= loop; i++) {
-    minify.optimize(source, svgoCallback);
-  }
-
-  return source;
-};
-
-/**
  * Parse dom objects
  * @param  {[type]} dom [description]
  * @return {[type]}     [description]
  */
 WebpackSvgStore.prototype.parseDomObject = function(data, filename, dom) {
-  var id = convertFilenameToId(this.options.prefix, filename);
+  var id = convertFilenameToId(filename);
   if (dom && dom[0]) {
     utils.defs(id, dom[0], data.defs);
     utils.symbols(id, dom[0], data.symbols);
   }
 
-
-  utils.log(data, 3);
   return data;
 };
 
@@ -158,7 +112,7 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
   // each over fils
   files.forEach(function(file) {
     // load and minify
-    var buffer = self.minify(fs.readFileSync(file, 'utf8'), self.options.loop);
+    var buffer = utils.minify(fs.readFileSync(file, 'utf8'), self.options.loop);
     // get filename for id generation
     var filename = path.basename(file, '.svg');
     var handler = new parse.DomHandler(function(error, dom) {
@@ -190,26 +144,45 @@ WebpackSvgStore.prototype.createSprite = function(data) {
  * @return {[type]}          [description]
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
+  var ajaxWrapper;
+  var ajaxWrapperFileName;
+
+  var options = this.options;
   var inputFolder = this.input;
   var outputFolder = this.output;
   var spriteName = this.options.name;
+
+  var filesMap = bind(this, 'filesMap');
   var parseFiles = bind(this, 'parseFiles');
   var createSprite = bind(this, 'createSprite');
 
   // prepare input / output folders
-  this.prepareFolder(inputFolder);
-  this.prepareFolder(outputFolder);
+  utils.prepareFolder(inputFolder);
+  utils.prepareFolder(outputFolder);
 
-  // get files from source path
-  this.filesMap(this.input, function(files) {
-    var fileContent = createSprite(parseFiles(files));
-    var hash = utils.hash(fileContent, spriteName);
+  // subscribe to webpack emit state
+  compiler.plugin('emit', function(compilation, callback) {
+    filesMap(inputFolder, function(files) {
+      var fileContent = createSprite(parseFiles(files));
+      var hash = utils.hash(fileContent, spriteName);
 
-    compiler.plugin('emit', function(compilation, callback) {
       compilation.assets[hash] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }
       };
+
+      // if ajaxWrapper enable
+      if (options && options.ajaxWrapper) {
+        ajaxWrapper = utils.svgXHR(hash);
+        ajaxWrapperFileName = options.ajaxWrapper.name || 'svgxhr.js';
+        ajaxWrapperFileName = utils.hash(ajaxWrapper, ajaxWrapperFileName);
+
+        compilation.assets[ajaxWrapperFileName] = {
+          size: function() { return Buffer.byteLength(ajaxWrapper, 'utf8'); },
+          source: function() { return new Buffer(ajaxWrapper); }
+        };
+      }
+
       callback();
     });
   });
