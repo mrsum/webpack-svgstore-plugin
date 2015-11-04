@@ -16,7 +16,7 @@ var _options = {
 var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
-var svgo = require('svgo');
+var Svgo = require('svgo');
 var walk = require('walk');
 var jade = require('jade');
 var parse = require('htmlparser2');
@@ -113,14 +113,24 @@ WebpackSvgStore.prototype.hash = function(buffer, name) {
 };
 
 /**
+ * Add new tag
+ * @param {[type]} action     [description]
+ * @param {[type]} name       [description]
+ * @param {[type]} attributes [description]
+ */
+WebpackSvgStore.prototype.addTag = function(action, name, attributes) {
+  console.log(action, name, attributes);
+};
+
+/**
  * Minify each svg file
  * @param  {[type]} file [description]
  * @param  {[type]} loop [description]
  * @return {[type]}      [description]
  */
-WebpackSvgStore.prototype.minify = function (file, loop) {
+WebpackSvgStore.prototype.minify = function(file, loop) {
   var i;
-  var minify = new svgo();
+  var minify = new Svgo();
   var source = file;
 
   function svgoCallback(result) {
@@ -133,6 +143,15 @@ WebpackSvgStore.prototype.minify = function (file, loop) {
   }
 
   return source;
+};
+
+/**
+ * [parseDomObject description]
+ * @param  {[type]} dom [description]
+ * @return {[type]}     [description]
+ */
+WebpackSvgStore.prototype.parseDomObject = function(filename, dom) {
+  console.log(filename, dom);
 };
 
 /**
@@ -152,16 +171,13 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
     var buffer = self.minify(fs.readFileSync(file, 'utf8'), self.options.loop);
     // get filename for id generation
     var filename = path.basename(file, '.svg');
-    // lets create parser instance
-    var Parser = new parse.Parser({
-      onopentag: function(name, attributes) {
-        self.addTag('open', name, attributes);
-      },
-      onclosetag: function(name, attributes) {
-        self.addTage('close', name, attributes);
-      }
-    }, { decodeEntities: true });
+    var handler = new parse.DomHandler(function (error, dom) {
+      if (error) console.log(error);
+      else self.parseDomObject(filename, dom);
+    });
 
+    // lets create parser instance
+    var Parser = new parse.Parser(handler);
     Parser.write(buffer);
     Parser.end();
   });
@@ -193,9 +209,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
   // get files from source path
   this.filesMap(this.input, function(files) {
-    var file = createSprite(parseFiles(files));
-
-
+    createSprite(parseFiles(files));
   });
 };
 
