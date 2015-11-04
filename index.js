@@ -1,6 +1,5 @@
 'use strict';
 
-
 // Defaults
 var _options = {
   svg: {
@@ -10,7 +9,7 @@ var _options = {
   data: [],
   loop: 1,
   prefix: 'icon-',
-  name: 'sprite.[hash].svg',
+  name: 'sprite.svg',
   ajaxWrapper: false
 };
 
@@ -38,11 +37,10 @@ var bind = function(obj, funcname) {
 
 /**
  * Convert filename to id
- * @param  {string} prefix   [description]
  * @param  {string} filename [description]
  * @return {string}          [description]
  */
-var convertFilenameToId = function(prefix, filename) {
+var convertFilenameToId = function(filename) {
   var _name = filename;
   var dotPos = filename.indexOf('.');
   if (dotPos > -1) {
@@ -132,14 +130,12 @@ WebpackSvgStore.prototype.minify = function(file, loop) {
  * @return {[type]}     [description]
  */
 WebpackSvgStore.prototype.parseDomObject = function(data, filename, dom) {
-  var id = convertFilenameToId(this.options.prefix, filename);
+  var id = convertFilenameToId(filename);
   if (dom && dom[0]) {
     utils.defs(id, dom[0], data.defs);
     utils.symbols(id, dom[0], data.symbols);
   }
 
-
-  utils.log(data, 3);
   return data;
 };
 
@@ -193,6 +189,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   var inputFolder = this.input;
   var outputFolder = this.output;
   var spriteName = this.options.name;
+  var filesMap = bind(this, 'filesMap');
   var parseFiles = bind(this, 'parseFiles');
   var createSprite = bind(this, 'createSprite');
 
@@ -200,12 +197,10 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   this.prepareFolder(inputFolder);
   this.prepareFolder(outputFolder);
 
-  // get files from source path
-  this.filesMap(this.input, function(files) {
-    var fileContent = createSprite(parseFiles(files));
-    var hash = utils.hash(fileContent, spriteName);
-
-    compiler.plugin('emit', function(compilation, callback) {
+  compiler.plugin('emit', function(compilation, callback) {
+    filesMap(inputFolder, function(files) {
+      var fileContent = createSprite(parseFiles(files));
+      var hash = utils.hash(fileContent, spriteName);
       compilation.assets[hash] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }

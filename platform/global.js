@@ -2,35 +2,12 @@
 
 // Depends
 var path = require('path');
-var SvgStore  = require('../index');
-var Manifest  = require('manifest-revision-webpack-plugin');
-var HtmlPlugin = require('html-webpack-plugin');
-
-var jsonPresent = function(data, parsedAssets) {
-  var output = {};
-  var obj = parsedAssets;
-
-  // remove path
-  for (var key in obj) {
-    var newkey = key.split('/').pop();
-    obj[newkey] = obj[key];
-    delete obj[key];
-  }
-
-  output.publicPath = data.publicPath;
-  output.assetsByChunkName = data.assetsByChunkName;
-  output.assets = obj;
-
-  return output;
-};
+var SvgStore = require('../index');
 
 module.exports = function(_path) {
-
   // define local variables
   var distPath = path.join(_path, 'platform', 'dist');
   var sourcePath = path.join(_path, 'platform', 'static');
-  var manifestPath = path.join(distPath, 'manifest.json');
-
   return {
     entry: {
       app: path.join(_path, 'platform', 'static', 'js', 'index.js'),
@@ -45,8 +22,7 @@ module.exports = function(_path) {
       extensions: ['', '.js'],
     },
     plugins: [
-      // create svg sprite from /path to /path with temp /path
-      new SvgStore(path.join(sourcePath, 'svg'), path.join(distPath, 'svg'))
+      new SvgStore(path.join(sourcePath, 'min'), path.join(distPath))
     ]
   };
 };

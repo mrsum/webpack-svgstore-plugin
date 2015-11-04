@@ -27,7 +27,7 @@ module.exports.defs = function(id, dom, data) {
   // lets find defs into dom
   var defs = _.findWhere(dom.children, { name: 'defs' });
   // check childrens
-  if (defs && defs.children && defs.children.length > 0){
+  if (defs && defs.children && defs.children.length > 0) {
     // mutable attribute
     defs.children.forEach(function(_data, _key) {
       defs.children[_key].attribs.id = [id, _data.attribs.id || 'id'].join('-');
