@@ -48,7 +48,7 @@ var convertFilenameToId = function(prefix, filename) {
   if (dotPos > -1) {
     _name = filename.substring(0, dotPos);
   }
-  return prefix + _name;
+  return _name;
 };
 
 /**
@@ -135,8 +135,11 @@ WebpackSvgStore.prototype.parseDomObject = function(data, filename, dom) {
   var id = convertFilenameToId(this.options.prefix, filename);
   if (dom && dom[0]) {
     utils.defs(id, dom[0], data.defs);
-    utils.symbols(id, dom[0], data.defs);
+    utils.symbols(id, dom[0], data.symbols);
   }
+
+
+  utils.log(data, 3);
   return data;
 };
 
@@ -168,8 +171,6 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
     Parser.write(buffer);
     Parser.end();
   });
-
-  utils.log(data, 3);
 
   return data;
 };
