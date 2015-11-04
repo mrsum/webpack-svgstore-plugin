@@ -1,5 +1,6 @@
 'use strict';
 
+
 // Defaults
 var _options = {
   svg: {
@@ -9,6 +10,7 @@ var _options = {
   data: [],
   loop: 1,
   prefix: 'icon-',
+  name: 'sprite.[hash].svg',
   ajaxWrapper: false
 };
 
@@ -20,6 +22,7 @@ var Svgo = require('svgo');
 var walk = require('walk');
 var jade = require('jade');
 var parse = require('htmlparser2');
+var utils = require('./helpers/utils');
 
 /**
  * Binding context to function
@@ -34,19 +37,19 @@ var bind = function(obj, funcname) {
 };
 
 /**
- * Filename converter
- * @param  {[type]} name [description]
- * @return {[type]}      [description]
+ * Convert filename to id
+ * @param  {string} prefix   [description]
+ * @param  {string} filename [description]
+ * @return {string}          [description]
  */
-var convertNameToId = function(name) {
-  var _name = name;
-  var dotPos = name.indexOf('.');
+var convertFilenameToId = function(prefix, filename) {
+  var _name = filename;
+  var dotPos = filename.indexOf('.');
   if (dotPos > -1) {
-    _name = name.substring(0, dotPos);
+    _name = filename.substring(0, dotPos);
   }
-  return _name;
+  return prefix + _name;
 };
-
 
 /**
  * Constructor
@@ -101,28 +104,6 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
 };
 
 /**
- * Calculate hash
- * @param  {object} buffer [description]
- * @param  {string} name   [description]
- * @return {string}        [description]
- */
-WebpackSvgStore.prototype.hash = function(buffer, name) {
-  
-
-  console.log(buffer, name);
-};
-
-/**
- * Add new tag
- * @param {[type]} action     [description]
- * @param {[type]} name       [description]
- * @param {[type]} attributes [description]
- */
-WebpackSvgStore.prototype.addTag = function(action, name, attributes) {
-  console.log(action, name, attributes);
-};
-
-/**
  * Minify each svg file
  * @param  {[type]} file [description]
  * @param  {[type]} loop [description]
@@ -146,12 +127,17 @@ WebpackSvgStore.prototype.minify = function(file, loop) {
 };
 
 /**
- * [parseDomObject description]
+ * Parse dom objects
  * @param  {[type]} dom [description]
  * @return {[type]}     [description]
  */
-WebpackSvgStore.prototype.parseDomObject = function(filename, dom) {
-  console.log(filename, dom);
+WebpackSvgStore.prototype.parseDomObject = function(data, filename, dom) {
+  var id = convertFilenameToId(this.options.prefix, filename);
+  if (dom && dom[0]) {
+    utils.defs(id, dom[0], data.defs);
+    utils.symbols(id, dom[0], data.defs);
+  }
+  return data;
 };
 
 /**
@@ -160,20 +146,21 @@ WebpackSvgStore.prototype.parseDomObject = function(filename, dom) {
  */
 WebpackSvgStore.prototype.parseFiles = function(files) {
   var self = this;
-  // result data
   var data = {
     svg: this.options.svg,
-    defs: []
+    defs: [],
+    symbols: []
   };
 
+  // each over fils
   files.forEach(function(file) {
-    // load and minifi
+    // load and minify
     var buffer = self.minify(fs.readFileSync(file, 'utf8'), self.options.loop);
     // get filename for id generation
     var filename = path.basename(file, '.svg');
     var handler = new parse.DomHandler(function (error, dom) {
       if (error) console.log(error);
-      else self.parseDomObject(filename, dom);
+      else data = self.parseDomObject(data, filename, dom);
     });
 
     // lets create parser instance
@@ -181,6 +168,8 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
     Parser.write(buffer);
     Parser.end();
   });
+
+  utils.log(data, 3);
 
   return data;
 };
@@ -200,16 +189,28 @@ WebpackSvgStore.prototype.createSprite = function (data) {
  * @return {[type]}          [description]
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
+  var inputFolder = this.input;
+  var outputFolder = this.output;
+  var spriteName = this.options.name;
   var parseFiles = bind(this, 'parseFiles');
   var createSprite = bind(this, 'createSprite');
 
   // prepare input / output folders
-  this.prepareFolder(this.input);
-  this.prepareFolder(this.output);
+  this.prepareFolder(inputFolder);
+  this.prepareFolder(outputFolder);
 
   // get files from source path
   this.filesMap(this.input, function(files) {
-    createSprite(parseFiles(files));
+    var fileContent = createSprite(parseFiles(files));
+    var hash = utils.hash(fileContent, spriteName);
+
+    compiler.plugin('emit', function(compilation, callback) {
+      compilation.assets[hash] = {
+        size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
+        source: function() { return new Buffer(fileContent); }
+      };
+      callback();
+    });
   });
 };
 

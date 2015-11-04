@@ -12,10 +12,6 @@
     {
       "name": "Gordey Levchenko",
       "email": "levchenko.gordey@gmail.com"
-    },
-    {
-      "name": "Ivan Potapov",
-      "email": "i.potapov@rambler-co.ru"
     }
   ],
   "license": "MIT",
@@ -29,7 +25,6 @@
   "devDependencies": {
     "eslint-config-rambler": "https://github.com/rambler-digital-solutions/dotfiles.git#master",
     "html-webpack-plugin": "^1.6.2",
-    "lodash": "^3.10.1",
     "manifest-revision-webpack-plugin": "0.0.5",
     "mocha": "^2.2.5",
     "path": "^0.11.14",

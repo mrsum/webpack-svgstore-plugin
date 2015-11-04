@@ -45,12 +45,6 @@ module.exports = function(_path) {
       extensions: ['', '.js'],
     },
     plugins: [
-
-      // new Manifest(manifestPath, {
-      //   rootAssetPath: sourcePath,
-      //   format: jsonPresent
-      // }),
-
       // create svg sprite from /path to /path with temp /path
       new SvgStore(path.join(sourcePath, 'svg'), path.join(distPath, 'svg'))
     ]
