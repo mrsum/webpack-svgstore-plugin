@@ -4,34 +4,31 @@
   "description": "Webpack svgstore plugin",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -R spec ./test/index.js"
+    "test": "mocha -R spec ./test/index.js",
+    "build": "rm -rf platform/dist/* && NODE_ENV=platform webpack --progress -p --colors"
   },
   "author": "me@mrsum.ru",
   "contributors": [
     {
       "name": "Gordey Levchenko",
       "email": "levchenko.gordey@gmail.com"
-    },
-    {
-      "name": "Ivan Potapov",
-      "email": "i.potapov@rambler-co.ru"
     }
   ],
   "license": "MIT",
   "dependencies": {
-    "cheerio": "^0.19.0",
-    "crypto": "0.0.3",
-    "handlebars": "^3.0.3",
-    "js-beautify": "^1.5.5",
-    "path": "^0.11.14",
-    "underscore": "^1.8.3",
-    "walk": "^2.3.9",
-    "mkdirp": "^0.5.1",
-    "svgo": "^0.5.1"
+    "htmlparser2": "^3.8.3",
+    "jade": "^1.11.0",
+    "lodash": "^3.10.1",
+    "svgo": "^0.5.6",
+    "walk": "^2.3.9"
   },
   "devDependencies": {
+    "eslint-config-rambler": "https://github.com/rambler-digital-solutions/dotfiles.git#master",
+    "html-webpack-plugin": "^1.6.2",
+    "manifest-revision-webpack-plugin": "0.0.5",
     "mocha": "^2.2.5",
-    "eslint-config-rambler": "https://github.com/rambler-digital-solutions/dotfiles.git#master"
+    "path": "^0.11.14",
+    "webpack": "^1.12.2"
   },
   "repository": {
     "type": "git",
