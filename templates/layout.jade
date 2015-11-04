@@ -1,4 +1,3 @@
 svg&attributes(svg)
-  defs
-    each def in defs
-      #[#{def.name}&attributes(def.attribs)]
+  defs #[include partials/defs]
+  include partials/symbols
