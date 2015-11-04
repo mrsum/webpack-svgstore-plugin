@@ -1,6 +1,7 @@
 'use strict';
 
 // Depends
+var _ = require('lodash');
 var util = require('util');
 var crypto = require('crypto');
 
@@ -23,6 +24,16 @@ var _log = function(subject, depth) {
  * @return {[type]}      [description]
  */
 module.exports.defs = function(id, dom, data) {
+  // lets find defs into dom
+  var defs = _.findWhere(dom.children, { name: 'defs' });
+  // check childrens
+  if (defs && defs.children && defs.children.length > 0){
+    // mutable attribute
+    defs.children.forEach(function(_data, _key) {
+      defs.children[_key].attribs.id = [id, _data.attribs.id || 'id'].join('-');
+      data.push(defs.children[_key]);
+    });
+  }
 
   return data;
 };
