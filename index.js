@@ -159,7 +159,7 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
     // get filename for id generation
     var filename = path.basename(file, '.svg');
     var handler = new parse.DomHandler(function (error, dom) {
-      if (error) console.log(error);
+      if (error) utils.log(error);
       else data = self.parseDomObject(data, filename, dom);
     });
 
