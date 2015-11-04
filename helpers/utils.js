@@ -2,7 +2,9 @@
 
 // Depends
 var _ = require('lodash');
+var fs = require('fs');
 var util = require('util');
+var Svgo = require('svgo');
 var crypto = require('crypto');
 
 /**
@@ -29,9 +31,9 @@ module.exports.defs = function(id, dom, data) {
   // check childrens
   if (defs && defs.children && defs.children.length > 0) {
     // mutable attribute
-    defs.children.forEach(function(_data, _key) {
-      defs.children[_key].attribs.id = [id, _data.attribs.id || 'id'].join('-');
-      data.push(defs.children[_key]);
+    defs.children.forEach(function(_data) {
+      _data.attribs.id = [id, _data.attribs.id || 'icon-id'].join('-');
+      data.push(_data);
     });
   }
 
@@ -46,6 +48,57 @@ module.exports.defs = function(id, dom, data) {
  */
 module.exports.symbols = function(id, dom, data) {
   return data;
+};
+
+/**
+ * Check folder
+ * @param  {[type]} path [description]
+ * @return {[type]}      [description]
+ */
+module.exports.prepareFolder = function(folder) {
+  try {
+    if (!fs.existsSync(folder)) {
+      fs.mkdirSync(folder);
+    }
+
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+/**
+ * Minify via SVGO
+ * @param  {string}   file  filename
+ * @param  {integer}  loop  loop count
+ * @return {[type]}         minified source
+ */
+module.exports.minify = function(file, loop) {
+  var i;
+  var minify = new Svgo();
+  var source = file;
+
+  function svgoCallback(result) {
+    source = result.data;
+  }
+
+  // optimize loop
+  for (i = 1; i <= loop; i++) {
+    minify.optimize(source, svgoCallback);
+  }
+
+  return source;
+};
+
+/**
+ * Prepare svgXHR function
+ * @param  {[type]} sprites [description]
+ * @return {[type]}         [description]
+ */
+module.exports.svgXHR = function(filename) {
+  var wrapper = fs.readFileSync('./templates/svgXHR.js', 'utf-8');
+  wrapper += 'svgXHR(\'' + filename + '\');';
+  return wrapper;
 };
 
 /**

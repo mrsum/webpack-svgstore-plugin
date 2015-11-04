@@ -8,6 +8,7 @@ module.exports = function(_path) {
   // define local variables
   var distPath = path.join(_path, 'platform', 'dist');
   var sourcePath = path.join(_path, 'platform', 'static');
+
   return {
     entry: {
       app: path.join(_path, 'platform', 'static', 'js', 'index.js'),
@@ -22,7 +23,12 @@ module.exports = function(_path) {
       extensions: ['', '.js'],
     },
     plugins: [
-      new SvgStore(path.join(sourcePath, 'min'), path.join(distPath))
+      new SvgStore(path.join(sourcePath, 'svg'), path.join(distPath), {
+        name: 'svg/[hash].sprite.svg',
+        ajaxWrapper: {
+          name: 'svg/[hash].svgxhr.js'
+        }
+      })
     ]
   };
 };
