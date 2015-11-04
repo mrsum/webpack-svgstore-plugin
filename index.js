@@ -4,7 +4,7 @@
  * Webpack SVGstore plugin based on grunt-svg-store
  * @see https://github.com/FWeinb/grunt-svgstore/blob/master/tasks/svgstore.js
  */
-
+ 
 // Depends
 var _ = require('underscore');
 var fs = require('fs');
