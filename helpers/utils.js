@@ -47,6 +47,26 @@ module.exports.defs = function(id, dom, data) {
  * @return {[type]}      [description]
  */
 module.exports.symbols = function(id, dom, data) {
+  // create symbol object
+  var symbol = {
+    type: 'tag',
+    name: 'symbol',
+    attribs: {
+      viewbox: dom.attribs.viewbox,
+      id: id
+    },
+    next: null,
+    prev: null,
+    parent: null
+  };
+
+  // add dom children without defs and titles
+  symbol.children = _.filter(dom.children, function(obj) {
+    return obj.name !== 'defs' && obj.name !== 'title';
+  });
+
+  data.push(symbol);
+
   return data;
 };
 
