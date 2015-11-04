@@ -158,7 +158,7 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
     var buffer = self.minify(fs.readFileSync(file, 'utf8'), self.options.loop);
     // get filename for id generation
     var filename = path.basename(file, '.svg');
-    var handler = new parse.DomHandler(function (error, dom) {
+    var handler = new parse.DomHandler(function(error, dom) {
       if (error) utils.log(error);
       else data = self.parseDomObject(data, filename, dom);
     });
@@ -179,7 +179,7 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
  * @param  {[type]} files [description]
  * @return {[type]}       [description]
  */
-WebpackSvgStore.prototype.createSprite = function (data) {
+WebpackSvgStore.prototype.createSprite = function(data) {
   return jade.renderFile('templates/layout.jade', data);
 };
 

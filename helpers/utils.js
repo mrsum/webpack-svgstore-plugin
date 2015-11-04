@@ -4,6 +4,12 @@
 var util = require('util');
 var crypto = require('crypto');
 
+/**
+ * Depth log
+ * @param  {[type]} subject [description]
+ * @param  {[type]} depth   [description]
+ * @return {[type]}         [description]
+ */
 var _log = function(subject, depth) {
   console.log(util.inspect(subject, {
     showHidden: true, depth: depth || 2
