@@ -54,7 +54,7 @@ module.exports.symbols = function(id, dom, data) {
     name: 'symbol',
     attribs: {
       viewbox: dom.attribs.viewbox,
-      id: id
+      id: 'icon-' + id
     },
     next: null,
     prev: null,
@@ -66,6 +66,37 @@ module.exports.symbols = function(id, dom, data) {
     return obj.name !== 'defs' && obj.name !== 'title';
   });
 
+  function recurFunc(coll) {
+    _.each(coll, function(obj) {
+      var match;
+      if (obj) {
+        if (obj.attribs) {
+          // if fill or mask and pass regexp - add id to url
+          if (obj.attribs.fill) {
+            match = /url\(\s*#([^ ]+?)\s*\)/g.exec(obj.attribs.fill);
+            if (match) {
+              obj.attribs.fill = 'url(#' + id + '-' + match[1] + ')';
+            }
+          } else if (obj.attribs.mask) {
+            match = /url\(\s*#([^ ]+?)\s*\)/g.exec(obj.attribs.mask);
+            if (match) {
+              obj.attribs.mask = 'url(#' + id + '-' + match[1] + ')';
+            }
+          }
+        }
+
+        // go deeper if children
+        if (obj.children && obj.children.length > 0) {
+          recurFunc(obj.children);
+        }
+      }
+    });
+  }
+
+  // go through the elements
+  recurFunc(symbol.children);
+
+  // push symbol data
   data.push(symbol);
 
   return data;
@@ -117,7 +148,7 @@ module.exports.minify = function(file, loop) {
  * @return {[type]}         [description]
  */
 module.exports.svgXHR = function(filename) {
-  var wrapper = fs.readFileSync(path.join(__dirname, 'svgxhr.js'), 'utf-8');
+  var wrapper = fs.readFileSync('./templates/svgXHR.js', 'utf-8');
   wrapper += 'svgXHR(\'' + filename + '\');';
   return wrapper;
 };
