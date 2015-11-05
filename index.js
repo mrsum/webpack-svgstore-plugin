@@ -6,7 +6,7 @@ var _options = {
     xmlns: 'http://www.w3.org/2000/svg',
     style: 'position:absolute; width: 0; height: 0'
   },
-  loop: 1,
+  loop: 2,
   prefix: 'icon-',
   name: 'sprite.[hash].svg',
   ajaxWrapper: false
@@ -147,9 +147,6 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   var ajaxWrapper;
   var ajaxWrapperFileName;
 
-  var manifest;
-  var manifestUpd;
-
   var options = this.options;
   var inputFolder = this.input;
   var outputFolder = this.output;
@@ -158,7 +155,6 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   var filesMap = bind(this, 'filesMap');
   var parseFiles = bind(this, 'parseFiles');
   var createSprite = bind(this, 'createSprite');
-
 
   // prepare input / output folders
   utils.prepareFolder(inputFolder);
@@ -187,39 +183,9 @@ WebpackSvgStore.prototype.apply = function(compiler) {
         };
       }
 
-      if (options && options.manifest && options.ajaxWrapper) {
-        // update manifest with sprite js
-        manifest = JSON.parse(fs.readFileSync(options.manifest, 'utf-8'));
-        manifest.assetsByChunkName.sprite = filename;
-        manifestUpd = JSON.stringify(manifest);
-
-        // rewrite manifest
-        fs.writeFile(options.manifest, manifestUpd, 'utf8');
-      }
-
       callback();
     });
   });
-
-  // compiler.plugin('done', function(compilation, callback) {
-  //   var manifest;
-  //   var manifestUpd;
-
-  //   ajaxWrapper = utils.svgXHR(hash);
-  //   ajaxWrapperFileName = options.ajaxWrapper.name || 'svgxhr.js';
-  //   ajaxWrapperFileName = utils.hash(ajaxWrapper, ajaxWrapperFileName);
-
-  //   if (options && options.manifest && options.ajaxWrapper) {
-  //     // update manifest with sprite js
-  //     manifest = JSON.parse(fs.readFileSync(options.manifest, 'utf-8'));
-  //     manifest.assetsByChunkName.sprite = filename;
-  //     manifestUpd = JSON.stringify(manifest);
-
-  //     // rewrite manifest
-  //     fs.writeFile(options.manifest, manifestUpd, 'utf8');
-  //   }
-  //   callback();
-  // });
 };
 
 /**
