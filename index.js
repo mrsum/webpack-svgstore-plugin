@@ -22,32 +22,6 @@ var parse = require('htmlparser2');
 var utils = require('./helpers/utils');
 
 /**
- * Binding context to function
- * @param  {[type]} obj      [description]
- * @param  {[type]} funcname [description]
- * @return {[type]}          [description]
- */
-var bind = function(obj, funcname) {
-  return function() {
-    return obj[funcname].apply(obj, arguments);
-  };
-};
-
-/**
- * Convert filename to id
- * @param  {string} filename [description]
- * @return {string}          [description]
- */
-var convertFilenameToId = function(filename) {
-  var _name = filename;
-  var dotPos = filename.indexOf('.');
-  if (dotPos > -1) {
-    _name = filename.substring(0, dotPos);
-  }
-  return _name;
-};
-
-/**
  * Constructor
  * @param {string} input   [description]
  * @param {string} output  [description]
@@ -88,7 +62,7 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
  * @return {[type]}     [description]
  */
 WebpackSvgStore.prototype.parseDomObject = function(data, filename, dom) {
-  var id = convertFilenameToId(filename);
+  var id = utils.convertFilenameToId(filename);
   if (dom && dom[0]) {
     utils.defs(id, dom[0], data.defs);
     utils.symbols(id, dom[0], data.symbols);
@@ -147,14 +121,11 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   var ajaxWrapper;
   var ajaxWrapperFileName;
 
+  var self = this;
   var options = this.options;
   var inputFolder = this.input;
   var outputFolder = this.output;
   var spriteName = this.options.name;
-
-  var filesMap = bind(this, 'filesMap');
-  var parseFiles = bind(this, 'parseFiles');
-  var createSprite = bind(this, 'createSprite');
 
   // prepare input / output folders
   utils.prepareFolder(inputFolder);
@@ -162,8 +133,8 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
   // subscribe to webpack emit state
   compiler.plugin('emit', function(compilation, callback) {
-    filesMap(inputFolder, function(files) {
-      var fileContent = createSprite(parseFiles(files));
+    self.filesMap(inputFolder, function(files) {
+      var fileContent = self.createSprite(self.parseFiles(files));
       var hash = utils.hash(fileContent, spriteName);
 
       compilation.assets[hash] = {

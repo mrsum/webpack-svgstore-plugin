@@ -66,6 +66,20 @@ var _parseSVG = function(arr, id) {
 };
 
 /**
+ * Convert filename to id
+ * @param  {string} filename [description]
+ * @return {string}          [description]
+ */
+var _convertFilenameToId = function(filename) {
+  var _name = filename;
+  var dotPos = filename.indexOf('.');
+  if (dotPos > -1) {
+    _name = filename.substring(0, dotPos);
+  }
+  return _name;
+};
+
+/**
  * Defs parser
  * @param  {[type]} id   [description]
  * @param  {[type]} data [description]
@@ -201,3 +215,9 @@ module.exports.fixUrls = _fixUrls;
  * @return {[type]}         [description]
  */
 module.exports.parseSVG = _parseSVG;
+
+/**
+ * [convertFilenameToId description]
+ * @type {[type]}
+ */
+module.exports.convertFilenameToId = _convertFilenameToId;
