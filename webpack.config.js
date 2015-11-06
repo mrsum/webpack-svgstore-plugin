@@ -1,14 +1,11 @@
 'use strict';
 
-//Depends
-var _ = require('lodash');
-
 /**
  * [config description]
  * @type {Object}
  */
 var _configs = {
-  //global section
+  // global section
   platform: require(__dirname + '/platform/global')
 };
 
@@ -18,15 +15,13 @@ var _configs = {
  * @return {[type]}            [description]
  */
 var _load = function(environment) {
-  console.log(environment);
-
-  //check enviroment
+  // check enviroment
   if (!environment) throw 'Can\'t find local environment variable via process.env.NODE_ENV';
   if (!_configs[environment]) throw 'Can\'t find enviroments see _congigs object';
 
-  //load config file by enviroment
+  // load config file by enviroment
   return _configs[environment](__dirname);
-}
+};
 
 /**
  * Export WebPack config
