@@ -1,6 +1,6 @@
 {
   "name": "webpack-svgstore-plugin",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Webpack svgstore plugin",
   "main": "index.js",
   "scripts": {
@@ -24,8 +24,6 @@
   },
   "devDependencies": {
     "eslint-config-rambler": "https://github.com/rambler-digital-solutions/dotfiles.git#master",
-    "html-webpack-plugin": "^1.6.2",
-    "manifest-revision-webpack-plugin": "0.0.5",
     "mocha": "^2.2.5",
     "path": "^0.11.14",
     "webpack": "^1.12.2"
