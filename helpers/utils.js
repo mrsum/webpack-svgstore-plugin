@@ -10,9 +10,9 @@ var crypto = require('crypto');
 
 /**
  * Depth log
- * @param  {[type]} subject [description]
- * @param  {[type]} depth   [description]
- * @return {[type]}         [description]
+ * @param  {object}   subject Consolable object or array
+ * @param  {integer}  depth   Depth level
+ * @return {void}
  */
 var _log = function(subject, depth) {
   console.log(util.inspect(subject, {
@@ -22,9 +22,9 @@ var _log = function(subject, depth) {
 
 /**
  * Fix urls
- * @param  {[type]} obj [description]
- * @param  {[type]} id  [description]
- * @return {[type]}     [description]
+ * @param  {object} obj
+ * @param  {string} id
+ * @return {void}
  */
 var _fixUrls = function(obj, id) {
   var key;
@@ -182,21 +182,21 @@ module.exports.hash = function(buffer, name) {
 };
 
 /**
- * [log description]
+ * Deep log util
  * @param  {[type]} subject [description]
  * @return {[type]}         [description]
  */
 module.exports.log = _log;
 
 /**
- * [fixUrls description]
+ * Fixing url inside each svg
  * @param  {[type]} subject [description]
  * @return {[type]}         [description]
  */
 module.exports.fixUrls = _fixUrls;
 
 /**
- * [parseSVG description]
+ * Simple SVG parser
  * @param  {[type]} subject [description]
  * @return {[type]}         [description]
  */
