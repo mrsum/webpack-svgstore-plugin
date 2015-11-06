@@ -3,6 +3,7 @@
 // Depends
 var _ = require('lodash');
 var fs = require('fs');
+var path = require('path');
 var util = require('util');
 var Svgo = require('svgo');
 var crypto = require('crypto');
@@ -17,6 +18,51 @@ var _log = function(subject, depth) {
   console.log(util.inspect(subject, {
     showHidden: true, depth: depth || 2
   }));
+};
+
+/**
+ * Fix urls
+ * @param  {[type]} obj [description]
+ * @param  {[type]} id  [description]
+ * @return {[type]}     [description]
+ */
+var _fixUrls = function(obj, id) {
+  var key;
+  var match;
+  var json = obj.attribs;
+  if (json) {
+    for (key in json) {
+      if (json.hasOwnProperty(key)) {
+        match = /url\(\s*#([^ ]+?)\s*\)/g.exec(json[key]);
+        if (key && match) {
+          json[key] = 'url(#' + id + '-' + match[1] + ')';
+        }
+      }
+    }
+  }
+};
+
+/**
+ * Svg parser
+ * @param  {[type]} arr   [description]
+ * @param  {[type]} id    [description]
+ * @return {[type]}       [description]
+ */
+var _parseSVG = function(arr, id) {
+  var data = [];
+  arr.forEach(function(obj) {
+    if (obj) {
+      // add unic ids to urls
+      _fixUrls(obj, id);
+      // go deeper if children exists
+      if (obj.children && obj.children.length > 0) {
+        _parseSVG(obj.children, id);
+      }
+      data.push(obj, id);
+    }
+  });
+
+  return data;
 };
 
 /**
@@ -47,6 +93,30 @@ module.exports.defs = function(id, dom, data) {
  * @return {[type]}      [description]
  */
 module.exports.symbols = function(id, dom, data) {
+  // create symbol object
+  var symbol = {
+    type: 'tag',
+    name: 'symbol',
+    attribs: {
+      viewbox: dom.attribs.viewbox,
+      id: 'icon-' + id
+    },
+    next: null,
+    prev: null,
+    parent: null
+  };
+
+  // add dom children without defs and titles
+  symbol.children = _.filter(dom.children, function(obj) {
+    return obj.name !== 'defs' && obj.name !== 'title';
+  });
+
+  // go through the svg element
+  _parseSVG(symbol.children, id);
+
+  // push symbol data
+  data.push(symbol);
+
   return data;
 };
 
@@ -96,7 +166,7 @@ module.exports.minify = function(file, loop) {
  * @return {[type]}         [description]
  */
 module.exports.svgXHR = function(filename) {
-  var wrapper = fs.readFileSync('./templates/svgXHR.js', 'utf-8');
+  var wrapper = fs.readFileSync(path.join(__dirname, 'svgxhr.js'), 'utf-8');
   wrapper += 'svgXHR(\'' + filename + '\');';
   return wrapper;
 };
@@ -117,3 +187,17 @@ module.exports.hash = function(buffer, name) {
  * @return {[type]}         [description]
  */
 module.exports.log = _log;
+
+/**
+ * [fixUrls description]
+ * @param  {[type]} subject [description]
+ * @return {[type]}         [description]
+ */
+module.exports.fixUrls = _fixUrls;
+
+/**
+ * [parseSVG description]
+ * @param  {[type]} subject [description]
+ * @return {[type]}         [description]
+ */
+module.exports.parseSVG = _parseSVG;

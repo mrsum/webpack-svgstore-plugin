@@ -6,7 +6,7 @@ var _options = {
     xmlns: 'http://www.w3.org/2000/svg',
     style: 'position:absolute; width: 0; height: 0'
   },
-  loop: 1,
+  loop: 2,
   prefix: 'icon-',
   name: 'sprite.[hash].svg',
   ajaxWrapper: false
@@ -135,7 +135,7 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
  * @return {[type]}       [description]
  */
 WebpackSvgStore.prototype.createSprite = function(data) {
-  return jade.renderFile('templates/layout.jade', data);
+  return jade.renderFile(path.join(__dirname, 'templates', 'layout.jade'), data);
 };
 
 /**
