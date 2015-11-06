@@ -21,6 +21,51 @@ var _log = function(subject, depth) {
 };
 
 /**
+ * Fix urls
+ * @param  {[type]} obj [description]
+ * @param  {[type]} id  [description]
+ * @return {[type]}     [description]
+ */
+var _fixUrls = function(obj, id) {
+  var key;
+  var match;
+  var json = obj.attribs;
+  if (json) {
+    for (key in json) {
+      if (json.hasOwnProperty(key)) {
+        match = /url\(\s*#([^ ]+?)\s*\)/g.exec(json[key]);
+        if (key && match) {
+          json[key] = 'url(#' + id + '-' + match[1] + ')';
+        }
+      }
+    }
+  }
+};
+
+/**
+ * Svg parser
+ * @param  {[type]} arr   [description]
+ * @param  {[type]} id    [description]
+ * @return {[type]}       [description]
+ */
+var _parseSVG = function(arr, id) {
+  var data = [];
+  arr.forEach(function(obj) {
+    if (obj) {
+      // add unic ids to urls
+      _fixUrls(obj, id);
+      // go deeper if children exists
+      if (obj.children && obj.children.length > 0) {
+        _parseSVG(obj.children, id);
+      }
+      data.push(obj, id);
+    }
+  });
+
+  return data;
+};
+
+/**
  * Defs parser
  * @param  {[type]} id   [description]
  * @param  {[type]} data [description]
@@ -66,35 +111,8 @@ module.exports.symbols = function(id, dom, data) {
     return obj.name !== 'defs' && obj.name !== 'title';
   });
 
-  function recurFunc(coll) {
-    _.each(coll, function(obj) {
-      var match;
-      if (obj) {
-        if (obj.attribs) {
-          // if fill or mask and pass regexp - add id to url
-          if (obj.attribs.fill) {
-            match = /url\(\s*#([^ ]+?)\s*\)/g.exec(obj.attribs.fill);
-            if (match) {
-              obj.attribs.fill = 'url(#' + id + '-' + match[1] + ')';
-            }
-          } else if (obj.attribs.mask) {
-            match = /url\(\s*#([^ ]+?)\s*\)/g.exec(obj.attribs.mask);
-            if (match) {
-              obj.attribs.mask = 'url(#' + id + '-' + match[1] + ')';
-            }
-          }
-        }
-
-        // go deeper if children
-        if (obj.children && obj.children.length > 0) {
-          recurFunc(obj.children);
-        }
-      }
-    });
-  }
-
-  // go through the elements
-  recurFunc(symbol.children);
+  // go through the svg element
+  _parseSVG(symbol.children, id);
 
   // push symbol data
   data.push(symbol);
@@ -169,3 +187,17 @@ module.exports.hash = function(buffer, name) {
  * @return {[type]}         [description]
  */
 module.exports.log = _log;
+
+/**
+ * [fixUrls description]
+ * @param  {[type]} subject [description]
+ * @return {[type]}         [description]
+ */
+module.exports.fixUrls = _fixUrls;
+
+/**
+ * [parseSVG description]
+ * @param  {[type]} subject [description]
+ * @return {[type]}         [description]
+ */
+module.exports.parseSVG = _parseSVG;
