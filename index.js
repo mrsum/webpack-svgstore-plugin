@@ -120,6 +120,7 @@ WebpackSvgStore.prototype.createSprite = function(data) {
 WebpackSvgStore.prototype.apply = function(compiler) {
   var ajaxWrapper;
   var ajaxWrapperFileName;
+  var publicPath;
 
   var self = this;
   var options = this.options;
@@ -133,6 +134,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
   // subscribe to webpack emit state
   compiler.plugin('emit', function(compilation, callback) {
+    publicPath = compilation.getStats().toJson().publicPath || '/';
     self.filesMap(inputFolder, function(files) {
       var fileContent = self.createSprite(self.parseFiles(files));
       var hash = utils.hash(fileContent, spriteName);
@@ -144,7 +146,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
       // if ajaxWrapper enable
       if (options && options.ajaxWrapper) {
-        ajaxWrapper = utils.svgXHR(hash);
+        ajaxWrapper = utils.svgXHR([publicPath, hash].join('/'));
         ajaxWrapperFileName = options.ajaxWrapper.name || 'svgxhr.js';
         ajaxWrapperFileName = utils.hash(ajaxWrapper, ajaxWrapperFileName);
 
