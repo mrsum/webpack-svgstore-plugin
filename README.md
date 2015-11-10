@@ -13,10 +13,10 @@ npm i webpack-svgstore-plugin --save-dev
 var SvgStore = require('webpack-svgstore-plugin');
 
 plugins: [
-  new SvgStore(path.join(sourcePath, 'min'), path.join(distPath, 'svg'), {
-    name: '[hash].sprite.svg',
+  new SvgStore(path.join(sourcePath, 'svg'), path.join(distPath, 'svg'), {
+    name: 'svg/[hash].sprite.svg',
     ajaxWrapper: {
-      name: '[hash].svgxhr.js'
+      name: 'svg/[hash].svgxhr.js'
     }
   })
 ]
