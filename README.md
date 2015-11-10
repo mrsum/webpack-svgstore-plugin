@@ -1,4 +1,5 @@
 # webpack-svgstore-plugin
+![webpack-svgstore-plugin](https://lincolnloop.global.ssl.fastly.net/uploads/uploads/demo.png)
 
 ## Installation
 ```bash
