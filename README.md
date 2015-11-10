@@ -1,4 +1,4 @@
-# Webpack-svgstore-plugin
+# webpack-svgstore-plugin
 
 ## Installation
 ```bash
@@ -6,7 +6,6 @@ npm i webpack-svgstore-plugin --save-dev
 ```
 ## Usage
 
-### webpack.config.js
 #### 1. require plugin
 ```javascript
 //webpack.config.js
