@@ -1,12 +1,5 @@
 'use strict';
 
-<<<<<<< HEAD
-/**
- * Webpack SVGstore plugin based on grunt-svg-store
- * @see https://github.com/FWeinb/grunt-svgstore/blob/master/tasks/svgstore.js
- */
- 
-=======
 // Defaults
 var _options = {
   svg: {
@@ -19,7 +12,6 @@ var _options = {
   ajaxWrapper: false
 };
 
->>>>>>> upstream/master
 // Depends
 var _ = require('lodash');
 var fs = require('fs');
@@ -125,26 +117,10 @@ WebpackSvgStore.prototype.createSprite = function(data) {
  * @param  {[type]} compiler [description]
  * @return {[type]}          [description]
  */
-<<<<<<< HEAD
-SvgStore.prototype.apply = function(compiler) {
-  var self = this;
-  var spriteAjax = fs.readFileSync(self.options.ajaxFunc, 'utf-8');
-  var output = this.options.output;
-  var oneForAll = output.length === 1 && output[0].filter === 'all';
-  var outputData;
-
-  if (typeof self.options.format === 'string' || self.options.format instanceof String) {
-    var format = new Format();
-    outputData = format[self.options.format]();
-  } else {
-    outputData = self.options.format();
-  }
-=======
 WebpackSvgStore.prototype.apply = function(compiler) {
   var ajaxWrapper;
   var ajaxWrapperFileName;
   var publicPath;
->>>>>>> upstream/master
 
   var self = this;
   var options = this.options;
