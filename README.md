@@ -39,6 +39,6 @@ plugins: [
 
 ## License
 
-[webpack-svgstore-plugin]: https://www.npmjs.com/package/webpack-svgstore-plugin
+NPM package avaliable here: [webpack-svgstore-plugin](https://www.npmjs.com/package/webpack-svgstore-plugin)
 
 MIT © [Chernobrov Mike](http://mrsum.ru), Gordey Levchenko
