@@ -1,0 +1,4 @@
+include symbols-childs
+
+each symbol in symbols
+  | #[#{symbol.name}&attributes(symbol.attribs) #[+parseObject(symbol.children)]]
