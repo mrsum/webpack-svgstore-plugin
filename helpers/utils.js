@@ -21,6 +21,19 @@ var _log = function(subject, depth) {
 };
 
 /**
+ * Fix masks
+ * @param  {object} obj
+ * @param  {string} id
+ * @return {void}
+ */
+var _fixMasks = function(obj, id) {
+  // add id to mask
+  if (obj.name === 'mask') {
+    obj.attribs.id = [id, obj.attribs.id || 'icon-id'].join('-');
+  }
+};
+
+/**
  * Fix urls
  * @param  {object} obj
  * @param  {string} id
@@ -54,6 +67,8 @@ var _parseSVG = function(arr, id) {
     if (obj) {
       // add unic ids to urls
       _fixUrls(obj, id);
+      // add ids to each mask
+      _fixMasks(obj, id);
       // go deeper if children exists
       if (obj.children && obj.children.length > 0) {
         _parseSVG(obj.children, id);
@@ -201,6 +216,13 @@ module.exports.hash = function(buffer, name) {
  * @return {[type]}         [description]
  */
 module.exports.log = _log;
+
+/**
+ * Fixing id inside each mask selector
+ * @param  {[type]} subject [description]
+ * @return {[type]}         [description]
+ */
+module.exports.fixUrls = _fixMasks;
 
 /**
  * Fixing url inside each svg
