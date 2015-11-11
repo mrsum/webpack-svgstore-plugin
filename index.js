@@ -20,6 +20,8 @@ var walk = require('walk');
 var jade = require('jade');
 var parse = require('htmlparser2');
 var utils = require('./helpers/utils');
+var ConcatSource = require('webpack/lib/ConcatSource');
+var ModuleFilenameHelpers = require('webpack/lib/ModuleFilenameHelpers');
 
 /**
  * Constructor
@@ -118,8 +120,7 @@ WebpackSvgStore.prototype.createSprite = function(data) {
  * @return {[type]}          [description]
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
-  var ajaxWrapper;
-  var ajaxWrapperFileName;
+  var chunkWrapper;
   var publicPath;
 
   var self = this;
@@ -133,7 +134,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   utils.prepareFolder(outputFolder);
 
   // subscribe to webpack emit state
-  compiler.plugin('emit', function(compilation, callback) {
+  compiler.plugin('compilation', function(compilation) {
     publicPath = compilation.getStats().toJson().publicPath || '/';
     self.filesMap(inputFolder, function(files) {
       var fileContent = self.createSprite(self.parseFiles(files));
@@ -144,19 +145,21 @@ WebpackSvgStore.prototype.apply = function(compiler) {
         source: function() { return new Buffer(fileContent); }
       };
 
-      // if ajaxWrapper enable
-      if (options && options.ajaxWrapper) {
-        ajaxWrapper = utils.svgXHR([publicPath, hash].join('/'));
-        ajaxWrapperFileName = options.ajaxWrapper.name || 'svgxhr.js';
-        ajaxWrapperFileName = utils.hash(ajaxWrapper, ajaxWrapperFileName);
-
-        compilation.assets[ajaxWrapperFileName] = {
-          size: function() { return Buffer.byteLength(ajaxWrapper, 'utf8'); },
-          source: function() { return new Buffer(ajaxWrapper); }
-        };
+      // if chunk enable
+      if (options && options.chunk) {
+        chunkWrapper = options.chunk;
+        compilation.plugin('optimize-chunk-assets', function(chunks, callback) {
+          chunks.forEach(function(chunk) {
+            if (options.entryOnly && !chunk.initial) return;
+            if (chunk.name === chunkWrapper) {
+              chunk.files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options)).forEach(function(file) {
+                compilation.assets[file] = new ConcatSource(utils.svgXHR([publicPath, hash].join('/')), '\n', compilation.assets[file]);
+              });
+            }
+          });
+          callback();
+        });
       }
-
-      callback();
     });
   });
 };

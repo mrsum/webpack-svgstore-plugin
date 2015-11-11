@@ -16,21 +16,13 @@ var SvgStore = require('webpack-svgstore-plugin');
 plugins: [
   new SvgStore(path.join(sourcePath, 'svg'), path.join(distPath, 'svg'), {
     name: 'svg/[hash].sprite.svg',
-    ajaxWrapper: {
-      name: 'svg/[hash].svgxhr.js'
-    }
+    chunk: 'app'
   })
 ]
 
 ```
 
-#### 2. Include svgxhr.js into your webpage
-
-```html
-  <script src="/assets/svgxhr.js" type="text/javascript" charset="utf-8"></script>
-```
-
-#### 3. HTML code for happy using
+#### 2. HTML code for happy using
 
 ```html
   <svg class="svg-icon">
