@@ -226,7 +226,7 @@ module.exports.log = _log;
  * @param  {[type]} subject [description]
  * @return {[type]}         [description]
  */
-module.exports.fixUrls = _fixMasks;
+module.exports.fixMasks = _fixMasks;
 
 /**
  * Fixing url inside each svg
