@@ -29,7 +29,11 @@ var _log = function(subject, depth) {
 var _fixMasks = function(obj, id) {
   // add id to mask
   if (obj.name === 'mask') {
-    obj.attribs.id = [id, obj.attribs.id || 'icon-id'].join('-');
+    obj.attribs.id = [id, obj.attribs.id].join('-');
+  }
+  // add id to use tag inside mask
+  if (obj.name === 'use' && obj.parent.name === 'mask') {
+    obj.attribs['xlink:href'] = ['#' + id, obj.attribs['xlink:href'].replace('#', '')].join('-');
   }
 };
 
