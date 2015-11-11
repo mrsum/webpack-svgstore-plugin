@@ -13,13 +13,17 @@ npm i webpack-svgstore-plugin --save-dev
 
 var SvgStore = require('webpack-svgstore-plugin');
 
-plugins: [
-  new SvgStore(path.join(sourcePath, 'svg'), path.join(distPath, 'svg'), {
-    name: 'svg/[hash].sprite.svg',
-    chunk: 'app'
-  })
-]
-
+module.exports = {
+  entry: {
+    app: path.join(_path, 'platform', 'static', 'js', 'index.js'),
+  },
+  plugins: [
+    new SvgStore(path.join(sourcePath, 'svg'), path.join(distPath, 'svg'), {
+      name: 'svg/[hash].sprite.svg',
+      chunk: 'app'
+    })
+  ]
+}
 ```
 
 #### 2. HTML code for happy using
