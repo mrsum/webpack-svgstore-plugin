@@ -2,6 +2,7 @@
 
 // Depends
 var chai = require('chai');
+var mocha = require('mocha');
 var plugin = require('../index');
 var utils = require('../helpers/utils');
 
