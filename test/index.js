@@ -55,3 +55,14 @@ describe('utils.convertFilenameToId', function() {
     assert.equal(utils.convertFilenameToId('cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'), 'cdbf2bdb4f64b7f94b4779d2320918d9');
   });
 });
+
+describe('utils.prepareFolder', function() {
+  var assert = chai.assert;
+  it('function is exists', function() {
+    assert.typeOf(utils.prepareFolder, 'function');
+  });
+
+  it('function create folder', function() {
+    assert.equal(utils.prepareFolder('test_folder'), true);
+  });
+});
