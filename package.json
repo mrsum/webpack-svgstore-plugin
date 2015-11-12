@@ -4,7 +4,7 @@
   "description": "Webpack svgstore plugin",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -R spec ./test/index.js",
+    "test": "mocha -w -R spec ./test/index.js",
     "build": "rm -rf platform/dist/* && NODE_ENV=platform webpack --progress -p --colors"
   },
   "author": "me@mrsum.ru",
@@ -23,6 +23,7 @@
     "walk": "^2.3.9"
   },
   "devDependencies": {
+    "chai": "^3.4.1",
     "eslint-config-rambler": "https://github.com/rambler-digital-solutions/dotfiles.git#master",
     "mocha": "^2.2.5",
     "path": "^0.11.14",

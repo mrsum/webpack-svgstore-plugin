@@ -1,12 +1,15 @@
 'use strict';
 
 // Depends
+var chai = require('chai');
 var plugin = require('../index');
 var utils = require('../helpers/utils');
 
 describe('utils.log', function() {
-  it('function is exists', function(done) {
-    if (typeof utils.log === 'function') done();
+  var assert = chai.assert;
+
+  it('function is exists', function() {
+    assert.typeOf(utils.log, 'function');
   });
 
   it('function is callable', function(done) {
@@ -17,19 +20,37 @@ describe('utils.log', function() {
 
 
 describe('utils.hash', function() {
-  it('function is exists', function(done) {
-    if (typeof utils.hash === 'function') done();
+  var assert = chai.assert;
+  it('function is exists', function() {
+    assert.typeOf(utils.hash, 'function');
   });
 
-  it('check hashsum #1', function(done) {
+  it('check hashsum #1', function() {
     var content = '<span>hello svg</span>';
     var fileName = '[hash].sprite.svg';
-    if (utils.hash(content, fileName) === 'cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg') done();
+
+    assert.equal(utils.hash(content, fileName), 'cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg');
   });
 
-  it('check hashsum #2', function(done) {
+  it('check hashsum #2', function() {
     var content = '<span>hello svg</span>';
     var fileName = 'sprite.svg';
-    if (utils.hash(content, fileName) === 'sprite.svg') done();
+    assert.equal(utils.hash(content, fileName), 'sprite.svg');
+  });
+});
+
+
+describe('utils.convertFilenameToId', function() {
+  var assert = chai.assert;
+  it('function is exists', function() {
+    assert.typeOf(utils.convertFilenameToId, 'function');
+  });
+
+  it('check function result #1 sprite.svg', function() {
+    assert.equal(utils.convertFilenameToId('sprite.svg'), 'sprite');
+  });
+
+  it('check function result #1 cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg', function() {
+    assert.equal(utils.convertFilenameToId('cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'), 'cdbf2bdb4f64b7f94b4779d2320918d9');
   });
 });
