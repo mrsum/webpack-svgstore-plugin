@@ -3,7 +3,7 @@
 // Depends
 var chai = require('chai');
 var mocha = require('mocha');
-var plugin = require('../index');
+var Plugin = require('../index');
 var utils = require('../helpers/utils');
 
 describe('utils.log', function() {
@@ -66,3 +66,21 @@ describe('utils.prepareFolder', function() {
     assert.equal(utils.prepareFolder('test_folder'), true);
   });
 });
+
+describe('plugin.WebpackSvgStore', function () {
+  var WebpackSvgStore;
+  var assert = chai.assert;
+
+  it('function is exists', function() {
+    assert.typeOf(Plugin, 'function');
+  });
+
+  it('try to create new object', function() {
+    WebpackSvgStore = new Plugin();
+  });
+
+  it('must be an object', function() {
+    assert.typeOf(WebpackSvgStore, 'object');
+  });
+});
+
