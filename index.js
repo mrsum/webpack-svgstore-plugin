@@ -16,7 +16,7 @@ var _options = {
 var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
-var walk = require('walk');
+var glob = require('glob');
 var jade = require('jade');
 var parse = require('htmlparser2');
 var utils = require('./helpers/utils');
@@ -45,17 +45,25 @@ var WebpackSvgStore = function(input, output, options) {
  * @return {array}        Array of paths
  */
 WebpackSvgStore.prototype.filesMap = function(input, cb) {
-  var files = [];
-  var walker = walk.walk(input, { followLinks: true });
-
-  walker.on('file', function(root, stat, next) {
-    files.push(root + '/' + stat.name);
-    next();
-  });
-
-  walker.on('end', function() {
+  // in case if array was passed
+  if (input instanceof Array) {
+    var files = [];
+    input.forEach(function(input) {
+      this.filesMap(input, function(fileList) {
+        files = files.concat(fileList);
+      });
+    });
+    console.log(files);
     cb(files);
-  });
+  } else {
+    glob(input, function(error, fileList) {
+      if (error) {
+        throw error;
+      }
+      // slice off pattern
+      cb(fileList.slice(1));
+    });
+  }
 };
 
 /**
