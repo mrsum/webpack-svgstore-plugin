@@ -16,7 +16,7 @@ var _options = {
 var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
-var walk = require('walk');
+var glob = require('glob');
 var jade = require('jade');
 var parse = require('htmlparser2');
 var utils = require('./helpers/utils');
@@ -45,17 +45,24 @@ var WebpackSvgStore = function(input, output, options) {
  * @return {array}        Array of paths
  */
 WebpackSvgStore.prototype.filesMap = function(input, cb) {
-  var files = [];
-  var walker = walk.walk(input, { followLinks: true });
-
-  walker.on('file', function(root, stat, next) {
-    files.push(root + '/' + stat.name);
-    next();
-  });
-
-  walker.on('end', function() {
+  // in case if array was passed
+  if (input instanceof Array) {
+    var files = [];
+    input.forEach(function(input) {
+      this.filesMap(input, function(fileList) {
+        files = files.concat(fileList);
+      });
+    });
     cb(files);
-  });
+  } else {
+    glob(input, function(error, fileList) {
+      if (error) {
+        throw error;
+      }
+      // slice off pattern
+      cb(fileList.slice(1));
+    });
+  }
 };
 
 /**
@@ -85,10 +92,11 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
     symbols: []
   };
 
-  // each over fils
+  // each over files
   files.forEach(function(file) {
+    var svgoOptions = _.assign({}, self.options.svgoOptions);
     // load and minify
-    var buffer = utils.minify(fs.readFileSync(file, 'utf8'), self.options.loop);
+    var buffer = utils.minify(fs.readFileSync(file, 'utf8'), self.options.loop, svgoOptions);
     // get filename for id generation
     var filename = path.basename(file, '.svg');
     var handler = new parse.DomHandler(function(error, dom) {
@@ -138,9 +146,11 @@ WebpackSvgStore.prototype.apply = function(compiler) {
     publicPath = compilation.getStats().toJson().publicPath || '/';
     self.filesMap(inputFolder, function(files) {
       var fileContent = self.createSprite(self.parseFiles(files));
-      var hash = utils.hash(fileContent, spriteName);
+      var fileName = utils.hash(fileContent, spriteName);
 
-      compilation.assets[hash] = {
+      var filePath = outputFolder.split('/').slice(-1)[0];
+
+      compilation.assets[[filePath, fileName].join('/')] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }
       };

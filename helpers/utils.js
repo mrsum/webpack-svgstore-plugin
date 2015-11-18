@@ -176,9 +176,9 @@ module.exports.prepareFolder = function(folder) {
  * @param  {integer}  loop  loop count
  * @return {[type]}         minified source
  */
-module.exports.minify = function(file, loop) {
+module.exports.minify = function(file, loop, svgoOptions) {
   var i;
-  var minify = new Svgo();
+  var minify = new Svgo(svgoOptions);
   var source = file;
 
   function svgoCallback(result) {

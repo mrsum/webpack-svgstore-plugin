@@ -18,11 +18,11 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "glob": "^6.0.1",
     "htmlparser2": "^3.8.3",
     "jade": "^1.11.0",
     "lodash": "^3.10.1",
-    "svgo": "^0.6.0",
-    "walk": "^2.3.9"
+    "svgo": "^0.6.0"
   },
   "devDependencies": {
     "chai": "^3.4.1",
