@@ -93,10 +93,11 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
     symbols: []
   };
 
-  // each over fils
+  // each over files
   files.forEach(function(file) {
+    var svgoOptions = _.assign({}, self.options.svgoOptions);
     // load and minify
-    var buffer = utils.minify(fs.readFileSync(file, 'utf8'), self.options.loop);
+    var buffer = utils.minify(fs.readFileSync(file, 'utf8'), self.options.loop, svgoOptions);
     // get filename for id generation
     var filename = path.basename(file, '.svg');
     var handler = new parse.DomHandler(function(error, dom) {
