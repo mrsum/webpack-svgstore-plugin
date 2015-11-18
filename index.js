@@ -53,7 +53,6 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
         files = files.concat(fileList);
       });
     });
-    console.log(files);
     cb(files);
   } else {
     glob(input, function(error, fileList) {
