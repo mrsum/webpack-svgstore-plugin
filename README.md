@@ -24,7 +24,7 @@ module.exports = {
   },
   plugins: [
     new SvgStore(path.join(sourcePath, 'svg', '**/*.svg'), path.join(distPath, 'svg'), {
-      name: 'svg/[hash].sprite.svg',
+      name: '[hash].sprite.svg',
       chunk: 'app',
       svgoOptions: {
         // options for svgo, optional

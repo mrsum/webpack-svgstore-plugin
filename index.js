@@ -53,7 +53,6 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
         files = files.concat(fileList);
       });
     });
-    console.log(files);
     cb(files);
   } else {
     glob(input, function(error, fileList) {
@@ -148,9 +147,10 @@ WebpackSvgStore.prototype.apply = function(compiler) {
     self.filesMap(inputFolder, function(files) {
       var fileContent = self.createSprite(self.parseFiles(files));
       var fileName = utils.hash(fileContent, spriteName);
-      var filePath = outputFolder ? path.join(outputFolder, fileName) : fileName;
 
-      compilation.assets[filePath] = {
+      var filePath = outputFolder.split('/').slice(-1)[0];
+
+      compilation.assets[[filePath, fileName].join('/')] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }
       };
