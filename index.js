@@ -138,9 +138,10 @@ WebpackSvgStore.prototype.apply = function(compiler) {
     publicPath = compilation.getStats().toJson().publicPath || '/';
     self.filesMap(inputFolder, function(files) {
       var fileContent = self.createSprite(self.parseFiles(files));
-      var hash = utils.hash(fileContent, spriteName);
+      var fileName = utils.hash(fileContent, spriteName);
+      var filePath = outputFolder ? path.join(outputFolder, fileName) : fileName;
 
-      compilation.assets[hash] = {
+      compilation.assets[filePath] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }
       };
@@ -153,7 +154,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
             if (options.entryOnly && !chunk.initial) return;
             if (chunk.name === chunkWrapper) {
               chunk.files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options)).forEach(function(file) {
-                compilation.assets[file] = new ConcatSource(utils.svgXHR([publicPath, hash].join('/')), '\n', compilation.assets[file]);
+                compilation.assets[file] = new ConcatSource(utils.svgXHR([publicPath, fileName].join('/')), '\n', compilation.assets[file]);
               });
             }
           });
