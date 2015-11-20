@@ -7,6 +7,7 @@ var _options = {
     style: 'position:absolute; width: 0; height: 0'
   },
   loop: 2,
+  svgoOptions: '{}',
   prefix: 'icon-',
   name: 'sprite.[hash].svg',
   ajaxWrapper: false
@@ -45,22 +46,23 @@ var WebpackSvgStore = function(input, output, options) {
  * @return {array}        Array of paths
  */
 WebpackSvgStore.prototype.filesMap = function(input, cb) {
+  var files = [];
+  var data = input;
   // in case if array was passed
-  if (input instanceof Array) {
-    var files = [];
-    input.forEach(function(input) {
-      this.filesMap(input, function(fileList) {
+  if (data instanceof Array) {
+    data.forEach(function(source) {
+      this.filesMap(source, function(fileList) {
         files = files.concat(fileList);
       });
     });
     cb(files);
   } else {
-    glob(input, function(error, fileList) {
+    glob(data, function(error, fileList) {
       if (error) {
         throw error;
       }
       // slice off pattern
-      cb(fileList.slice(1));
+      cb(fileList);
     });
   }
 };
@@ -94,9 +96,8 @@ WebpackSvgStore.prototype.parseFiles = function(files) {
 
   // each over files
   files.forEach(function(file) {
-    var svgoOptions = _.assign({}, self.options.svgoOptions);
     // load and minify
-    var buffer = utils.minify(fs.readFileSync(file, 'utf8'), self.options.loop, svgoOptions);
+    var buffer = utils.minify(fs.readFileSync(file, 'utf8'), self.options.loop, self.options.svgoOptions);
     // get filename for id generation
     var filename = path.basename(file, '.svg');
     var handler = new parse.DomHandler(function(error, dom) {
