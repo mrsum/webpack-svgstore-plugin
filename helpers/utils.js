@@ -5,9 +5,19 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
+var jade = require('jade');
 var Svgo = require('svgo');
 var crypto = require('crypto');
 var parse = require('htmlparser2');
+
+/**
+ * Create sprite
+ * @param  {[type]} files [description]
+ * @return {[type]}       [description]
+ */
+var _createSprite = function(data) {
+  return jade.renderFile(path.join(__dirname, '../templates', 'layout.jade'), data);
+};
 
 /**
  * Depth log
@@ -332,3 +342,11 @@ module.exports.symbols = _symbols;
  * @return {[type]}         minified source
  */
 module.exports.minify = _minify;
+
+/**
+ * Sprite creation
+ * @param  {[type]} files [description]
+ * @return {[type]}       [description]
+ */
+module.exports.createSprite = _createSprite;
+

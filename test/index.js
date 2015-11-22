@@ -1,7 +1,9 @@
 'use strict';
 
 // Depends
+var fs = require('fs');
 var chai = require('chai');
+var path = require('path');
 var mocha = require('mocha');
 var Plugin = require('../index');
 var utils = require('../helpers/utils');
@@ -40,6 +42,38 @@ describe('utils.hash', function() {
   });
 });
 
+describe('utils.symbols', function() {
+  var assert = chai.assert;
+  it('function is exists', function() {
+    assert.typeOf(utils.symbols, 'function');
+  });
+});
+
+describe('utils.createSprite', function() {
+  var assert = chai.assert;
+  var arr = [];
+  var output = fs.readFileSync('./test/svg/compiled_svg.svg', 'utf-8');
+  var options = {
+    svg: {
+      xmlns: 'http://www.w3.org/2000/svg',
+      style: 'position:absolute; width: 0; height: 0'
+    },
+    loop: 2,
+    svgoOptions: {},
+    prefix: 'icon-',
+    name: 'sprite.[hash].svg',
+    ajaxWrapper: false
+  };
+  var source;
+
+  arr.push(path.join(__dirname, 'svg', 'test_svg.svg'));
+
+  source = utils.createSprite(utils.parseFiles(arr, options));
+
+  it('check full sprite creation', function() {
+    assert.equal(source, output);
+  });
+});
 
 describe('utils.convertFilenameToId', function() {
   var assert = chai.assert;
@@ -67,7 +101,7 @@ describe('utils.prepareFolder', function() {
   });
 });
 
-describe('plugin.WebpackSvgStore', function () {
+describe('plugin.WebpackSvgStore', function() {
   var WebpackSvgStore;
   var assert = chai.assert;
 
