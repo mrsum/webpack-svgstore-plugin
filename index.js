@@ -15,8 +15,6 @@ var _options = {
 
 // Depends
 var _ = require('lodash');
-var fs = require('fs');
-var path = require('path');
 var glob = require('glob');
 var utils = require('./helpers/utils');
 var ConcatSource = require('webpack/lib/ConcatSource');
