@@ -19,7 +19,6 @@ var fs = require('fs');
 var path = require('path');
 var glob = require('glob');
 var jade = require('jade');
-var parse = require('htmlparser2');
 var utils = require('./helpers/utils');
 var ConcatSource = require('webpack/lib/ConcatSource');
 var ModuleFilenameHelpers = require('webpack/lib/ModuleFilenameHelpers');
@@ -68,53 +67,6 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
 };
 
 /**
- * Parse dom objects
- * @param  {[type]} dom [description]
- * @return {[type]}     [description]
- */
-WebpackSvgStore.prototype.parseDomObject = function(data, filename, dom) {
-  var id = utils.convertFilenameToId(filename);
-  if (dom && dom[0]) {
-    utils.defs(id, dom[0], data.defs);
-    utils.symbols(id, dom[0], data.symbols);
-  }
-
-  return data;
-};
-
-/**
- * [parseFiles description]
- * @return {[type]} [description]
- */
-WebpackSvgStore.prototype.parseFiles = function(files) {
-  var self = this;
-  var data = {
-    svg: this.options.svg,
-    defs: [],
-    symbols: []
-  };
-
-  // each over files
-  files.forEach(function(file) {
-    // load and minify
-    var buffer = utils.minify(fs.readFileSync(file, 'utf8'), self.options.loop, self.options.svgoOptions);
-    // get filename for id generation
-    var filename = path.basename(file, '.svg');
-    var handler = new parse.DomHandler(function(error, dom) {
-      if (error) utils.log(error);
-      else data = self.parseDomObject(data, filename, dom);
-    });
-
-    // lets create parser instance
-    var Parser = new parse.Parser(handler);
-    Parser.write(buffer);
-    Parser.end();
-  });
-
-  return data;
-};
-
-/**
  * Parse files
  * @param  {[type]} files [description]
  * @return {[type]}       [description]
@@ -146,7 +98,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   compiler.plugin('compilation', function(compilation) {
     publicPath = compilation.getStats().toJson().publicPath || '/';
     self.filesMap(inputFolder, function(files) {
-      var fileContent = self.createSprite(self.parseFiles(files));
+      var fileContent = self.createSprite(utils.parseFiles(files, options));
       var fileName = utils.hash(fileContent, spriteName);
 
       var filePath = outputFolder.split('/').slice(-1)[0];
