@@ -7,18 +7,13 @@ var _options = {
     style: 'position:absolute; width: 0; height: 0'
   },
   loop: 2,
-  prefix: 'icon-',
-  name: 'sprite.[hash].svg',
-  ajaxWrapper: false
+  svgoOptions: {},
+  name: 'sprite.[hash].svg'
 };
 
 // Depends
 var _ = require('lodash');
-var fs = require('fs');
-var path = require('path');
 var glob = require('glob');
-var jade = require('jade');
-var parse = require('htmlparser2');
 var utils = require('./helpers/utils');
 var ConcatSource = require('webpack/lib/ConcatSource');
 var ModuleFilenameHelpers = require('webpack/lib/ModuleFilenameHelpers');
@@ -45,81 +40,25 @@ var WebpackSvgStore = function(input, output, options) {
  * @return {array}        Array of paths
  */
 WebpackSvgStore.prototype.filesMap = function(input, cb) {
+  var files = [];
+  var data = input;
   // in case if array was passed
-  if (input instanceof Array) {
-    var files = [];
-    input.forEach(function(input) {
-      this.filesMap(input, function(fileList) {
+  if (data instanceof Array) {
+    data.forEach(function(source) {
+      this.filesMap(source, function(fileList) {
         files = files.concat(fileList);
       });
     });
     cb(files);
   } else {
-    glob(input, function(error, fileList) {
+    glob(data, function(error, fileList) {
       if (error) {
         throw error;
       }
       // slice off pattern
-      cb(fileList.slice(1));
+      cb(fileList);
     });
   }
-};
-
-/**
- * Parse dom objects
- * @param  {[type]} dom [description]
- * @return {[type]}     [description]
- */
-WebpackSvgStore.prototype.parseDomObject = function(data, filename, dom) {
-  var id = utils.convertFilenameToId(filename);
-  if (dom && dom[0]) {
-    utils.defs(id, dom[0], data.defs);
-    utils.symbols(id, dom[0], data.symbols);
-  }
-
-  return data;
-};
-
-/**
- * [parseFiles description]
- * @return {[type]} [description]
- */
-WebpackSvgStore.prototype.parseFiles = function(files) {
-  var self = this;
-  var data = {
-    svg: this.options.svg,
-    defs: [],
-    symbols: []
-  };
-
-  // each over files
-  files.forEach(function(file) {
-    var svgoOptions = _.assign({}, self.options.svgoOptions);
-    // load and minify
-    var buffer = utils.minify(fs.readFileSync(file, 'utf8'), self.options.loop, svgoOptions);
-    // get filename for id generation
-    var filename = path.basename(file, '.svg');
-    var handler = new parse.DomHandler(function(error, dom) {
-      if (error) utils.log(error);
-      else data = self.parseDomObject(data, filename, dom);
-    });
-
-    // lets create parser instance
-    var Parser = new parse.Parser(handler);
-    Parser.write(buffer);
-    Parser.end();
-  });
-
-  return data;
-};
-
-/**
- * Parse files
- * @param  {[type]} files [description]
- * @return {[type]}       [description]
- */
-WebpackSvgStore.prototype.createSprite = function(data) {
-  return jade.renderFile(path.join(__dirname, 'templates', 'layout.jade'), data);
 };
 
 /**
@@ -145,7 +84,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   compiler.plugin('compilation', function(compilation) {
     publicPath = compilation.getStats().toJson().publicPath || '/';
     self.filesMap(inputFolder, function(files) {
-      var fileContent = self.createSprite(self.parseFiles(files));
+      var fileContent = utils.createSprite(utils.parseFiles(files, options));
       var fileName = utils.hash(fileContent, spriteName);
 
       var filePath = outputFolder.split('/').slice(-1)[0];
@@ -163,7 +102,9 @@ WebpackSvgStore.prototype.apply = function(compiler) {
             if (options.entryOnly && !chunk.initial) return;
             if (chunk.name === chunkWrapper) {
               chunk.files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options)).forEach(function(file) {
-                compilation.assets[file] = new ConcatSource(utils.svgXHR([publicPath, fileName].join('/')), '\n', compilation.assets[file]);
+                if (/\.js?$/.test(file)) {
+                  compilation.assets[file] = new ConcatSource(utils.svgXHR([publicPath, fileName].join('/')), '\n', compilation.assets[file]);
+                }
               });
             }
           });
