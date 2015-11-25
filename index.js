@@ -86,8 +86,9 @@ WebpackSvgStore.prototype.apply = function(compiler) {
     self.filesMap(inputFolder, function(files) {
       var fileContent = utils.createSprite(utils.parseFiles(files, options));
       var fileName = utils.hash(fileContent, spriteName);
+      var filePath = [outputFolder, fileName].join('/');
 
-      compilation.assets[[outputFolder, fileName].join('/')] = {
+      compilation.assets[filePath] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }
       };
@@ -101,7 +102,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
             if (chunk.name === chunkWrapper) {
               chunk.files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options)).forEach(function(file) {
                 if (/\.js?$/.test(file)) {
-                  compilation.assets[file] = new ConcatSource(utils.svgXHR([publicPath, fileName].join('/')), '\n', compilation.assets[file]);
+                  compilation.assets[file] = new ConcatSource(utils.svgXHR([publicPath, filePath].join('/')), '\n', compilation.assets[file]);
                 }
               });
             }
