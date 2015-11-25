@@ -87,9 +87,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       var fileContent = utils.createSprite(utils.parseFiles(files, options));
       var fileName = utils.hash(fileContent, spriteName);
 
-      var filePath = outputFolder.split('/').slice(-1)[0];
-
-      compilation.assets[[filePath, fileName].join('/')] = {
+      compilation.assets[[outputFolder, fileName].join('/')] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }
       };
