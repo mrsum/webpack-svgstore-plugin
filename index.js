@@ -14,6 +14,7 @@ var _options = {
 
 // Depends
 var _ = require('lodash');
+var path = require('path');
 var glob = require('glob');
 var utils = require('./helpers/utils');
 var ConcatSource = require('webpack/lib/ConcatSource');
@@ -103,7 +104,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
             if (chunk.name === chunkWrapper) {
               chunk.files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options)).forEach(function(file) {
                 if (/\.js?$/.test(file)) {
-                  compilation.assets[file] = new ConcatSource(utils.svgXHR([publicPath, filePath].join('/')), '\n', compilation.assets[file]);
+                  compilation.assets[file] = new ConcatSource(utils.svgXHR(path.join(publicPath, filePath)), '\n', compilation.assets[file]);
                 }
               });
             }
