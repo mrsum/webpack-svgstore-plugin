@@ -1,4 +1,6 @@
 include symbols-childs
 
-each def in defs
-  | #[#{def.name}&attributes(def.attribs)  #[+parseObject(def.children)]]
+if defs.length
+  defs
+    each def in defs
+      | #[#{def.name}&attributes(def.attribs)  #[+parseObject(def.children)]]
