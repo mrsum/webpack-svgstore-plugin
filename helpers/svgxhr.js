@@ -7,7 +7,7 @@
  */
 function svgXHR(url) {
   var _ajax = new XMLHttpRequest();
-  var fullUrl = window.location.protocol + '//' + window.location.hostname + ':' +  window.location.port;
+  var fullUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
   _ajax.open('GET', fullUrl + url, true);
   _ajax.send();
   _ajax.onload = function() {
