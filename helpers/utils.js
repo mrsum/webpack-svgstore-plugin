@@ -122,14 +122,14 @@ var _defs = function(id, dom, data) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-var _symbols = function(id, dom, data) {
+var _symbols = function(id, dom, data, prefix) {
   // create symbol object
   var symbol = {
     type: 'tag',
     name: 'symbol',
     attribs: {
       viewbox: dom.attribs.viewbox,
-      id: 'icon-' + id
+      id: prefix + id
     },
     next: null,
     prev: null,
@@ -169,11 +169,11 @@ var _convertFilenameToId = function(filename) {
  * @param  {[type]} dom [description]
  * @return {[type]}     [description]
  */
-var _parseDomObject = function(data, filename, dom) {
+var _parseDomObject = function(data, filename, dom, prefix) {
   var id = _convertFilenameToId(filename);
   if (dom && dom[0]) {
     _defs(id, dom[0], data.defs);
-    _symbols(id, dom[0], data.symbols);
+    _symbols(id, dom[0], data.symbols, prefix);
   }
 
   return data;
@@ -222,7 +222,7 @@ var _parseFiles = function(files, options) {
     var filename = path.basename(file, '.svg');
     var handler = new parse.DomHandler(function(error, dom) {
       if (error) self.log(error);
-      else data = _parseDomObject(data, filename, dom);
+      else data = _parseDomObject(data, filename, dom, options.prefix);
     });
 
     // lets create parser instance

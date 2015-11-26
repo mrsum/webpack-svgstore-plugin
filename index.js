@@ -8,7 +8,8 @@ var _options = {
   },
   loop: 2,
   svgoOptions: {},
-  name: 'sprite.[hash].svg'
+  name: 'sprite.[hash].svg',
+  prefix: 'icon-'
 };
 
 // Depends
