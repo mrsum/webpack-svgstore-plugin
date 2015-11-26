@@ -26,6 +26,7 @@ module.exports = {
     new SvgStore(path.join(sourcePath, 'svg', '**/*.svg'), path.join(distPath, 'svg'), {
       name: '[hash].sprite.svg',
       chunk: 'app',
+      prefix: 'myprefix-',
       svgoOptions: {
         // options for svgo, optional
       }
@@ -33,6 +34,13 @@ module.exports = {
   ]
 }
 ```
+`name` - sprite name
+
+`chunk` - add xhr to etry point chunk (optional) 
+
+`prefix` - add prefix to svg id's (optional, default: `'icon-'`)
+
+`svgoOtions` - options for svgo (optional, default: `{}`)
 
 #### 2. HTML code for happy using
 
