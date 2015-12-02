@@ -39,7 +39,7 @@ module.exports = {
 
 `chunk` - add xhr to etry point chunk (optional) 
 
-`baseUrl` - server where the sprites are stored, for example a CDN (optional, default: `'window.location'`)
+`baseUrl` - server where the sprites are stored, for example a CDN (optional, default: `'window.location'` OR window.baseUrl if set)
 
 `prefix` - add prefix to svg id's (optional, default: `'icon-'`)
 
