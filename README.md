@@ -36,7 +36,7 @@ module.exports = {
 ```
 `name` - sprite name
 
-`chunk` - add xhr to etry point chunk (optional) 
+`chunk` - add xhr to entry point chunk (optional) 
 
 `prefix` - add prefix to svg id's (optional, default: `'icon-'`)
 
