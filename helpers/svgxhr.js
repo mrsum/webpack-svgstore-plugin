@@ -5,10 +5,18 @@
  * @see: https://www.npmjs.com/package/webpack-svgstore-plugin
  * @return {[type]}     [description]
  */
-function svgXHR(url) {
+function svgXHR(url, baseUrl) {
   var _ajax = new XMLHttpRequest();
-  var fullUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
-  _ajax.open('GET', fullUrl + url, true);
+
+  if (typeof baseUrl === 'undefined') {
+  	if (typeof window.baseUrl !== 'undefined') {
+  		baseUrl = window.baseUrl;
+  	} else {
+  		baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+  	}
+  }
+
+  _ajax.open('GET', baseUrl + url, true);
   _ajax.send();
   _ajax.onload = function() {
     var div = document.createElement('div');

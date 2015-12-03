@@ -254,11 +254,15 @@ module.exports.prepareFolder = function(folder) {
 /**
  * Prepare svgXHR function
  * @param  {[type]} sprites [description]
+ * @param  {[type]} baseUrl [description]
  * @return {[type]}         [description]
  */
-module.exports.svgXHR = function(filename) {
+module.exports.svgXHR = function(filename, baseUrl) {
   var wrapper = fs.readFileSync(path.join(__dirname, 'svgxhr.js'), 'utf-8');
-  wrapper += 'svgXHR(\'' + filename + '\');';
+
+  baseUrl = (typeof baseUrl !== 'undefined') ? ', \''+ baseUrl +'\'': '';
+
+  wrapper += 'svgXHR(\'' + filename + '\''+ baseUrl +');';
   return wrapper;
 };
 

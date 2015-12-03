@@ -26,6 +26,7 @@ module.exports = {
     new SvgStore(path.join(sourcePath, 'svg', '**/*.svg'), path.join(distPath, 'svg'), {
       name: '[hash].sprite.svg',
       chunk: 'app',
+      baseUrl: '//path-to-cdn:port/'
       prefix: 'myprefix-',
       svgoOptions: {
         // options for svgo, optional
@@ -37,6 +38,8 @@ module.exports = {
 `name` - sprite name
 
 `chunk` - add xhr to entry point chunk (optional) 
+
+`baseUrl` - server where the sprites are stored, for example a CDN (optional, default: `'window.location'` OR window.baseUrl if set)
 
 `prefix` - add prefix to svg id's (optional, default: `'icon-'`)
 
