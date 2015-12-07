@@ -79,7 +79,6 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   var spriteName = this.options.name;
 
   // prepare input / output folders
-  utils.prepareFolder(inputFolder);
   utils.prepareFolder(outputFolder);
 
   // subscribe to webpack emit state
