@@ -57,7 +57,6 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
       if (error) {
         throw error;
       }
-      // slice off pattern
       cb(fileList);
     });
   }
