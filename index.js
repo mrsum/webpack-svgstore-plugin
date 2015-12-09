@@ -16,6 +16,7 @@ var _options = {
 var _ = require('lodash');
 var path = require('path');
 var glob = require('glob');
+var slash = require('slash');
 var utils = require('./helpers/utils');
 var ConcatSource = require('webpack/lib/ConcatSource');
 var ModuleFilenameHelpers = require('webpack/lib/ModuleFilenameHelpers');
@@ -90,6 +91,9 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       var fileName = utils.hash(fileContent, spriteName);
       var filePath = [outputFolder, fileName].join('/');
 
+      //fallback for windows backslashes
+      var fullPath = slash(path.join('\\asdasd\\asdsd', publicPath, filePath));
+
       compilation.assets[filePath] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }
@@ -104,7 +108,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
             if (chunk.name === chunkWrapper) {
               chunk.files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options)).forEach(function(file) {
                 if (/\.js?$/.test(file)) {
-                  compilation.assets[file] = new ConcatSource(utils.svgXHR(path.join(publicPath, filePath), options.baseUrl), '\n', compilation.assets[file]);
+                  compilation.assets[file] = new ConcatSource(utils.svgXHR(fullPath, options.baseUrl), '\n', compilation.assets[file]);
                 }
               });
             }
