@@ -262,7 +262,7 @@ module.exports.svgXHR = function(filename, baseUrl) {
 
   baseUrl = (typeof baseUrl !== 'undefined') ? ', \''+ baseUrl +'\'': '';
 
-  wrapper += 'window.onload = function() { svgXHR(\'' + filename + '\''+ baseUrl +'); }';
+  wrapper += 'document.addEventListener(\'DOMContentLoaded\', svgXHR(\'' + filename + '\''+ baseUrl +'), false);';
   return wrapper;
 };
 
