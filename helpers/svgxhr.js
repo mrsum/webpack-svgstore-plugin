@@ -9,11 +9,11 @@ function svgXHR(url, baseUrl) {
   var _ajax = new XMLHttpRequest();
 
   if (typeof baseUrl === 'undefined') {
-  	if (typeof window.baseUrl !== 'undefined') {
-  		baseUrl = window.baseUrl;
-  	} else {
-  		baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
-  	}
+    if (typeof window.baseUrl !== 'undefined') {
+      baseUrl = window.baseUrl;
+    } else {
+      baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+    }
   }
 
   _ajax.open('GET', baseUrl + url, true);
