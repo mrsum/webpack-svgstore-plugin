@@ -91,7 +91,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       var fileName = utils.hash(fileContent, spriteName);
       var filePath = [outputFolder, fileName].join('/');
 
-      //fallback for windows backslashes
+      // fallback for windows backslashes
       var fullPath = slash(path.join(publicPath, filePath));
 
       compilation.assets[filePath] = {
