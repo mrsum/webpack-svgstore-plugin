@@ -32,35 +32,18 @@ var _log = function(subject, depth) {
 };
 
 /**
- * Fix masks
+ * Fix ids
  * @param  {object} obj
  * @param  {string} id
  * @return {void}
  */
-var _fixMasks = function(obj, id) {
-  // add id to mask
-  if (obj.name === 'mask') {
+var _fixIds = function(obj, id) {
+  // add id
+  if (obj.attribs && obj.attribs.id) {
     obj.attribs.id = [id, obj.attribs.id].join('-');
   }
-  // add id to use tag inside mask
-  if (obj.name === 'use' && obj.parent.name === 'mask') {
-    obj.attribs['xlink:href'] = ['#' + id, obj.attribs['xlink:href'].replace('#', '')].join('-');
-  }
-};
-
-/**
- * Fix clippaths
- * @param  {object} obj
- * @param  {string} id
- * @return {void}
- */
-var _fixClipPath = function(obj, id) {
-  // add id to clippath
-  if (obj.name === 'clippath') {
-    obj.attribs.id = [id, obj.attribs.id].join('-');
-  }
-  // add id to use tag inside clippath
-  if (obj.name === 'use' && obj.parent.name === 'clippath') {
+  // add id to use tag
+  if (obj.name === 'use') {
     obj.attribs['xlink:href'] = ['#' + id, obj.attribs['xlink:href'].replace('#', '')].join('-');
   }
 };
@@ -99,10 +82,8 @@ var _parseSVG = function(arr, id) {
     if (obj) {
       // add unic ids to urls
       _fixUrls(obj, id);
-      // add ids to each mask
-      _fixMasks(obj, id);
-      // add ids to each clippath
-      _fixClipPath(obj, id);
+      // add ids
+      _fixIds(obj, id);
       // go deeper if children exists
       if (obj.children && obj.children.length > 0) {
         _parseSVG(obj.children, id);
@@ -316,11 +297,11 @@ module.exports.parseFiles = _parseFiles;
 module.exports.parseDomObject = _parseDomObject;
 
 /**
- * Fixing id inside each mask selector
+ * Fixing id inside each selector
  * @param  {[type]} subject [description]
  * @return {[type]}         [description]
  */
-module.exports.fixMasks = _fixMasks;
+module.exports.fixIds = _fixIds;
 
 /**
  * Fixing url inside each svg
