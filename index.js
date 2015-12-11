@@ -32,7 +32,7 @@ var WebpackSvgStore = function(input, output, options) {
   // set attributes
   this.input    = input;
   this.output   = output;
-  this.options  = _.merge(_options, options);
+  this.options  = _.merge({}, _options, options);
 
   return this;
 };
