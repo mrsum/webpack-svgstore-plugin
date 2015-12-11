@@ -103,15 +103,17 @@ var _parseSVG = function(arr, id) {
  */
 var _defs = function(id, dom, data) {
   // lets find defs into dom
-  var defs = _.findWhere(dom.children, { name: 'defs' });
+  var defs = _.filter(dom.children, { name: 'defs' });
   // check childrens
-  if (defs && defs.children && defs.children.length > 0) {
-    // mutable attribute
-    defs.children.forEach(function(_data) {
-      _data.attribs.id = [id, _data.attribs.id || 'icon-id'].join('-');
-      data.push(_data);
-    });
-  }
+  defs.forEach(function(item) {
+    if (item.children && item.children.length > 0) {
+      // mutable attribute
+      item.children.forEach(function(_data) {
+        _data.attribs.id = [id, _data.attribs.id || 'icon-id'].join('-');
+        data.push(_data);
+      });
+    }
+  });
 
   return data;
 };
