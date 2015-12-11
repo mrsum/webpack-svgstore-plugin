@@ -43,7 +43,7 @@ module.exports = {
 
 `prefix` - add prefix to svg id's (optional, default: `'icon-'`)
 
-`svgoOtions` - options for svgo (optional, default: `{}`)
+`svgoOptions` - options for svgo (optional, default: `{}`)
 
 #### 2. HTML code for happy using
 
@@ -55,6 +55,6 @@ module.exports = {
 
 ## License
 
-NPM package avaliable here: [webpack-svgstore-plugin](https://www.npmjs.com/package/webpack-svgstore-plugin)
+NPM package available here: [webpack-svgstore-plugin](https://www.npmjs.com/package/webpack-svgstore-plugin)
 
 MIT © [Chernobrov Mike](http://mrsum.ru), Gordey Levchenko
