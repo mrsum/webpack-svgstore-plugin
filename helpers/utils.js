@@ -49,6 +49,23 @@ var _fixMasks = function(obj, id) {
 };
 
 /**
+ * Fix clippaths
+ * @param  {object} obj
+ * @param  {string} id
+ * @return {void}
+ */
+var _fixClipPath = function(obj, id) {
+  // add id to clippath
+  if (obj.name === 'clippath') {
+    obj.attribs.id = [id, obj.attribs.id].join('-');
+  }
+  // add id to use tag inside clippath
+  if (obj.name === 'use' && obj.parent.name === 'clippath') {
+    obj.attribs['xlink:href'] = ['#' + id, obj.attribs['xlink:href'].replace('#', '')].join('-');
+  }
+};
+
+/**
  * Fix urls
  * @param  {object} obj
  * @param  {string} id
@@ -84,6 +101,8 @@ var _parseSVG = function(arr, id) {
       _fixUrls(obj, id);
       // add ids to each mask
       _fixMasks(obj, id);
+      // add ids to each clippath
+      _fixClipPath(obj, id);
       // go deeper if children exists
       if (obj.children && obj.children.length > 0) {
         _parseSVG(obj.children, id);
