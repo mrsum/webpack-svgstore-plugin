@@ -32,18 +32,18 @@ var _log = function(subject, depth) {
 };
 
 /**
- * Fix masks
+ * Fix ids
  * @param  {object} obj
  * @param  {string} id
  * @return {void}
  */
-var _fixMasks = function(obj, id) {
-  // add id to mask
-  if (obj.name === 'mask') {
+var _fixIds = function(obj, id) {
+  // add id
+  if (obj.attribs && obj.attribs.id) {
     obj.attribs.id = [id, obj.attribs.id].join('-');
   }
-  // add id to use tag inside mask
-  if (obj.name === 'use' && obj.parent.name === 'mask') {
+  // add id to use tag
+  if (obj.name === 'use') {
     obj.attribs['xlink:href'] = ['#' + id, obj.attribs['xlink:href'].replace('#', '')].join('-');
   }
 };
@@ -82,8 +82,8 @@ var _parseSVG = function(arr, id) {
     if (obj) {
       // add unic ids to urls
       _fixUrls(obj, id);
-      // add ids to each mask
-      _fixMasks(obj, id);
+      // add ids
+      _fixIds(obj, id);
       // go deeper if children exists
       if (obj.children && obj.children.length > 0) {
         _parseSVG(obj.children, id);
@@ -103,15 +103,17 @@ var _parseSVG = function(arr, id) {
  */
 var _defs = function(id, dom, data) {
   // lets find defs into dom
-  var defs = _.findWhere(dom.children, { name: 'defs' });
+  var defs = _.filter(dom.children, { name: 'defs' });
   // check childrens
-  if (defs && defs.children && defs.children.length > 0) {
-    // mutable attribute
-    defs.children.forEach(function(_data) {
-      _data.attribs.id = [id, _data.attribs.id || 'icon-id'].join('-');
-      data.push(_data);
-    });
-  }
+  defs.forEach(function(item) {
+    if (item.children && item.children.length > 0) {
+      // mutable attribute
+      item.children.forEach(function(_data) {
+        _data.attribs.id = [id, _data.attribs.id || 'icon-id'].join('-');
+        data.push(_data);
+      });
+    }
+  });
 
   return data;
 };
@@ -297,11 +299,11 @@ module.exports.parseFiles = _parseFiles;
 module.exports.parseDomObject = _parseDomObject;
 
 /**
- * Fixing id inside each mask selector
+ * Fixing id inside each selector
  * @param  {[type]} subject [description]
  * @return {[type]}         [description]
  */
-module.exports.fixMasks = _fixMasks;
+module.exports.fixIds = _fixIds;
 
 /**
  * Fixing url inside each svg
