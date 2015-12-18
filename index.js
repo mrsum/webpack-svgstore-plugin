@@ -54,7 +54,7 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
     });
     cb(files);
   } else {
-    glob(data, function(error, fileList) {
+    glob(data, {nodir: true}, function(error, fileList) {
       if (error) {
         throw error;
       }
