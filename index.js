@@ -89,7 +89,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
     self.filesMap(inputFolder, function(files) {
       var fileContent = utils.createSprite(utils.parseFiles(files, options));
       var fileName = utils.hash(fileContent, spriteName);
-      var filePath = [outputFolder, fileName].join('/');
+      var filePath = path.join(outputFolder, fileName);
 
       // fallback for windows backslashes
       var fullPath = slash(path.join(publicPath, filePath));
