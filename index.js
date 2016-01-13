@@ -58,7 +58,6 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
       if (error) {
         throw error;
       }
-      // slice off pattern
       cb(fileList);
     });
   }
@@ -80,7 +79,6 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   var spriteName = this.options.name;
 
   // prepare input / output folders
-  utils.prepareFolder(inputFolder);
   utils.prepareFolder(outputFolder);
 
   // subscribe to webpack emit state
