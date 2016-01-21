@@ -104,7 +104,7 @@ describe('utils.prepareFolder', function() {
 describe('plugin.WebpackSvgStore', function() {
   var WebpackSvgStore;
   var assert = chai.assert;
-
+  
   it('function is exists', function() {
     assert.typeOf(Plugin, 'function');
   });
@@ -113,8 +113,25 @@ describe('plugin.WebpackSvgStore', function() {
     WebpackSvgStore = new Plugin();
   });
 
-  it('must be an object', function() {
+  it('should be an object', function() {
     assert.typeOf(WebpackSvgStore, 'object');
   });
+
+  it('should contain filesMap function', function() {
+    assert.typeOf(WebpackSvgStore.filesMap, 'function');
+  });
+
+  it('should callback filesMap function', function(done) {
+    WebpackSvgStore.filesMap(path.join(__dirname, '..', 'platform', '**', '*.svg'), function(items) {
+      assert.isArray(items);
+      assert(items.length > 0, 'Files array must be more than 0');
+      done();
+    });
+  });
+
+  it('should contain apply function', function() {
+    assert.typeOf(WebpackSvgStore.apply, 'function');
+  });
+  
 });
 
