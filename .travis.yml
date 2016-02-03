@@ -3,6 +3,9 @@ node_js:
   - "5.0"
   - "4.0"
   - "0.12"
+env:
+  global:
+    - NODE_ENV=platform
 sudo: false
 before_install:
   - "export DISPLAY=:99.0"
