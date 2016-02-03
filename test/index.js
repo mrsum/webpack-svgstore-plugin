@@ -4,9 +4,25 @@
 var fs = require('fs');
 var chai = require('chai');
 var path = require('path');
+var webpack = require('webpack');
 var mocha = require('mocha');
 var Plugin = require('../index');
 var utils = require('../helpers/utils');
+var configPath = path.join(__dirname,'..', 'webpack.config.js');
+var config = require(configPath);
+
+
+/**
+ * Run example
+ * @param  {Function} done [description]
+ * @return {[type]}        [description]
+ */
+var runExample = function(done) {
+  webpack(config, function() {
+    done();
+  });
+};
+
 
 describe('utils.log', function() {
   var assert = chai.assert;
@@ -101,7 +117,7 @@ describe('utils.prepareFolder', function() {
   });
 });
 
-describe('plugin.WebpackSvgStore', function() {
+describe('plugin.WebpackSvgStore static functions', function() {
   var WebpackSvgStore;
   var assert = chai.assert;
   
@@ -132,6 +148,12 @@ describe('plugin.WebpackSvgStore', function() {
   it('should contain apply function', function() {
     assert.typeOf(WebpackSvgStore.apply, 'function');
   });
-  
 });
+
+describe('plugin.WebpackSvgStore', function() {
+  it('should run without errors', function(done) {
+    runExample(done);
+  })
+});
+
 
