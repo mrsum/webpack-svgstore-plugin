@@ -130,7 +130,7 @@ var _symbols = function(id, dom, data, prefix) {
     type: 'tag',
     name: 'symbol',
     attribs: {
-      viewBox: dom.attribs.viewbox
+      viewBox: dom.attribs.viewbox,
       id: prefix + id
     },
     next: null,
