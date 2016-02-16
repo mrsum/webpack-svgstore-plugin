@@ -228,7 +228,9 @@ var _parseFiles = function(files, options) {
     });
 
     // lets create parser instance
-    var Parser = new parse.Parser(handler);
+    var Parser = new parse.Parser(handler, {
+      xmlMode: true
+    });
     Parser.write(buffer);
     Parser.end();
   });
