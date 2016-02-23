@@ -118,7 +118,6 @@ WebpackSvgStore.prototype.apply = function(compiler) {
             if (chunk.name === chunkWrapper) {
               chunk.files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options)).forEach(function(file) {
                 if (/\.js?$/.test(file)) {
-                  console.log(file);
                   compilation.assets[file] = new ConcatSource(utils.svgXHR(fullPath, options.baseUrl), '\n', compilation.assets[file]);
                 }
               });
