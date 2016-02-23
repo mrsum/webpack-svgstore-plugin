@@ -23,6 +23,31 @@ var runExample = function(done) {
   });
 };
 
+/**
+ * Side effect testing
+ * @param  {Function} done [description]
+ * @return {[type]}        [description]
+ */
+var runSideEffectExample = function(done) {
+
+  var instance = new Plugin(path.join(__dirname, 'svg-source', '**/*.svg'), path.join('sprites'), {
+    name: '[hash].sprite.svg',
+    chunk: 'app',
+    prefix: 'icon-',
+    svgoOptions: {}
+  });
+
+  // @see https://github.com/mrsum/webpack-svgstore-plugin/issues/51
+  var pluginConfigSection = [instance];
+
+  // replace plugin config
+  config.plugins = pluginConfigSection;
+
+  webpack(config, function(log) {
+    done();
+  });
+};
+
 
 describe('utils.log', function() {
   var assert = chai.assert;
@@ -150,9 +175,16 @@ describe('plugin.WebpackSvgStore static functions', function() {
   });
 });
 
+
 describe('plugin.WebpackSvgStore', function() {
   it('should run without errors', function(done) {
     runExample(done);
+  })
+});
+
+describe('plugin.WebpackSvgStore side effect testing', function() {
+  it('should run without errors', function(done) {
+    runSideEffectExample(done);
   })
 });
 
