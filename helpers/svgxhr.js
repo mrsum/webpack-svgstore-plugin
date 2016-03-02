@@ -21,10 +21,14 @@ function svgXHR(url, baseUrl) {
   }
 
   _ajax.open('GET', baseUrl + url, true);
-  _ajax.send();
+
+  _ajax.onprogress = function(){};
+
   _ajax.onload = function() {
     var div = document.createElement('div');
     div.innerHTML = _ajax.responseText;
     document.body.insertBefore(div, document.body.childNodes[0]);
   };
+
+  _ajax.send();
 }
