@@ -15,6 +15,7 @@ var _options = {
 // Depends
 var _ = require('lodash');
 var path = require('path');
+var url = require('url');
 var glob = require('glob');
 var slash = require('slash');
 var utils = require('./helpers/utils');
@@ -96,10 +97,10 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       var fileName = utils.hash(fileContent, spriteName);
       var filePath = path.join(outputFolder, fileName);
 
-      // fallback for windows backslashes
-      fullPath = path.relative(publicPath, filePath);
+      // resolve with node url
+      fullPath = url.resolve(publicPath, filePath);
 
-      compilation.assets[slash(fullPath)] = {
+      compilation.assets[slash(filePath)] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }
       };
