@@ -100,9 +100,9 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       var filePath = path.join(outputFolder, fileName);
 
       // fallback for windows backslashes
-      path.isAbsolute(filePath)
-        ? fullPath = path.relative(distAbsolutePath, filePath)
-        : fullPath = filePath;
+      fullPath = path.isAbsolute(filePath)
+        ? path.relative(distAbsolutePath, filePath)
+        : filePath;
 
       compilation.assets[slash(fullPath)] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
@@ -110,8 +110,8 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       };
 
       // if chunk enable apply to chunk
-      if(options && options.chunk) {
-        var chunkWrapper = options.chunk;
+      if (options && options.chunk) {
+        chunkWrapper = options.chunk;
         compilation.plugin('optimize-chunk-assets', function(chunks, callback) {
           chunks.forEach(function(chunk) {
             if (options.entryOnly && !chunk.initial) return;

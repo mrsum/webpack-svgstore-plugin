@@ -242,7 +242,7 @@ var _parseFiles = function(files, options) {
  * @return {[type]}      [description]
  */
 module.exports.prepareFolder = function(folder) {
-  if (!path.isAbsolute(folder)) return true;
+  if (path.isAbsolute(folder)) return false;
   try {
     if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder);
