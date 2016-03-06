@@ -20,7 +20,7 @@ function svgXHR(url, baseUrl) {
     }
   }
 
-  _ajax.open('GET', baseUrl + url, true);
+  _ajax.open('GET', baseUrl + '/' + url, true);
 
   _ajax.onprogress = function(){};
 

@@ -73,7 +73,6 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
 WebpackSvgStore.prototype.apply = function(compiler) {
 
   var chunkWrapper;
-  var distAbsolutePath;
   var publicPath;
 
   var self = this;
@@ -84,10 +83,8 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
   // subscribe to webpack emit state
   compiler.plugin('compilation', function(compilation) {
-    // full path from webpack config
-    distAbsolutePath = compilation.getStats().compilation.options.output.path || __dirname;
     // path into dist absolute path
-    publicPath = compilation.getStats().toJson().publicPath || '/';
+    publicPath = compilation.getStats().toJson().publicPath || __dirname;
 
     // prepare input / output folders
     utils.prepareFolder(inputFolder);
@@ -100,9 +97,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       var filePath = path.join(outputFolder, fileName);
 
       // fallback for windows backslashes
-      fullPath = path.isAbsolute(filePath)
-        ? path.relative(distAbsolutePath, filePath)
-        : filePath;
+      fullPath = path.relative(publicPath, filePath);
 
       compilation.assets[slash(fullPath)] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
