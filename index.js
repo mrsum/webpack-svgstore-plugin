@@ -97,9 +97,9 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       var filePath = path.join(outputFolder, fileName);
 
       // fallback for windows backslashes
-      fullPath = path.relative(publicPath, filePath);
+      fullPath = path.resolve(publicPath, filePath);
 
-      compilation.assets[slash(fullPath)] = {
+      compilation.assets[slash(filePath)] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }
       };
