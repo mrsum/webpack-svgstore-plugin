@@ -130,7 +130,7 @@ var _symbols = function(id, dom, data, prefix) {
     type: 'tag',
     name: 'symbol',
     attribs: {
-      viewBox: dom.attribs.viewbox,
+      viewBox: dom.attribs.viewBox,
       id: prefix + id
     },
     next: null,
@@ -228,7 +228,9 @@ var _parseFiles = function(files, options) {
     });
 
     // lets create parser instance
-    var Parser = new parse.Parser(handler);
+    var Parser = new parse.Parser(handler, {
+      xmlMode: true
+    });
     Parser.write(buffer);
     Parser.end();
   });
