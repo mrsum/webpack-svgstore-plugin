@@ -17,8 +17,31 @@ var config = require(configPath);
  * @param  {Function} done [description]
  * @return {[type]}        [description]
  */
-var runExample = function(done) {
+var runRelativePathsExample = function(done) {
   webpack(config, function() {
+    done();
+  });
+};
+
+/**
+ * Side effect testing
+ * @param  {Function} done [description]
+ * @return {[type]}        [description]
+ */
+var runAbsolutePathsExample = function(done) {
+
+  var instance = new Plugin(path.join(__dirname, '..', 'svg-source', '**/*.svg'), path.join(__dirname, '..', 'sprites'), {
+    name: 'issue51.[hash].sprite.svg',
+    chunk: false, // if chunk is equal to false, 
+    prefix: 'icon-',
+    svgoOptions: {}
+  });
+
+  // @see https://github.com/mrsum/webpack-svgstore-plugin/issues/51
+  // replace plugin config
+  config.plugins = [instance];
+
+  webpack(config, function(log) {
     done();
   });
 };
@@ -150,9 +173,16 @@ describe('plugin.WebpackSvgStore static functions', function() {
   });
 });
 
+
 describe('plugin.WebpackSvgStore', function() {
   it('should run without errors', function(done) {
-    runExample(done);
+    runRelativePathsExample(done);
+  })
+});
+
+describe('plugin.WebpackSvgStore side effect testing: issue-51', function() {
+  it('should run without errors', function(done) {
+    runAbsolutePathsExample(done);
   })
 });
 

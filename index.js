@@ -64,13 +64,16 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
   }
 };
 
+
 /**
  * Runner method
  * @param  {[type]} compiler [description]
  * @return {[type]}          [description]
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
+
   var chunkWrapper;
+  var distAbsolutePath;
   var publicPath;
 
   var self = this;
@@ -79,27 +82,34 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   var outputFolder = this.output;
   var spriteName = this.options.name;
 
-  // prepare input / output folders
-  utils.prepareFolder(inputFolder);
-  utils.prepareFolder(outputFolder);
-
   // subscribe to webpack emit state
   compiler.plugin('compilation', function(compilation) {
+    // full path from webpack config
+    distAbsolutePath = compilation.getStats().compilation.options.output.path || __dirname;
+    // path into dist absolute path
     publicPath = compilation.getStats().toJson().publicPath || '/';
+
+    // prepare input / output folders
+    utils.prepareFolder(inputFolder);
+    utils.prepareFolder(outputFolder);
+
     self.filesMap(inputFolder, function(files) {
+      var fullPath;
       var fileContent = utils.createSprite(utils.parseFiles(files, options));
       var fileName = utils.hash(fileContent, spriteName);
       var filePath = path.join(outputFolder, fileName);
 
       // fallback for windows backslashes
-      var fullPath = slash(path.join(publicPath, filePath));
+      fullPath = path.isAbsolute(filePath)
+        ? path.relative(distAbsolutePath, filePath)
+        : filePath;
 
-      compilation.assets[filePath] = {
+      compilation.assets[slash(fullPath)] = {
         size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
         source: function() { return new Buffer(fileContent); }
       };
 
-      // if chunk enable
+      // if chunk enable apply to chunk
       if (options && options.chunk) {
         chunkWrapper = options.chunk;
         compilation.plugin('optimize-chunk-assets', function(chunks, callback) {
@@ -116,6 +126,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           callback();
         });
       }
+
     });
   });
 };
