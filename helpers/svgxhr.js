@@ -7,6 +7,7 @@
  */
 function svgXHR(url, baseUrl) {
   var _ajax = new XMLHttpRequest();
+  var _fullPath;
 
   if (typeof XDomainRequest !== 'undefined') {
     _ajax = new XDomainRequest();
@@ -20,7 +21,12 @@ function svgXHR(url, baseUrl) {
     }
   }
 
-  _ajax.open('GET', baseUrl + '/' + url, true);
+  _fullPath = 'http://' + (baseUrl + '/' + url)
+    .replace(/^http\:\/\//, '')
+    .replace(/\/+/g, '/')
+    .replace(/\/+$/, '');
+
+  _ajax.open('GET', _fullPath, true);
 
   _ajax.onprogress = function(){};
 

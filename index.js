@@ -72,12 +72,12 @@ WebpackSvgStore.prototype.filesMap = function(input, cb) {
  * @return {[type]}          [description]
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
-
   var chunkWrapper;
   var publicPath;
 
   var self = this;
   var options = this.options;
+
   var inputFolder = this.input;
   var outputFolder = this.output;
   var spriteName = this.options.name;
@@ -85,7 +85,14 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   // subscribe to webpack emit state
   compiler.plugin('compilation', function(compilation) {
     // path into dist absolute path
-    publicPath = compilation.getStats().toJson().publicPath || __dirname;
+    publicPath = compilation.getStats().toJson().publicPath;
+
+    if (!publicPath) {
+      publicPath = path.isAbsolute(outputFolder)
+        ? outputFolder
+        : '/'
+      ;
+    }
 
     // prepare input / output folders
     utils.prepareFolder(inputFolder);
@@ -122,7 +129,6 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           callback();
         });
       }
-
     });
   });
 };
