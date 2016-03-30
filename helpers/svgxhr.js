@@ -21,10 +21,7 @@ function svgXHR(url, baseUrl) {
     }
   }
 
-  _fullPath = 'http://' + (baseUrl + '/' + url)
-    .replace(/^http\:\/\//, '')
-    .replace(/\/+/g, '/')
-    .replace(/\/+$/, '');
+  _fullPath = (baseUrl + '/' + url).replace(/([^:]\/)\/+/g, '$1');
 
   _ajax.open('GET', _fullPath, true);
 
