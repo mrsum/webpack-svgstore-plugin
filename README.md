@@ -29,7 +29,10 @@ module.exports = {
       baseUrl: '//path-to-cdn:port/'
       prefix: 'myprefix-',
       svgoOptions: {
-        // options for svgo, optional
+        // options for svgo
+        plugins: [
+          { removeTitle: true }
+        ]
       }
     })
   ]
