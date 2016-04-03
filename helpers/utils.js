@@ -8,6 +8,7 @@ var util = require('util');
 var jade = require('jade');
 var Svgo = require('svgo');
 var crypto = require('crypto');
+var globby = require('globby');
 var parse = require('htmlparser2');
 
 /**
@@ -167,6 +168,19 @@ var _convertFilenameToId = function(filename) {
 };
 
 /**
+ * Build files map
+ * @param  {string} input Destination path
+ * @return {array}        Array of paths
+ */
+var _filesMap = function(input, cb) {
+  var data = input;
+
+  globby(data).then(function(fileList) {
+    cb(fileList);
+  });
+};
+
+/**
  * Parse dom objects
  * @param  {[type]} dom [description]
  * @return {[type]}     [description]
@@ -294,6 +308,13 @@ module.exports.log = _log;
  * @return {[type]} [description]
  */
 module.exports.parseFiles = _parseFiles;
+
+/**
+ * Build files map
+ * @param  {string} input Destination path
+ * @return {array}        Array of paths
+ */
+module.exports.filesMap = _filesMap;
 
 /**
  * Parse dom objects

@@ -23,18 +23,23 @@ module.exports = {
     app: path.join(_path, 'platform', 'static', 'js', 'index.js'),
   },
   plugins: [
-    new SvgStore(path.join(sourcePath, 'svg', '**/*.svg'), path.join(distPath, 'svg'), {
-      name: '[hash].sprite.svg',
-      chunk: 'app',
-      baseUrl: '//path-to-cdn:port/'
-      prefix: 'myprefix-',
-      svgoOptions: {
-        // options for svgo
-        plugins: [
-          { removeTitle: true }
-        ]
+    new SvgStore(
+      [
+        path.join(sourcePath, 'svg', '**/*.svg'),
+        '!' + path.join(sourcePath, 'svg', 'excludeFolder', '**/*.svg'),
+      ], path.join(distPath, 'svg'), {
+        name: '[hash].sprite.svg',
+        chunk: 'app',
+        baseUrl: '//path-to-cdn:port/'
+        prefix: 'myprefix-',
+        svgoOptions: {
+          // options for svgo
+          plugins: [
+            { removeTitle: true }
+          ]
+        }
       }
-    })
+    )
   ]
 }
 ```
