@@ -26,7 +26,7 @@ module.exports = {
     new SvgStore(path.join(sourcePath, 'svg', '**/*.svg'), path.join(distPath, 'svg'), {
       name: '[hash].sprite.svg',
       chunk: 'app',
-      baseUrl: '//path-to-cdn:port/'
+      baseUrl: '//path-to-cdn:port/',
       prefix: 'myprefix-',
       svgoOptions: {
         // options for svgo
