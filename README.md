@@ -12,7 +12,7 @@ npm i webpack-svgstore-plugin --save-dev
 ```
 ## Usage
 
-#### 1. require plugin
+#### 1) require plugin
 ```javascript
 //webpack.config.js
 
@@ -24,16 +24,20 @@ module.exports = {
   },
   plugins: [
     new SvgStore(
+      //=========> input path
       [
         path.join(sourcePath, 'svg', '**/*.svg'),
         '!' + path.join(sourcePath, 'svg', 'excludeFolder', '**/*.svg'),
-      ], path.join(distPath, 'svg'), {
+      ], 
+      //=========> output path 
+      'svg', 
+      //=========> options
+    {
         name: '[hash].sprite.svg',
         chunk: 'app',
         baseUrl: '//path-to-cdn:port/'
         prefix: 'myprefix-',
         svgoOptions: {
-          // options for svgo
           plugins: [
             { removeTitle: true }
           ]
@@ -43,26 +47,30 @@ module.exports = {
   ]
 }
 ```
-`name` - sprite name
-
-`chunk` - add xhr to entry point chunk (optional) 
-
-`baseUrl` - server where the sprites are stored, for example a CDN (optional, default: `'window.location'` OR window.baseUrl if set)
-
-`prefix` - add prefix to svg id's (optional, default: `'icon-'`)
-
-`svgoOptions` - options for svgo (optional, default: `{}`)
-
-#### 2. HTML code for happy using
+#### 2) html code for happy using
 
 ```html
   <svg class="svg-icon">
     <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-name"></use>
   </svg>
 ```
+## Plugin settings
+
+#### input path
+- path to folder with svgs, use [globby](https://github.com/sindresorhus/globby) patterns
+
+#### output path
+- path to output folder, begins with webpack `publicPath`
+
+#### options
+- `name` - sprite name 
+- `chunk` - add xhr to entry point chunk (optional) 
+- `baseUrl` - server where the sprites are stored, for example a CDN (optional)
+- `prefix` - add prefix to svg id's (optional, default: `'icon-'`)
+- `svgoOptions` - options for [svgo](https://github.com/svg/svgo) (optional, default: `{}`)
 
 ## License
 
 NPM package available here: [webpack-svgstore-plugin](https://www.npmjs.com/package/webpack-svgstore-plugin)
 
-MIT © [Chernobrov Mike](http://mrsum.ru), Gordey Levchenko
+MIT © [Chernobrov Mike](http://mrsum.ru), [Gordey Levchenko](https://github.com/lgordey)
