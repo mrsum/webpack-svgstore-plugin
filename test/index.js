@@ -114,6 +114,38 @@ describe('utils.createSprite', function() {
   });
 });
 
+describe('utils.filesMap', function() {
+  var assert = chai.assert;
+
+  it('should contain filesMap function', function() {
+    assert.typeOf(utils.filesMap, 'function');
+  });
+
+  it('should callback filesMap function', function(done) {
+    utils.filesMap(path.join(__dirname, '..', 'platform', '**', '*.svg'), function(items) {
+      assert.isArray(items);
+      assert(items.length > 0, 'Files array must be more than 0');
+      done();
+    });
+  });
+
+  it('should support exclude globby pattern', function(done) {
+    utils.filesMap(
+      [
+        path.join(__dirname, '..', 'svg-source', '**/*.svg'),
+        '!' + path.join(__dirname, '..', 'svg-source', 'test', '**/*.svg')
+      ], function(paths) {
+        assert.equal(paths.length, 2);
+        // basenames equals to ['like.svg', 'like-2.svg']
+        assert.equal(path.basename(paths[0]), 'like.svg');
+        assert.equal(path.basename(paths[1]), 'like-2.svg');
+        done();
+      }
+    );
+  });
+
+});
+
 describe('utils.convertFilenameToId', function() {
   var assert = chai.assert;
   it('function is exists', function() {
@@ -143,7 +175,7 @@ describe('utils.prepareFolder', function() {
 describe('plugin.WebpackSvgStore static functions', function() {
   var WebpackSvgStore;
   var assert = chai.assert;
-  
+
   it('function is exists', function() {
     assert.typeOf(Plugin, 'function');
   });
@@ -154,18 +186,6 @@ describe('plugin.WebpackSvgStore static functions', function() {
 
   it('should be an object', function() {
     assert.typeOf(WebpackSvgStore, 'object');
-  });
-
-  it('should contain filesMap function', function() {
-    assert.typeOf(WebpackSvgStore.filesMap, 'function');
-  });
-
-  it('should callback filesMap function', function(done) {
-    WebpackSvgStore.filesMap(path.join(__dirname, '..', 'platform', '**', '*.svg'), function(items) {
-      assert.isArray(items);
-      assert(items.length > 0, 'Files array must be more than 0');
-      done();
-    });
   });
 
   it('should contain apply function', function() {
