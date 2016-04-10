@@ -16,7 +16,6 @@ var _options = {
 var _ = require('lodash');
 var path = require('path');
 var url = require('url');
-var glob = require('glob');
 var slash = require('slash');
 var utils = require('./helpers/utils');
 var ConcatSource = require('webpack/lib/ConcatSource');
@@ -31,40 +30,12 @@ var ModuleFilenameHelpers = require('webpack/lib/ModuleFilenameHelpers');
  */
 var WebpackSvgStore = function(input, output, options) {
   // set attributes
-  this.input    = input;
-  this.output   = output;
-  this.options  = _.merge({}, _options, options);
+  this.input   = input;
+  this.output  = output;
+  this.options = _.merge({}, _options, options);
 
   return this;
 };
-
-/**
- * Build files map
- * @param  {string} input Destination path
- * @return {array}        Array of paths
- */
-WebpackSvgStore.prototype.filesMap = function(input, cb) {
-  var files = [];
-  var data = input;
-  // in case if array was passed
-  if (data instanceof Array) {
-    data.forEach(function(source) {
-      this.filesMap(source, function(fileList) {
-        files = files.concat(fileList);
-      });
-    });
-    cb(files);
-  } else {
-    glob(data, {nodir: true}, function(error, fileList) {
-      if (error) {
-        throw error;
-      }
-      // slice off pattern
-      cb(fileList);
-    });
-  }
-};
-
 
 /**
  * Runner method
@@ -75,7 +46,6 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   var chunkWrapper;
   var publicPath;
 
-  var self = this;
   var options = this.options;
 
   var inputFolder = this.input;
@@ -94,11 +64,10 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       ;
     }
 
-    // prepare input / output folders
-    utils.prepareFolder(inputFolder);
+    // prepare output folder
     utils.prepareFolder(outputFolder);
 
-    self.filesMap(inputFolder, function(files) {
+    utils.filesMap(inputFolder, function(files) {
       var fullPath;
       var fileContent = utils.createSprite(utils.parseFiles(files, options));
       var fileName = utils.hash(fileContent, spriteName);
