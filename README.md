@@ -51,7 +51,7 @@ module.exports = {
 
 ```html
   <svg class="svg-icon">
-    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-name"></use>
+    <use xlink:href="#icon-name"></use>
   </svg>
 ```
 ## Plugin settings
