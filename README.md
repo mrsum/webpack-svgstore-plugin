@@ -28,14 +28,14 @@ module.exports = {
       [
         path.join(sourcePath, 'svg', '**/*.svg'),
         '!' + path.join(sourcePath, 'svg', 'excludeFolder', '**/*.svg'),
-      ], 
-      //=========> output path 
-      'svg', 
+      ],
+      //=========> output path
+      'svg',
       //=========> options
     {
         name: '[hash].sprite.svg',
         chunk: 'app',
-        baseUrl: '//path-to-cdn:port/'
+        baseUrl: '//path-to-cdn:port/',
         prefix: 'myprefix-',
         svgoOptions: {
           plugins: [
