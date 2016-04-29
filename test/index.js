@@ -8,8 +8,11 @@ var webpack = require('webpack');
 var mocha = require('mocha');
 var Plugin = require('../index');
 var utils = require('../helpers/utils');
-var configPath = path.join(__dirname,'..', 'webpack.config.js');
+var configPath = path.join(__dirname, '..', 'webpack.config.js');
 var config = require(configPath);
+
+var rawFilePath = path.resolve(__dirname, './svg/test_svg.svg');
+var compiledFilePath = path.resolve(__dirname, './svg/compiled_svg.svg');
 
 
 /**
@@ -32,7 +35,7 @@ var runAbsolutePathsExample = function(done) {
 
   var instance = new Plugin(path.join(__dirname, '..', 'svg-source', '**/*.svg'), path.join(__dirname, '..', 'sprites'), {
     name: 'issue51.[hash].sprite.svg',
-    chunk: false, // if chunk is equal to false, 
+    chunk: false, // if chunk is equal to false,
     prefix: 'icon-',
     svgoOptions: {}
   });
@@ -91,7 +94,7 @@ describe('utils.symbols', function() {
 describe('utils.createSprite', function() {
   var assert = chai.assert;
   var arr = [];
-  var output = fs.readFileSync('./test/svg/compiled_svg.svg', 'utf-8');
+  var output = fs.readFileSync(compiledFilePath, 'utf-8');
   var options = {
     svg: {
       xmlns: 'http://www.w3.org/2000/svg',
@@ -105,7 +108,7 @@ describe('utils.createSprite', function() {
   };
   var source;
 
-  arr.push(path.join(__dirname, 'svg', 'test_svg.svg'));
+  arr.push(rawFilePath);
 
   source = utils.createSprite(utils.parseFiles(arr, options));
 
@@ -169,6 +172,23 @@ describe('utils.prepareFolder', function() {
 
   it('function create folder', function() {
     assert.equal(utils.prepareFolder('test_folder'), true);
+  });
+});
+
+describe('utils.filesChanged', function() {
+  var assert = chai.assert;
+
+  it('should return true for new file', function() {
+    assert.isTrue(utils.filesChanged([rawFilePath]));
+  });
+
+  it('should return false if file hasn\'t changed', function() {
+    assert.isFalse(utils.filesChanged([rawFilePath]));
+  });
+
+  it('should return true if file has changed', function() {
+    fs.utimesSync(rawFilePath, Date.now(), Date.now());
+    assert.isTrue(utils.filesChanged([rawFilePath]));
   });
 });
 

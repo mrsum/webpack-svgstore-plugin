@@ -259,22 +259,22 @@ var _parseFiles = function(files, options) {
  * @param  {[path]}
  * @return {bool}
  */
-var _filesChanged = function(files){
+var _filesChanged = function(files) {
   var result = false;
-  try{
+  try {
     for (var i = 0; i < files.length; i++) {
       var filepath = files[i];
-        var fstat = fs.statSync(filepath);
-        if(fstat.mtime > (fileCache[filepath] || 0)){
-          fileCache[filepath] = fstat.mtime;
-          result = true;
-        }
+      var fstat = fs.statSync(filepath);
+      if (fstat.mtime > (fileCache[filepath] || 0)) {
+        fileCache[filepath] = fstat.mtime;
+        result = true;
+      }
     }
-  } catch(e){
-      result = true;
+  } catch (e) {
+    result = true;
   }
   return result;
-}
+};
 
 /**
  * Check folder
