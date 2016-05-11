@@ -216,12 +216,14 @@ describe('plugin.WebpackSvgStore static functions', function() {
 
 
 describe('plugin.WebpackSvgStore', function() {
+  this.timeout(500);
   it('should run without errors', function(done) {
     runRelativePathsExample(done);
   })
 });
 
 describe('plugin.WebpackSvgStore side effect testing: issue-51', function() {
+  this.timeout(500);
   it('should run without errors', function(done) {
     runAbsolutePathsExample(done);
   })
