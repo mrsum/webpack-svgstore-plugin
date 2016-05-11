@@ -11,6 +11,8 @@ var crypto = require('crypto');
 var globby = require('globby');
 var parse = require('htmlparser2');
 
+var fileCache = {};
+
 /**
  * Create sprite
  * @param  {[type]} files [description]
@@ -253,6 +255,28 @@ var _parseFiles = function(files, options) {
 };
 
 /**
+ * Check files have changed
+ * @param  {[path]}
+ * @return {bool}
+ */
+var _filesChanged = function(files) {
+  var result = false;
+  try {
+    for (var i = 0; i < files.length; i++) {
+      var filepath = files[i];
+      var fstat = fs.statSync(filepath);
+      if (fstat.mtime > (fileCache[filepath] || 0)) {
+        fileCache[filepath] = fstat.mtime;
+        result = true;
+      }
+    }
+  } catch (e) {
+    result = true;
+  }
+  return result;
+};
+
+/**
  * Check folder
  * @param  {[type]} path [description]
  * @return {[type]}      [description]
@@ -381,3 +405,9 @@ module.exports.minify = _minify;
  */
 module.exports.createSprite = _createSprite;
 
+/**
+ * Check files have changed
+ * @param  {[path]}
+ * @return {bool}
+ */
+module.exports.filesChanged = _filesChanged;

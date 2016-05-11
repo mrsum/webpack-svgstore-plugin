@@ -68,6 +68,9 @@ WebpackSvgStore.prototype.apply = function(compiler) {
     utils.prepareFolder(outputFolder);
 
     utils.filesMap(inputFolder, function(files) {
+      if (!utils.filesChanged(files)){
+        return;
+      }
       var fullPath;
       var fileContent = utils.createSprite(utils.parseFiles(files, options));
       var fileName = utils.hash(fileContent, spriteName);
