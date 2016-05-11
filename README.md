@@ -39,6 +39,7 @@ module.exports = {
         chunk: 'app',
         baseUrl: '//path-to-cdn:port/',
         prefix: 'myprefix-',
+        template: path.join('root', 'templates', 'layout.jade'),
         svgoOptions: {
           plugins: [
             { removeTitle: true }
@@ -69,6 +70,7 @@ module.exports = {
 - `chunk` - add xhr to entry point chunk (optional) 
 - `baseUrl` - server where the sprites are stored, for example a CDN (optional)
 - `prefix` - add prefix to svg id's (optional, default: `'icon-'`)
+- `template` - add custom jade template layout (optional)
 - `svgoOptions` - options for [svgo](https://github.com/svg/svgo) (optional, default: `{}`)
 
 ## License

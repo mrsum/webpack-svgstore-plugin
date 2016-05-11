@@ -44,7 +44,6 @@ var WebpackSvgStore = function(input, output, options) {
  * @return {[type]}          [description]
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
-  var chunkWrapper;
   var publicPath;
 
   var options = this.options;
@@ -52,9 +51,10 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   var inputFolder = this.input;
   var outputFolder = this.output;
   var spriteName = this.options.name;
+  var lastXhrText;
 
   // subscribe to webpack emit state
-  compiler.plugin('compilation', function(compilation) {
+  compiler.plugin('emit', function(compilation, callback) {
     // path into dist absolute path
     publicPath = compilation.getStats().toJson().publicPath;
 
@@ -69,13 +69,19 @@ WebpackSvgStore.prototype.apply = function(compiler) {
     utils.prepareFolder(outputFolder);
 
     utils.filesMap(inputFolder, function(files) {
-      if (!utils.filesChanged(files)){
-        return;
-      }
       var fullPath;
-      var fileContent = utils.createSprite(utils.parseFiles(files, options), options.template);
-      var fileName = utils.hash(fileContent, spriteName);
-      var filePath = path.join(outputFolder, fileName);
+      var fileContent;
+      var fileName;
+      var filePath;
+
+      if (!utils.filesChanged(files)) {
+        injectXhr(options, compilation, lastXhrText);
+        return callback();
+      }
+
+      fileContent = utils.createSprite(utils.parseFiles(files, options), options.template);
+      fileName = utils.hash(fileContent, spriteName);
+      filePath = path.join(outputFolder, fileName);
 
       // resolve with node url
       fullPath = url.resolve(publicPath, filePath);
@@ -85,25 +91,26 @@ WebpackSvgStore.prototype.apply = function(compiler) {
         source: function() { return new Buffer(fileContent); }
       };
 
-      // if chunk enable apply to chunk
-      if (options && options.chunk) {
-        chunkWrapper = options.chunk;
-        compilation.plugin('optimize-chunk-assets', function(chunks, callback) {
-          chunks.forEach(function(chunk) {
-            if (options.entryOnly && !chunk.initial) return;
-            if (chunk.name === chunkWrapper) {
-              chunk.files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options)).forEach(function(file) {
-                if (/\.js?$/.test(file)) {
-                  compilation.assets[file] = new ConcatSource(utils.svgXHR(fullPath, options.baseUrl), '\n', compilation.assets[file]);
-                }
-              });
-            }
-          });
-          callback();
-        });
-      }
+      lastXhrText = utils.svgXHR(fullPath, options.baseUrl);
+      injectXhr(options, compilation, lastXhrText);
+
+      callback();
     });
   });
+
+  function injectXhr(opt, compilation, lxt) {
+    var chunk;
+    // if chunk enable apply to chunk
+    if (opt && opt.chunk) {
+      chunk = _.find(compilation.chunks, {name: opt.chunk});
+      if (!chunk) return;
+      chunk.files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, opt)).forEach(function(file) {
+        if (/\.js?$/.test(file)) {
+          compilation.assets[file] = new ConcatSource(lxt, '\n', compilation.assets[file]);
+        }
+      });
+    }
+  }
 };
 
 /**

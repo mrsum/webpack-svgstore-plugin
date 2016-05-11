@@ -1,3 +1,9 @@
+### 2.2.0
+
+- Add `template` option for custom jade layout
+- Add file caching to fix multiple sprite creation
+- Use `emit` instead `compilation` state for comfortable work in devmode
+
 ### 2.1.5
 
 - Change `glob` with `globby` to support multiple patterns
