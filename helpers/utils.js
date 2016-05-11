@@ -16,8 +16,8 @@ var parse = require('htmlparser2');
  * @param  {[type]} files [description]
  * @return {[type]}       [description]
  */
-var _createSprite = function(data) {
-  return jade.renderFile(path.join(__dirname, '../templates', 'layout.jade'), data);
+var _createSprite = function(data, template) {
+  return jade.renderFile(template, data);
 };
 
 /**

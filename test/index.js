@@ -101,13 +101,14 @@ describe('utils.createSprite', function() {
     svgoOptions: {},
     prefix: 'icon-',
     name: 'sprite.[hash].svg',
-    ajaxWrapper: false
+    ajaxWrapper: false,
+    template: path.join(__dirname, '..', 'templates/layout.jade')
   };
   var source;
 
   arr.push(path.join(__dirname, 'svg', 'test_svg.svg'));
 
-  source = utils.createSprite(utils.parseFiles(arr, options));
+  source = utils.createSprite(utils.parseFiles(arr, options), options.template);
 
   it('check full sprite creation', function() {
     assert.equal(source, output);

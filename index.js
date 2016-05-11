@@ -9,7 +9,8 @@ var _options = {
   loop: 2,
   svgoOptions: {},
   name: 'sprite.[hash].svg',
-  prefix: 'icon-'
+  prefix: 'icon-',
+  template: __dirname + '/templates/layout.jade'
 };
 
 // Depends
@@ -69,7 +70,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
     utils.filesMap(inputFolder, function(files) {
       var fullPath;
-      var fileContent = utils.createSprite(utils.parseFiles(files, options));
+      var fileContent = utils.createSprite(utils.parseFiles(files, options), options.template);
       var fileName = utils.hash(fileContent, spriteName);
       var filePath = path.join(outputFolder, fileName);
 
