@@ -1,3 +1,11 @@
+### 2.2.2
+
+- Add default`xmlns:xlink` attribute to result svg
+
+### 2.2.1
+
+- Use new ConcatSource dependency for webpack 2.x
+
 ### 2.2.0
 
 - Add `template` option for custom jade layout
