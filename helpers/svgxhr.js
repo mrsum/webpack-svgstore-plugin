@@ -21,7 +21,9 @@ function svgXHR(url, baseUrl) {
     }
   }
 
-  _fullPath = (baseUrl + '/' + url).replace(/([^:]\/)\/+/g, '$1');
+  baseUrl = baseUrl.length === 0 ? '' : baseUrl + '/';
+
+  _fullPath = (baseUrl + url).replace(/([^:]\/)\/+/g, '$1');
 
   _ajax.open('GET', _fullPath, true);
 
