@@ -15,13 +15,13 @@ function svgXHR(url, baseUrl) {
 
   if (typeof baseUrl === 'undefined') {
     if (typeof window.baseUrl !== 'undefined') {
-      baseUrl = window.baseUrl;
+      baseUrl = window.baseUrl + '/';
     } else {
-      baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+      baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') + '/';
     }
   }
 
-  _fullPath = (baseUrl + '/' + url).replace(/([^:]\/)\/+/g, '$1');
+  _fullPath = (baseUrl + url).replace(/([^:]\/)\/+/g, '$1');
 
   _ajax.open('GET', _fullPath, true);
 
