@@ -8,15 +8,18 @@ var util = require('util');
 var jade = require('jade');
 var Svgo = require('svgo');
 var crypto = require('crypto');
+var globby = require('globby');
 var parse = require('htmlparser2');
+
+var fileCache = {};
 
 /**
  * Create sprite
  * @param  {[type]} files [description]
  * @return {[type]}       [description]
  */
-var _createSprite = function(data) {
-  return jade.renderFile(path.join(__dirname, '../templates', 'layout.jade'), data);
+var _createSprite = function(data, template) {
+  return jade.renderFile(template, data);
 };
 
 /**
@@ -130,7 +133,7 @@ var _symbols = function(id, dom, data, prefix) {
     type: 'tag',
     name: 'symbol',
     attribs: {
-      viewBox: dom.attribs.viewbox,
+      viewBox: dom.attribs.viewBox,
       id: prefix + id
     },
     next: null,
@@ -164,6 +167,19 @@ var _convertFilenameToId = function(filename) {
     _name = filename.substring(0, dotPos);
   }
   return _name;
+};
+
+/**
+ * Build files map
+ * @param  {string} input Destination path
+ * @return {array}        Array of paths
+ */
+var _filesMap = function(input, cb) {
+  var data = input;
+
+  globby(data).then(function(fileList) {
+    cb(fileList);
+  });
 };
 
 /**
@@ -228,7 +244,9 @@ var _parseFiles = function(files, options) {
     });
 
     // lets create parser instance
-    var Parser = new parse.Parser(handler);
+    var Parser = new parse.Parser(handler, {
+      xmlMode: true
+    });
     Parser.write(buffer);
     Parser.end();
   });
@@ -237,11 +255,34 @@ var _parseFiles = function(files, options) {
 };
 
 /**
+ * Check files have changed
+ * @param  {[path]}
+ * @return {bool}
+ */
+var _filesChanged = function(files) {
+  var result = false;
+  try {
+    for (var i = 0; i < files.length; i++) {
+      var filepath = files[i];
+      var fstat = fs.statSync(filepath);
+      if (fstat.mtime > (fileCache[filepath] || 0)) {
+        fileCache[filepath] = fstat.mtime;
+        result = true;
+      }
+    }
+  } catch (e) {
+    result = true;
+  }
+  return result;
+};
+
+/**
  * Check folder
  * @param  {[type]} path [description]
  * @return {[type]}      [description]
  */
 module.exports.prepareFolder = function(folder) {
+  if (path.isAbsolute(folder)) return false;
   try {
     if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder);
@@ -251,6 +292,7 @@ module.exports.prepareFolder = function(folder) {
   } catch (e) {
     return false;
   }
+
 };
 
 /**
@@ -290,6 +332,13 @@ module.exports.log = _log;
  * @return {[type]} [description]
  */
 module.exports.parseFiles = _parseFiles;
+
+/**
+ * Build files map
+ * @param  {string} input Destination path
+ * @return {array}        Array of paths
+ */
+module.exports.filesMap = _filesMap;
 
 /**
  * Parse dom objects
@@ -356,3 +405,9 @@ module.exports.minify = _minify;
  */
 module.exports.createSprite = _createSprite;
 
+/**
+ * Check files have changed
+ * @param  {[path]}
+ * @return {bool}
+ */
+module.exports.filesChanged = _filesChanged;

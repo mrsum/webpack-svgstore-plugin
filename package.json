@@ -1,6 +1,6 @@
 {
   "name": "webpack-svgstore-plugin",
-  "version": "2.1.2",
+  "version": "2.2.2",
   "description": "Webpack svgstore plugin",
   "main": "index.js",
   "scripts": {
@@ -18,12 +18,13 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "glob": "^6.0.1",
+    "globby": "^4.0.0",
     "htmlparser2": "^3.8.3",
     "jade": "^1.11.0",
     "lodash": "^3.10.1",
     "slash": "^1.0.0",
-    "svgo": "^0.6.0"
+    "svgo": "^0.6.0",
+    "webpack-sources": "^0.1.2"
   },
   "devDependencies": {
     "chai": "^3.4.1",

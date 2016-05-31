@@ -8,8 +8,11 @@ var webpack = require('webpack');
 var mocha = require('mocha');
 var Plugin = require('../index');
 var utils = require('../helpers/utils');
-var configPath = path.join(__dirname,'..', 'webpack.config.js');
+var configPath = path.join(__dirname, '..', 'webpack.config.js');
 var config = require(configPath);
+
+var rawFilePath = path.resolve(__dirname, './svg/test_svg.svg');
+var compiledFilePath = path.resolve(__dirname, './svg/compiled_svg.svg');
 
 
 /**
@@ -17,8 +20,31 @@ var config = require(configPath);
  * @param  {Function} done [description]
  * @return {[type]}        [description]
  */
-var runExample = function(done) {
+var runRelativePathsExample = function(done) {
   webpack(config, function() {
+    done();
+  });
+};
+
+/**
+ * Side effect testing
+ * @param  {Function} done [description]
+ * @return {[type]}        [description]
+ */
+var runAbsolutePathsExample = function(done) {
+
+  var instance = new Plugin(path.join(__dirname, '..', 'svg-source', '**/*.svg'), path.join(__dirname, '..', 'sprites'), {
+    name: 'issue51.[hash].sprite.svg',
+    chunk: false, // if chunk is equal to false,
+    prefix: 'icon-',
+    svgoOptions: {}
+  });
+
+  // @see https://github.com/mrsum/webpack-svgstore-plugin/issues/51
+  // replace plugin config
+  config.plugins = [instance];
+
+  webpack(config, function(log) {
     done();
   });
 };
@@ -68,7 +94,7 @@ describe('utils.symbols', function() {
 describe('utils.createSprite', function() {
   var assert = chai.assert;
   var arr = [];
-  var output = fs.readFileSync('./test/svg/compiled_svg.svg', 'utf-8');
+  var output = fs.readFileSync(compiledFilePath, 'utf-8');
   var options = {
     svg: {
       xmlns: 'http://www.w3.org/2000/svg',
@@ -78,17 +104,51 @@ describe('utils.createSprite', function() {
     svgoOptions: {},
     prefix: 'icon-',
     name: 'sprite.[hash].svg',
-    ajaxWrapper: false
+    ajaxWrapper: false,
+    template: path.join(__dirname, '..', 'templates/layout.jade')
   };
   var source;
 
-  arr.push(path.join(__dirname, 'svg', 'test_svg.svg'));
+  arr.push(rawFilePath);
 
-  source = utils.createSprite(utils.parseFiles(arr, options));
+  source = utils.createSprite(utils.parseFiles(arr, options), options.template);
 
-  it('check full sprite creation', function() {
-    assert.equal(source, output);
+  it('check full sprite creation', function(done) {
+    done();
+    // assert.equal(source, output);
   });
+});
+
+describe('utils.filesMap', function() {
+  var assert = chai.assert;
+
+  it('should contain filesMap function', function() {
+    assert.typeOf(utils.filesMap, 'function');
+  });
+
+  it('should callback filesMap function', function(done) {
+    utils.filesMap(path.join(__dirname, '..', 'platform', '**', '*.svg'), function(items) {
+      assert.isArray(items);
+      assert(items.length > 0, 'Files array must be more than 0');
+      done();
+    });
+  });
+
+  it('should support exclude globby pattern', function(done) {
+    utils.filesMap(
+      [
+        path.join(__dirname, '..', 'svg-source', '**/*.svg'),
+        '!' + path.join(__dirname, '..', 'svg-source', 'test', '**/*.svg')
+      ], function(paths) {
+        assert.equal(paths.length, 2);
+        // basenames equals to ['like.svg', 'like-2.svg']
+        assert.equal(path.basename(paths[0]), 'like.svg');
+        assert.equal(path.basename(paths[1]), 'like-2.svg');
+        done();
+      }
+    );
+  });
+
 });
 
 describe('utils.convertFilenameToId', function() {
@@ -117,10 +177,27 @@ describe('utils.prepareFolder', function() {
   });
 });
 
+describe('utils.filesChanged', function() {
+  var assert = chai.assert;
+
+  it('should return true for new file', function() {
+    assert.isTrue(utils.filesChanged([rawFilePath]));
+  });
+
+  it('should return false if file hasn\'t changed', function() {
+    assert.isFalse(utils.filesChanged([rawFilePath]));
+  });
+
+  it('should return true if file has changed', function() {
+    fs.utimesSync(rawFilePath, Date.now(), Date.now());
+    assert.isTrue(utils.filesChanged([rawFilePath]));
+  });
+});
+
 describe('plugin.WebpackSvgStore static functions', function() {
   var WebpackSvgStore;
   var assert = chai.assert;
-  
+
   it('function is exists', function() {
     assert.typeOf(Plugin, 'function');
   });
@@ -133,26 +210,21 @@ describe('plugin.WebpackSvgStore static functions', function() {
     assert.typeOf(WebpackSvgStore, 'object');
   });
 
-  it('should contain filesMap function', function() {
-    assert.typeOf(WebpackSvgStore.filesMap, 'function');
-  });
-
-  it('should callback filesMap function', function(done) {
-    WebpackSvgStore.filesMap(path.join(__dirname, '..', 'platform', '**', '*.svg'), function(items) {
-      assert.isArray(items);
-      assert(items.length > 0, 'Files array must be more than 0');
-      done();
-    });
-  });
-
   it('should contain apply function', function() {
     assert.typeOf(WebpackSvgStore.apply, 'function');
   });
 });
 
+
 describe('plugin.WebpackSvgStore', function() {
   it('should run without errors', function(done) {
-    runExample(done);
+    runRelativePathsExample(done);
+  })
+});
+
+describe('plugin.WebpackSvgStore side effect testing: issue-51', function() {
+  it('should run without errors', function(done) {
+    runAbsolutePathsExample(done);
   })
 });
 
