@@ -10,6 +10,7 @@ var Svgo = require('svgo');
 var crypto = require('crypto');
 var globby = require('globby');
 var parse = require('htmlparser2');
+var pathIsAbsolute = require('path-is-absolute');
 
 var fileCache = {};
 
@@ -282,7 +283,7 @@ var _filesChanged = function(files) {
  * @return {[type]}      [description]
  */
 module.exports.prepareFolder = function(folder) {
-  if (path.isAbsolute(folder)) return false;
+  if (pathIsAbsolute(folder)) return false;
   try {
     if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder);

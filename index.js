@@ -66,7 +66,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
     publicPath = compilation.getStats().toJson().publicPath;
 
     if (!publicPath) {
-      publicPath = path.isAbsolute(outputFolder)
+      publicPath = pathIsAbsolute(outputFolder)
         ? outputFolder
         : '/'
       ;
