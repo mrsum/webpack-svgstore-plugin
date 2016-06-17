@@ -5,7 +5,7 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
-var jade = require('jade');
+var pug = require('pug');
 var Svgo = require('svgo');
 var crypto = require('crypto');
 var globby = require('globby');
@@ -15,11 +15,12 @@ var fileCache = {};
 
 /**
  * Create sprite
- * @param  {[type]} files [description]
- * @return {[type]}       [description]
+ * @param  {object} data
+ * @param  {string} template
+ * @return {string}
  */
 var _createSprite = function(data, template) {
-  return jade.renderFile(template, data);
+  return pug.renderFile(template, data);
 };
 
 /**
@@ -292,7 +293,6 @@ module.exports.prepareFolder = function(folder) {
   } catch (e) {
     return false;
   }
-
 };
 
 /**
@@ -304,8 +304,9 @@ module.exports.prepareFolder = function(folder) {
 module.exports.svgXHR = function(filename, baseUrl) {
   var wrapper = fs.readFileSync(path.join(__dirname, 'svgxhr.js'), 'utf-8');
 
-  baseUrl = (typeof baseUrl !== 'undefined') ? ', \''+ baseUrl +'\'': '';
-
+  baseUrl = (typeof baseUrl !== 'undefined') 
+    ? ', \''+ baseUrl +'\''
+    : '';
   wrapper += 'document.addEventListener(\'DOMContentLoaded\', svgXHR(\'' + filename + '\''+ baseUrl +'), false);';
   return wrapper;
 };
@@ -317,7 +318,9 @@ module.exports.svgXHR = function(filename, baseUrl) {
  * @return {[type]}        [description]
  */
 module.exports.hash = function(buffer, name) {
-  return name.indexOf('[hash]') >= 0 ? name.replace('[hash]', crypto.createHash('md5').update(buffer).digest('hex')) : name;
+  return name.indexOf('[hash]') >= 0
+    ? name.replace('[hash]', crypto.createHash('md5').update(buffer).digest('hex'))
+    : name;
 };
 
 /**
