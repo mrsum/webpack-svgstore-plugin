@@ -25,6 +25,11 @@ module.exports = function(_path) {
     plugins: [
       // create svgStore instance object
       new SvgStore({
+        // path, where sprites will put
+        output: __dirname + '/platform/dist/svg/',
+        // relative path from publicPath
+        relative: 'svg/',
+        // svgo options
         svgoOptions: {
           plugins: [
             { removeTitle: true }

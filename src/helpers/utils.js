@@ -108,6 +108,7 @@ var _parseSVG = function(arr, id) {
 var _defs = function(id, dom, data) {
   // lets find defs into dom
   var defs = _.filter(dom.children, { name: 'defs' });
+ 
   // check childrens
   defs.forEach(function(item) {
     if (item.children && item.children.length > 0) {
@@ -167,7 +168,7 @@ var _convertFilenameToId = function(filename) {
   if (dotPos > -1) {
     _name = filename.substring(0, dotPos);
   }
-  return _name;
+  return _name.toLowerCase();
 };
 
 /**
@@ -204,8 +205,7 @@ var _parseDomObject = function(data, filename, dom, prefix) {
  * @param  {integer}  loop  loop count
  * @return {[type]}         minified source
  */
-var _minify = function(file, loop, svgoOptions) {
-  var i;
+var _minify = function(file, svgoOptions) {
   var min = new Svgo(svgoOptions);
   var source = file;
 
@@ -213,10 +213,7 @@ var _minify = function(file, loop, svgoOptions) {
     source = result.data;
   }
 
-  // optimize loop
-  for (i = 1; i <= loop; i++) {
-    min.optimize(source, svgoCallback);
-  }
+  min.optimize(source, svgoCallback);
 
   return source;
 };
@@ -236,9 +233,10 @@ var _parseFiles = function(files, options) {
   // each over files
   files.forEach(function(file) {
     // load and minify
-    var buffer = _minify(fs.readFileSync(file, 'utf8'), options.loop, options.svgoOptions);
+    var buffer = _minify(fs.readFileSync(file, 'utf8'), options.svgoOptions);
     // get filename for id generation
     var filename = path.basename(file, '.svg');
+
     var handler = new parse.DomHandler(function(error, dom) {
       if (error) self.log(error);
       else data = _parseDomObject(data, filename, dom, options.prefix);
@@ -283,7 +281,6 @@ var _filesChanged = function(files) {
  * @return {[type]}      [description]
  */
 module.exports.prepareFolder = function(folder) {
-  if (path.isAbsolute(folder)) return false;
   try {
     if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder);

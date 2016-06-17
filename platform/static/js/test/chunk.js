@@ -1,3 +1,5 @@
 'use strict';
 
-webpackSvgStore('platform/static/svg/**/*.svg', 'platform/dist/svg/[hash].icons.svg');
+require('./test-2.js');
+
+webpackSvgStore('platform/static/test/svg/**/*.svg', 'dist/svg1/[hash].logos.svg');

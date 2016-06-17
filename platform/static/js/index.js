@@ -1,6 +1,7 @@
 'use strict';
 
-require('./test/chunk.js');
-
 // load icons tasks
-webpackSvgStore('platform/static/svg/**/*.svg', 'platform/dist/svg/[hash].icons.svg');
+webpackSvgStore('platform/static/svg/**/*.svg', '[hash].icons.svg');
+
+
+// require('./test/chunk.js');
