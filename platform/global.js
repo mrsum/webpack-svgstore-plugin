@@ -23,7 +23,7 @@ module.exports = function(_path) {
       extensions: ['', '.js'],
     },
     plugins: [
-
+      // create svgStore instance object
       new SvgStore({
         svgoOptions: {
           plugins: [
@@ -31,8 +31,6 @@ module.exports = function(_path) {
           ]
         }
       })
-
-
     ]
   };
 };

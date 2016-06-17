@@ -51,21 +51,18 @@ var WebpackSvgStore = function(input, output, options) {
  * @return {[type]}          [description]
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
+  compiler.parser.plugin('call webpackSvgStore', function(expr) {
 
-  compiler.plugin('compilation', function(compilation) {
-    compilation.plugin('optimize-tree', function(chunks, modules) {
-      console.log(chunks);
-    });
-    // callback();
+    let input   = expr.arguments[0].value ? expr.arguments[0].value : false;
+    let output  = expr.arguments[1].value ? expr.arguments[1].value : false;
+
+    console.log(input, output, this.state.current.resource);
+
+    //console.log(this.evaluateExpression(expr.arguments[0].string));
   });
-  
-  compiler.parser.plugin('call webpackSvgStore', function (expr) {
-    let value = false;
-    console.log(expr);
-    // expr.arguments[0] && expr.arguments[1]
-    //   ? value = new Putin(expr, expr.arguments[0], expr.arguments[1])
-    //   : null;
-    // return value;
+
+  compiler.plugin('emit', function(compilation) {
+        
   });
 };
 
