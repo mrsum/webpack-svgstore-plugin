@@ -28,7 +28,7 @@ module.exports = function(_path) {
         // path, where sprites will put
         output: __dirname + '/platform/dist/svg/',
         // relative path from publicPath
-        relative: 'svg/',
+        relative: 'svg',
         // svgo options
         svgoOptions: {
           plugins: [

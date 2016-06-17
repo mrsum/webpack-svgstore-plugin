@@ -1,3 +1,3 @@
 'use strict';
 
-webpackSvgStore('platform/static/test/svg/**/*.svg', 'dist/svg2/[hash].logos.svg');
+webpackSvgStore('platform/static/svg/**/*.svg', '[hash].test.svg');

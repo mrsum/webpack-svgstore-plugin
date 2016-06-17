@@ -2,4 +2,4 @@
 
 require('./test-2.js');
 
-webpackSvgStore('platform/static/test/svg/**/*.svg', 'dist/svg1/[hash].logos.svg');
+webpackSvgStore('platform/static/svg/**/*.svg', '[hash].logos.svg');
