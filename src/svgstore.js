@@ -17,6 +17,7 @@ var _ = require('lodash');
 var path = require('path');
 var slash = require('slash');
 var utils = require('./helpers/utils');
+var ReplaceSource = require('webpack-core/lib/ReplaceSource');
 
 /**
  * Constructor
@@ -37,6 +38,7 @@ var WebpackSvgStore = function(options) {
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
   let tasks = [];
+  let options = this.options;
 
   // lets find plugin marks
   compiler.parser.plugin('call webpackSvgStore', function(expr) {
@@ -45,13 +47,12 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
     // check arguments
     input && spriteName
-      ? tasks.push({ input, spriteName, file: this.state.current })
+      ? tasks.push({ input, spriteName, file: this.state.current, expr })
       : null;
   });
 
   compiler.plugin('emit', (compilation, callback) => {
     tasks.forEach(entity => {
-      let options = this.options;
       let spriteFolder = options.output;
       let spriteName = entity.spriteName;
       let relativePath = options.relative;
@@ -72,6 +73,9 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
           source: function() { return new Buffer(fileContent); }
         };
+
+        let lastXhrText = utils.svgXHR(filePath, options.baseUrl || false);
+        entity.file.source().replace(entity.expr.range[0], entity.expr.range[1], lastXhrText);
 
         callback();
       });
