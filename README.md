@@ -43,7 +43,7 @@ module.exports = {
 ```
 
 #### 2) put function mark at your chunk
-```
+```javascript
 webpackSvgStore('path/to/your/icons/**/*.svg', '[hash].icons.svg');
 ```
 
