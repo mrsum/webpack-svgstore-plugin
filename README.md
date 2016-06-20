@@ -25,32 +25,28 @@ module.exports = {
     app: path.join(_path, 'platform', 'static', 'js', 'index.js'),
   },
   plugins: [
-    new SvgStore(
-      //=========> input path
-      [
-        path.join(sourcePath, 'svg', '**/*.svg'),
-        '!' + path.join(sourcePath, 'svg', 'excludeFolder', '**/*.svg'),
-      ],
-      //=========> output path
-      'svg',
-      //=========> options
-    {
-        name: '[hash].sprite.svg',
-        chunk: 'app',
-        baseUrl: '//path-to-cdn:port/',
-        prefix: 'myprefix-',
-        template: path.join('root', 'templates', 'layout.jade'),
-        svgoOptions: {
-          plugins: [
-            { removeTitle: true }
-          ]
-        }
+    // create svgStore instance object
+    new SvgStore({
+      // path, where sprites will put
+      output: __dirname + '/platform/dist/svg/',
+      // relative path from publicPath
+      relative: 'svg',
+      // svgo options
+      svgoOptions: {
+        plugins: [
+          { removeTitle: true }
+        ]
       }
-    )
+    })
   ]
 }
+
+#### 2) put function mark at your chunk
 ```
-#### 2) html code for happy using
+webpackSvgStore('path/to/your/icons/**/*.svg', '[hash].icons.svg');
+```
+
+#### 3) html code for happy using
 
 ```html
   <svg class="svg-icon">
