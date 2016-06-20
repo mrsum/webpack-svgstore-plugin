@@ -40,6 +40,7 @@ module.exports = {
     })
   ]
 }
+```
 
 #### 2) put function mark at your chunk
 ```
