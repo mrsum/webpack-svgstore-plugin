@@ -51,13 +51,10 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   });
 
   compiler.plugin('emit', function(compilation, callback) {
-    tasks.forEach(function(entity) {
+    tasks.length > 0 ? tasks.forEach(function(entity) {
       var spriteName = entity.spriteName;
-      var spriteFolder = options.output;
       var relativePath = options.relative;
 
-      // prepare output folder
-      utils.prepareFolder(spriteFolder);
       // iterate by entities
       utils.filesMap(entity.input, function(files) {
         var fileContent = utils.createSprite(
@@ -80,10 +77,10 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           entity.expr.range[1],
           utils.svgXHR(filePath, options.baseUrl)
         );
-
-        callback();
       });
-    });
+    }) : null;
+
+    callback();
   });
 };
 
