@@ -4,3 +4,4 @@ coverage/
 platform/dist/
 platform/static/min/
 sprites/
+*.log

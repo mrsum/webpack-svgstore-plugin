@@ -17,7 +17,6 @@ var _ = require('lodash');
 var path = require('path');
 var slash = require('slash');
 var utils = require('./helpers/utils');
-var ReplaceSource = require('webpack-core/lib/ReplaceSource');
 
 /**
  * Constructor
@@ -37,13 +36,13 @@ var WebpackSvgStore = function(options) {
  * @return {[type]}          [description]
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
-  let tasks = [];
-  let options = this.options;
+  var tasks = [];
+  var options = this.options;
 
-  // lets find plugin marks
+  // vars find plugin marks
   compiler.parser.plugin('call webpackSvgStore', function(expr) {
-    let input       = expr.arguments[0].value ? expr.arguments[0].value : false;
-    let spriteName  = expr.arguments[1].value ? expr.arguments[1].value : false;
+    var input       = expr.arguments[0].value ? expr.arguments[0].value : false;
+    var spriteName  = expr.arguments[1].value ? expr.arguments[1].value : false;
 
     // check arguments
     input && spriteName
@@ -51,31 +50,36 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       : null;
   });
 
-  compiler.plugin('emit', (compilation, callback) => {
-    tasks.forEach(entity => {
-      let spriteFolder = options.output;
-      let spriteName = entity.spriteName;
-      let relativePath = options.relative;
+  compiler.plugin('emit', function(compilation, callback) {
+    tasks.forEach(function(entity) {
+      var spriteName = entity.spriteName;
+      var spriteFolder = options.output;
+      var relativePath = options.relative;
 
       // prepare output folder
       utils.prepareFolder(spriteFolder);
-
+      // iterate by entities
       utils.filesMap(entity.input, function(files) {
-        let fileContent = utils.createSprite(
+        var fileContent = utils.createSprite(
           utils.parseFiles(files, options),
           options.template
         );
 
-        let fileName = utils.hash(fileContent, spriteName);
-        let filePath = path.join(relativePath, fileName);
+        var fileName = utils.hash(fileContent, spriteName);
+        var filePath = path.join(relativePath, fileName);
 
+        // add sprite to assets
         compilation.assets[slash(filePath)] = {
           size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
           source: function() { return new Buffer(fileContent); }
         };
 
-        let lastXhrText = utils.svgXHR(filePath, options.baseUrl || false);
-        entity.file.source().replace(entity.expr.range[0], entity.expr.range[1], lastXhrText);
+        // replace source link to load function
+        entity.file.source().replace(
+          entity.expr.range[0],
+          entity.expr.range[1],
+          utils.svgXHR(filePath, options.baseUrl)
+        );
 
         callback();
       });
