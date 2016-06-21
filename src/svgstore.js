@@ -15,7 +15,6 @@ var _options = {
 // Depends
 var _ = require('lodash');
 var path = require('path');
-var slash = require('slash');
 var utils = require('./helpers/utils');
 
 /**
@@ -86,7 +85,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
             var fileName = utils.hash(fileContent, commands.name || '[hash].icons.svg');
 
             // add sprite to assets
-            compilation.assets[slash(fileName)] = {
+            compilation.assets[fileName] = {
               size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
               source: function() { return new Buffer(fileContent); }
             };
