@@ -109,6 +109,3 @@ WebpackSvgStore.prototype.apply = function(compiler) {
  */
 module.exports = WebpackSvgStore;
 module.exports.Options = WebpackSvgStore;
-module.exports.extract = function(source) {
-  return source;
-};
