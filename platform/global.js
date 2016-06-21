@@ -12,6 +12,7 @@ module.exports = function(_path) {
   return {
     entry: {
       app: path.join(_path, 'platform', 'static', 'js', 'index.js'),
+      // app1: path.join(_path, 'platform', 'static', 'js', 'one-more.js'),
     },
     output: {
       path: distPath,
@@ -22,13 +23,16 @@ module.exports = function(_path) {
     resolve: {
       extensions: ['', '.js'],
     },
+    module: {
+      loaders: [
+        { test: /\.svgjs$/, loader: SvgStore.extract() },
+      ]
+    },
     plugins: [
       // create svgStore instance object
-      new SvgStore({
-        // path, where sprites will put
-        output: __dirname + '/platform/dist/svg/',
-        // relative path from publicPath
-        relative: 'svg',
+      new SvgStore.Options({
+        // path, from webpack context
+        output: '/platform/dist/svg/',
         // svgo options
         svgoOptions: {
           plugins: [

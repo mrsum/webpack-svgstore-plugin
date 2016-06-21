@@ -1,6 +1,7 @@
 'use strict';
 
-// load icons tasks
-webpackSvgStore('platform/static/svg/**/*.svg', '[hash].icons.svg');
+var __svg__ = { path: '../svg/**/*.svg', name: '[hash].logos.svg' };
+var __sprite__ = { path: '../svg/**/*.svg', name: 'test/for/svg/[hash].geckos.svg' };
+var __svgstore__ = { path: '../svg/**/*.svg', name: 'svg/[hash].icon.svg' };
 
-require('./test/chunk.js');
+require('../../../src/helpers/svgxhr')(__svg__);

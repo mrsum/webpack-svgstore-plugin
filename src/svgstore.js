@@ -38,48 +38,57 @@ var WebpackSvgStore = function(options) {
 WebpackSvgStore.prototype.apply = function(compiler) {
   var tasks = [];
   var options = this.options;
+  var output = path.join(compiler.context, options.output);
 
-  // vars find plugin marks
-  compiler.parser.plugin('call webpackSvgStore', function(expr) {
-    var input       = expr.arguments[0].value ? expr.arguments[0].value : false;
-    var spriteName  = expr.arguments[1].value ? expr.arguments[1].value : false;
+  /**
+   * Analyze AST
+   * @param  {[type]} expr [description]
+   * @return {[type]}      [description]
+   */
+  var analyze = function(expr) {
+    tasks.push({
+      expr: expr,
+      context: this.state.current.context,
+      current: this.state.current,
+      commands: expr.init.properties.map(function(item) {
+        return { key: item.key.name.toString(), value: item.value.value.toString() };
+      })
+    });
+  };
 
-    // check arguments
-    input && spriteName
-      ? tasks.push({ input, spriteName, file: this.state.current, expr })
-      : null;
-  });
+  // AST parser
+  compiler.parser.plugin('var __svg__', analyze);
+  compiler.parser.plugin('var __sprite__', analyze);
+  compiler.parser.plugin('var __svgstore__', analyze);
+  compiler.parser.plugin('var __svgsprite__', analyze);
+  compiler.parser.plugin('var __webpack_svgstore__', analyze);
 
+  // run the trap
   compiler.plugin('emit', function(compilation, callback) {
-    tasks.length > 0 ? tasks.forEach(function(entity) {
-      var spriteName = entity.spriteName;
-      var relativePath = options.relative;
+    tasks.length > 0 ? tasks.forEach(function(task) {
+      // parse commands from variable
+      var commands = {};
+      task.commands.forEach(function(command) {
+        commands[command.key] = command.value;
+      });
 
       // iterate by entities
-      utils.filesMap(entity.input, function(files) {
+      utils.filesMap(path.join(task.context, commands.path || ''), function(files) {
         var fileContent = utils.createSprite(
           utils.parseFiles(files, options),
           options.template
         );
-
-        var fileName = utils.hash(fileContent, spriteName);
-        var filePath = path.join(relativePath, fileName);
+        // generate filename
+        var fileName = utils.hash(fileContent, commands.name || '[hash].icons.svg');
 
         // add sprite to assets
-        compilation.assets[slash(filePath)] = {
+        compilation.assets[slash(fileName)] = {
           size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
           source: function() { return new Buffer(fileContent); }
         };
-
-        // replace source link to load function
-        entity.file.source().replace(
-          entity.expr.range[0],
-          entity.expr.range[1],
-          utils.svgXHR(filePath, options.baseUrl)
-        );
       });
-    }) : null;
 
+    }) : null;
     callback();
   });
 };
@@ -89,3 +98,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
  * @type {[type]}
  */
 module.exports = WebpackSvgStore;
+module.exports.Options = WebpackSvgStore;
+module.exports.extract = function(source) {
+  return source;
+};
