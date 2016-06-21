@@ -5,7 +5,15 @@
  * @see: https://www.npmjs.com/package/webpack-svgstore-plugin
  * @return {[type]}     [description]
  */
-var svgXHR = function(url, baseUrl) {
+var svgXHR = function(options) {
+  var url = false;
+  var baseUrl = undefined;
+
+  options && options.file
+    ? url = optins.file
+    : null;
+
+  if (!url) return false;
   var _ajax = new XMLHttpRequest();
   var _fullPath;
 

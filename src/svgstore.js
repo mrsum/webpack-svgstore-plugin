@@ -68,7 +68,6 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   compiler.plugin('emit', function(compilation, callback) {
     compilation.modules.forEach(function(module) {
       if (suggests.indexOf(module.resource) > -1) {
-
         tasks.length > 0 ? tasks.forEach(function(task) {
           // parse commands from variable
           var commands = {};
