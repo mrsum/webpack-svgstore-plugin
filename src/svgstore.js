@@ -37,6 +37,7 @@ var WebpackSvgStore = function(options) {
  */
 WebpackSvgStore.prototype.apply = function(compiler) {
   var tasks = [];
+  var suggests = [];
   var options = this.options;
 
   /**
@@ -45,10 +46,11 @@ WebpackSvgStore.prototype.apply = function(compiler) {
    * @return {[type]}      [description]
    */
   var analyze = function(expr) {
+    suggests.push(this.state.current.userRequest);
     tasks.push({
       expr: expr,
       context: this.state.current.context,
-      current: this.state.current,
+      file: this.state.current.userRequest,
       commands: expr.init.properties.map(function(item) {
         return { key: item.key.name.toString(), value: item.value.value.toString() };
       })
@@ -64,37 +66,41 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
   // run the trap
   compiler.plugin('emit', function(compilation, callback) {
-    tasks.length > 0 ? tasks.forEach(function(task) {
-      // parse commands from variable
-      var commands = {};
-      task.commands.forEach(function(command) {
-        commands[command.key] = command.value;
-      });
+    compilation.modules.forEach(function(module) {
+      if (suggests.indexOf(module.resource) > -1) {
 
-      // iterate by entities
-      utils.filesMap(path.join(task.context, commands.path || ''), function(files) {
-        var fileContent = utils.createSprite(
-          utils.parseFiles(files, options),
-          options.template
-        );
+        tasks.length > 0 ? tasks.forEach(function(task) {
+          // parse commands from variable
+          var commands = {};
+          task.commands.forEach(function(command) {
+            commands[command.key] = command.value;
+          });
 
-        // generate filename
-        var fileName = utils.hash(fileContent, commands.name || '[hash].icons.svg');
+          // iterate by entities
+          utils.filesMap(path.join(task.context, commands.path || ''), function(files) {
+            var fileContent = utils.createSprite(
+              utils.parseFiles(files, options),
+              options.template
+            );
 
-        // add sprite to assets
-        compilation.assets[slash(fileName)] = {
-          size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
-          source: function() { return new Buffer(fileContent); }
-        };
-        // replace original source
-        task.current.source().replace(
-          task.expr.range[0],
-          task.expr.range[1],
-          `${task.expr.id.name} = {file: '${fileName}'};`
-        );
-      });
-    }) : null;
+            // generate filename
+            var fileName = utils.hash(fileContent, commands.name || '[hash].icons.svg');
 
+            // add sprite to assets
+            compilation.assets[slash(fileName)] = {
+              size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
+              source: function() { return new Buffer(fileContent); }
+            };
+            // replace original source
+            module.source().replace(
+              task.expr.range[0],
+              task.expr.range[1],
+              `${task.expr.id.name} = {file: '${fileName}'};`
+            );
+          });
+        }) : null;
+      }
+    });
     callback();
   });
 };
