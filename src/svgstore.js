@@ -78,6 +78,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           utils.parseFiles(files, options),
           options.template
         );
+
         // generate filename
         var fileName = utils.hash(fileContent, commands.name || '[hash].icons.svg');
 
@@ -86,9 +87,15 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
           source: function() { return new Buffer(fileContent); }
         };
+        // replace original source
+        task.current.source().replace(
+          task.expr.range[0],
+          task.expr.range[1],
+          `${task.expr.id.name} = {file: '${fileName}'};`
+        );
       });
-
     }) : null;
+
     callback();
   });
 };
