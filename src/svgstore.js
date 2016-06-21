@@ -38,7 +38,6 @@ var WebpackSvgStore = function(options) {
 WebpackSvgStore.prototype.apply = function(compiler) {
   var tasks = [];
   var options = this.options;
-  var output = path.join(compiler.context, options.output);
 
   /**
    * Analyze AST
