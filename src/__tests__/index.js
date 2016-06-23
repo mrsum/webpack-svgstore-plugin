@@ -70,10 +70,8 @@ describe('utils.hash', function() {
   });
 
   it('check hashsum #1', function() {
-    var content = '<span>hello svg</span>';
     var fileName = '[hash].sprite.svg';
-
-    assert.equal(utils.hash(content, fileName), 'cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg');
+    assert.equal(utils.hash('cdbf2bdb4f64b7f94b4779d2320918d9', fileName), 'cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg');
   });
 
   it('check hashsum #2', function() {
@@ -126,7 +124,7 @@ describe('utils.filesMap', function() {
   });
 
   it('should callback filesMap function', function(done) {
-    utils.filesMap(path.join(__dirname, '..', 'platform', '**', '*.svg'), function(items) {
+    utils.filesMap(path.join(__dirname, 'svg', '**', '*.svg'), function(items) {
       assert.isArray(items);
       assert(items.length > 0, 'Files array must be more than 0');
       done();
@@ -146,17 +144,6 @@ describe('utils.convertFilenameToId', function() {
 
   it('check function result #1 cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg', function() {
     assert.equal(utils.convertFilenameToId('cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'), 'cdbf2bdb4f64b7f94b4779d2320918d9');
-  });
-});
-
-describe('utils.prepareFolder', function() {
-  var assert = chai.assert;
-  it('function is exists', function() {
-    assert.typeOf(utils.prepareFolder, 'function');
-  });
-
-  it('function create folder', function() {
-    assert.equal(utils.prepareFolder('test_folder'), true);
   });
 });
 
@@ -210,3 +197,4 @@ describe('plugin.WebpackSvgStore side effect testing: issue-51', function() {
     runAbsolutePathsExample(done);
   });
 });
+
