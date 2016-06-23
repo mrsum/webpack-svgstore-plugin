@@ -33,7 +33,7 @@ var WebpackSvgStore = function(options) {
 WebpackSvgStore.prototype.apply = function(compiler) {
   var tasks = {};
   var options = this.options;
-  var memoize = function(file, value) {
+  var parseRepl = function(file, value) {
     tasks[file]
       ? tasks[file].push(value)
       : function() { tasks[file] = []; tasks[file].push(value); }();
@@ -45,21 +45,23 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       fileName: '[hash].sprite.svg',
       context: this.state.current.context
     };
+    var replacement = false;
+    var dep = false;
     var timeStamp = this.state.current.buildTimestamp;
     expr.init.properties.forEach(function(prop) {
-      switch(prop.key.name) {
+      switch (prop.key.name) {
         case 'name': data.fileName = utils.hash(timeStamp, prop.value.value); break;
-        case 'path': data.path = prop.value.value;
+        case 'path': data.path = prop.value.value; break;
         default: break;
       }
     });
 
-    var replacement = expr.id.name + ' = { filename: "' + data.fileName + '" }';
-    var dep = new ConstDependency(replacement, expr.range);
+    replacement = expr.id.name + ' = { filename: "' + data.fileName + '" }';
+    dep = new ConstDependency(replacement, expr.range);
     dep.loc = expr.loc;
     this.state.current.addDependency(dep);
-
-    memoize(this.state.current.request, data);
+    // parse repl
+    parseRepl(this.state.current.request, data);
   };
 
   // AST parser
