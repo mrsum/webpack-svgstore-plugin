@@ -21,9 +21,6 @@ npm i webpack-svgstore-plugin --save-dev
 var SvgStore = require('webpack-svgstore-plugin');
 
 module.exports = {
-  entry: {
-    app: path.join(_path, 'platform', 'static', 'js', 'index.js'),
-  },
   plugins: [
     // create svgStore instance object
     new SvgStore({
@@ -69,7 +66,6 @@ require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svg__);
 - path to output folder, begins with webpack `publicPath`
 
 #### options
-- `prefix` - add prefix to svg id's (optional, default: `'icon-'`)
 - `template` - add custom jade template layout (optional)
 - `svgoOptions` - options for [svgo](https://github.com/svg/svgo) (optional, default: `{}`)
 
