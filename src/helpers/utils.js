@@ -7,7 +7,6 @@ var path = require('path');
 var util = require('util');
 var pug = require('pug');
 var Svgo = require('svgo');
-var crypto = require('crypto');
 var globby = require('globby');
 var parse = require('htmlparser2');
 
@@ -276,23 +275,6 @@ var _filesChanged = function(files) {
 };
 
 /**
- * Check folder
- * @param  {[type]} path [description]
- * @return {[type]}      [description]
- */
-module.exports.prepareFolder = function(folder) {
-  try {
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder);
-    }
-
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
-
-/**
  * Prepare svgXHR function
  * @param  {[type]} sprites [description]
  * @param  {[type]} baseUrl [description]
@@ -314,9 +296,9 @@ module.exports.svgXHR = function(filename, baseUrl) {
  * @param  {[type]} name   [description]
  * @return {[type]}        [description]
  */
-module.exports.hash = function(buffer, name) {
+module.exports.hash = function(hash, name) {
   return name.indexOf('[hash]') >= 0
-    ? name.replace('[hash]', crypto.createHash('md5').update(buffer).digest('hex'))
+    ? name.replace('[hash]', hash)
     : name;
 };
 

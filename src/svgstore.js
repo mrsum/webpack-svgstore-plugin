@@ -16,7 +16,7 @@ var _options = {
 var _ = require('lodash');
 var path = require('path');
 var utils = require('./helpers/utils');
-var async = require('async');
+var ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 
 /**
  * Constructor
@@ -30,95 +30,66 @@ var WebpackSvgStore = function(options) {
   return this;
 };
 
-/**
- * Runner method
- * @param  {[type]} compiler [description]
- * @return {[type]}          [description]
- */
 WebpackSvgStore.prototype.apply = function(compiler) {
-  var svgs = [];
-  var tasks = [];
-  var suggests = [];
+  var tasks = {};
   var options = this.options;
+  var memoize = function(file, value) {
+    tasks[file]
+      ? tasks[file].push(value)
+      : function() { tasks[file] = []; tasks[file].push(value); }();
+  };
 
-
-  /**
-   * Analyze AST
-   * @param  {[type]} expr [description]
-   * @return {[type]}      [description]
-   */
-  var analyze = function(expr) {
-    suggests.push(this.state.current.userRequest);
-    tasks.push({
-      expr: expr,
-      context: this.state.current.context,
-      file: this.state.current.userRequest,
-      commands: expr.init.properties.map(function(item) {
-        return { key: item.key.name.toString(), value: item.value.value.toString() };
-      })
+  var analyzeAst = function(expr) {
+    var data = {
+      path: '/**/*.svg',
+      fileName: '[hash].sprite.svg',
+      context: this.state.current.context
+    };
+    var timeStamp = this.state.current.buildTimestamp;
+    expr.init.properties.forEach(function(prop) {
+      switch(prop.key.name) {
+        case 'name': data.fileName = utils.hash(timeStamp, prop.value.value); break;
+        case 'path': data.path = prop.value.value;
+        default: break;
+      }
     });
+
+    var replacement = expr.id.name + ' = { filename: "' + data.fileName + '" }';
+    var dep = new ConstDependency(replacement, expr.range);
+    dep.loc = expr.loc;
+    this.state.current.addDependency(dep);
+
+    memoize(this.state.current.request, data);
   };
 
   // AST parser
-  compiler.parser.plugin('var __svg__', analyze);
-  compiler.parser.plugin('var __sprite__', analyze);
-  compiler.parser.plugin('var __svgstore__', analyze);
-  compiler.parser.plugin('var __svgsprite__', analyze);
-  compiler.parser.plugin('var __webpack_svgstore__', analyze);
-
-  compiler.plugin('compilation', function(compilation) {
-    compilation.plugin('optimize-chunk-assets', function(chunks, callback) {
-      chunks.forEach(function(chunk) {
-      // async.forEach(chunks, function(chunk, callback) {
-        chunk.modules.forEach(module => {
-          // check tasks for each modules
-          if (suggests.indexOf(module.resource) > -1) {
-            // run
-            tasks.length > 0 ? async.forEach(tasks, function(task) {
-              var commands = {};
-              var fileName = '[hash].icons.svg';
-              task.commands.forEach(function(command) {
-                commands[command.key] = command.value;
-              });
-
-              // generate filename
-              fileName = utils.hash(compilation.hash, commands.name || '[hash].icons.svg');
-
-              // replace for original source
-              module.source().replace(
-                task.expr.range[0],
-                task.expr.range[1],
-                `${task.expr.id.name} = {sprite: '${fileName}'};`
-              );
-
-              // console.log(module.source());
-              svgs.push({file: fileName, commands: commands, task: task});
-            }) : null;
-          }
-        });
-      });
-      callback();
-    });
-  });
+  compiler.parser.plugin('var __svg__', analyzeAst);
+  compiler.parser.plugin('var __sprite__', analyzeAst);
+  compiler.parser.plugin('var __svgstore__', analyzeAst);
+  compiler.parser.plugin('var __svgsprite__', analyzeAst);
+  compiler.parser.plugin('var __webpack_svgstore__', analyzeAst);
 
   // save file to fs
   compiler.plugin('emit', function(compilation, callback) {
-    svgs.forEach(function(svg) {
-      // iterate by entities
-      utils.filesMap(path.join(svg.task.context, svg.commands.path || ''), function(files) {
-        var fileContent = utils.createSprite(
-          utils.parseFiles(files, options),
-          options.template
-        );
+    Object.keys(tasks).forEach(function(key) {
+      tasks[key].forEach(function(task) {
+        utils.filesMap(path.join(task.context, task.path || ''), function(files) {
+          // fileContent
+          var fileContent = utils.createSprite(
+            utils.parseFiles(files, options),
+            options.template
+          );
 
-        // add sprite to assets
-        compilation.assets[svg.file] = {
-          size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
-          source: function() { return new Buffer(fileContent); }
-        };
+          // add sprite to assets
+          compilation.assets[task.fileName] = {
+            size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
+            source: function() { return new Buffer(fileContent); }
+          };
+        });
       });
     });
 
+    tasks = {};
     callback();
   });
 };

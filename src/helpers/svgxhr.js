@@ -9,8 +9,8 @@ var svgXHR = function(options) {
   var url = false;
   var baseUrl = undefined;
 
-  options && options.file
-    ? url = optins.file
+  options && options.filename
+    ? url = options.filename
     : null;
 
   if (!url) return false;
