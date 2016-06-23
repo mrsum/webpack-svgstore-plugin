@@ -43,15 +43,14 @@ module.exports = {
 // plugin will find marks and build sprite
 
 var __svg__ = { path: './assets/svg/**/*.svg', name: 'assets/svg/[hash].logos.svg' };
+// will overwrite to var __svg__ = { filename: "assets/svg/1466687804854.logos.svg" };
+
 // var __sprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].icons.svg' };
 // var __svgstore__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].stuff.svg' };
 // var __svgsprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].1logos.svg' };
 
-
+// require basic or custom sprite loader
 require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svg__);
-// require('webpack-svgstore-plugin/src/helpers/svgxhr')(__sprite__);
-// require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svgstore__);
-// require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svgsprite__);
 ```
 
 #### 3) html code for happy using
