@@ -27,10 +27,6 @@ module.exports = {
   plugins: [
     // create svgStore instance object
     new SvgStore({
-      // path, where sprites will put
-      output: __dirname + '/platform/dist/svg/',
-      // relative path from publicPath
-      relative: 'svg',
       // svgo options
       svgoOptions: {
         plugins: [
@@ -44,7 +40,18 @@ module.exports = {
 
 #### 2) put function mark at your chunk
 ```javascript
-webpackSvgStore('path/to/your/icons/**/*.svg', '[hash].icons.svg');
+// plugin will find marks and build sprite
+
+var __svg__ = { path: './assets/svg/**/*.svg', name: 'assets/svg/[hash].logos.svg' };
+// var __sprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].icons.svg' };
+// var __svgstore__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].stuff.svg' };
+// var __svgsprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].1logos.svg' };
+
+
+require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svg__);
+// require('webpack-svgstore-plugin/src/helpers/svgxhr')(__sprite__);
+// require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svgstore__);
+// require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svgsprite__);
 ```
 
 #### 3) html code for happy using
