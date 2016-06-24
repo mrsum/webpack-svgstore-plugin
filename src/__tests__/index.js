@@ -6,6 +6,9 @@ var chai = require('chai');
 var path = require('path');
 var webpack = require('webpack');
 var mocha = require('mocha');
+var describe = mocha.describe;
+
+
 var Plugin = require('../svgstore');
 var utils = require('../helpers/utils');
 var configPath = path.join(__dirname, '..', '..', 'webpack.config.js');
@@ -89,8 +92,8 @@ describe('utils.symbols', function() {
 });
 
 describe('utils.createSprite', function() {
-  var assert = chai.assert;
   var arr = [];
+  var assert = chai.assert;
   var output = fs.readFileSync(compiledFilePath, 'utf-8');
   var options = {
     svg: {
