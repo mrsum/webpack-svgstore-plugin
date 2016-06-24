@@ -42,6 +42,7 @@ module.exports = {
 var __svg__ = { path: './assets/svg/**/*.svg', name: 'assets/svg/[hash].logos.svg' };
 // will overwrite to var __svg__ = { filename: "assets/svg/1466687804854.logos.svg" };
 
+// also you can use next variables for sprite compile
 // var __sprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].icons.svg' };
 // var __svgstore__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].stuff.svg' };
 // var __svgsprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].1logos.svg' };
@@ -49,6 +50,10 @@ var __svg__ = { path: './assets/svg/**/*.svg', name: 'assets/svg/[hash].logos.sv
 // require basic or custom sprite loader
 require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svg__);
 ```
+
+Dear friend, as you know, last version has integrated ajax sprite loader.
+Right now, you can override that.
+Or create custom ajax load function.
 
 #### 3) html code for happy using
 
