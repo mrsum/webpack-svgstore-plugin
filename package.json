@@ -1,16 +1,20 @@
 {
   "name": "webpack-svgstore-plugin",
-  "version": "2.2.2",
+  "version": "3.0.0-alpha.2",
   "description": "Webpack svgstore plugin",
-  "main": "index.js",
+  "main": "src/svgstore.js",
   "scripts": {
-    "code:test": "NODE_ENV=platform mocha -w -R spec ./test/index.js",
+    "test": "NODE_ENV=platform mocha -w -R spec ./src/__tests__/index.js",
     "code:coverage": "NODE_ENV=platform ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha && npm run code:report",
     "code:report": "CODECLIMATE_REPO_TOKEN=29b2c943849c33562af12b70563d86e95c073e04c7510e9da5d9711cf3233b17 ./node_modules/.bin/codeclimate-test-reporter < coverage/lcov.info",
-    "build": "rm -rf platform/dist/* && NODE_ENV=platform webpack --progress -p --colors"
+    "build": "rm -rf platform/dist/* && NODE_ENV=platform webpack --progress --colors --bail"
   },
   "author": "me@mrsum.ru",
   "contributors": [
+    {
+      "name": "Mike Chernobrov",
+      "email": "me@mrsum.ru"
+    },
     {
       "name": "Gordey Levchenko",
       "email": "levchenko.gordey@gmail.com"
@@ -18,22 +22,20 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "globby": "^4.0.0",
-    "htmlparser2": "^3.8.3",
-    "jade": "^1.11.0",
-    "lodash": "^3.10.1",
-    "slash": "^1.0.0",
-    "svgo": "^0.6.0",
-    "webpack-sources": "^0.1.2"
+    "globby": "4.1.0",
+    "htmlparser2": "3.9.1",
+    "lodash": "3.10.1",
+    "pug": "0.1.0",
+    "svgo": "0.6.6"
   },
   "devDependencies": {
-    "chai": "^3.4.1",
-    "codeclimate-test-reporter": "^0.1.1",
-    "eslint-config-rambler": "https://github.com/rambler-digital-solutions/dotfiles.git#master",
-    "istanbul": "^0.4.0",
-    "mocha": "^2.2.5",
-    "path": "^0.11.14",
-    "webpack": "^1.12.2"
+    "chai": "3.5.0",
+    "codeclimate-test-reporter": "0.1.1",
+    "eslint-config-rambler": "0.2.2",
+    "istanbul": "0.4.3",
+    "mocha": "2.5.3",
+    "path": "0.11.14",
+    "webpack": "1.13.1"
   },
   "repository": {
     "type": "git",

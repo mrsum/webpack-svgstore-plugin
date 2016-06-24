@@ -5,9 +5,8 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
-var jade = require('jade');
+var pug = require('pug');
 var Svgo = require('svgo');
-var crypto = require('crypto');
 var globby = require('globby');
 var parse = require('htmlparser2');
 
@@ -15,11 +14,12 @@ var fileCache = {};
 
 /**
  * Create sprite
- * @param  {[type]} files [description]
- * @return {[type]}       [description]
+ * @param  {object} data
+ * @param  {string} template
+ * @return {string}
  */
 var _createSprite = function(data, template) {
-  return jade.renderFile(template, data);
+  return pug.renderFile(template, data);
 };
 
 /**
@@ -107,6 +107,7 @@ var _parseSVG = function(arr, id) {
 var _defs = function(id, dom, data) {
   // lets find defs into dom
   var defs = _.filter(dom.children, { name: 'defs' });
+ 
   // check childrens
   defs.forEach(function(item) {
     if (item.children && item.children.length > 0) {
@@ -166,7 +167,7 @@ var _convertFilenameToId = function(filename) {
   if (dotPos > -1) {
     _name = filename.substring(0, dotPos);
   }
-  return _name;
+  return _name.toLowerCase();
 };
 
 /**
@@ -203,8 +204,7 @@ var _parseDomObject = function(data, filename, dom, prefix) {
  * @param  {integer}  loop  loop count
  * @return {[type]}         minified source
  */
-var _minify = function(file, loop, svgoOptions) {
-  var i;
+var _minify = function(file, svgoOptions) {
   var min = new Svgo(svgoOptions);
   var source = file;
 
@@ -212,10 +212,7 @@ var _minify = function(file, loop, svgoOptions) {
     source = result.data;
   }
 
-  // optimize loop
-  for (i = 1; i <= loop; i++) {
-    min.optimize(source, svgoCallback);
-  }
+  min.optimize(source, svgoCallback);
 
   return source;
 };
@@ -235,9 +232,10 @@ var _parseFiles = function(files, options) {
   // each over files
   files.forEach(function(file) {
     // load and minify
-    var buffer = _minify(fs.readFileSync(file, 'utf8'), options.loop, options.svgoOptions);
+    var buffer = _minify(fs.readFileSync(file, 'utf8'), options.svgoOptions);
     // get filename for id generation
     var filename = path.basename(file, '.svg');
+
     var handler = new parse.DomHandler(function(error, dom) {
       if (error) self.log(error);
       else data = _parseDomObject(data, filename, dom, options.prefix);
@@ -277,25 +275,6 @@ var _filesChanged = function(files) {
 };
 
 /**
- * Check folder
- * @param  {[type]} path [description]
- * @return {[type]}      [description]
- */
-module.exports.prepareFolder = function(folder) {
-  if (path.isAbsolute(folder)) return false;
-  try {
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder);
-    }
-
-    return true;
-  } catch (e) {
-    return false;
-  }
-
-};
-
-/**
  * Prepare svgXHR function
  * @param  {[type]} sprites [description]
  * @param  {[type]} baseUrl [description]
@@ -304,8 +283,9 @@ module.exports.prepareFolder = function(folder) {
 module.exports.svgXHR = function(filename, baseUrl) {
   var wrapper = fs.readFileSync(path.join(__dirname, 'svgxhr.js'), 'utf-8');
 
-  baseUrl = (typeof baseUrl !== 'undefined') ? ', \''+ baseUrl +'\'': '';
-
+  baseUrl = (typeof baseUrl !== 'undefined') 
+    ? ', \''+ baseUrl +'\''
+    : '';
   wrapper += 'document.addEventListener(\'DOMContentLoaded\', svgXHR(\'' + filename + '\''+ baseUrl +'), false);';
   return wrapper;
 };
@@ -316,8 +296,10 @@ module.exports.svgXHR = function(filename, baseUrl) {
  * @param  {[type]} name   [description]
  * @return {[type]}        [description]
  */
-module.exports.hash = function(buffer, name) {
-  return name.indexOf('[hash]') >= 0 ? name.replace('[hash]', crypto.createHash('md5').update(buffer).digest('hex')) : name;
+module.exports.hash = function(hash, name) {
+  return name.indexOf('[hash]') >= 0
+    ? name.replace('[hash]', hash)
+    : name;
 };
 
 /**

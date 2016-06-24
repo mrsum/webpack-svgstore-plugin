@@ -2,7 +2,7 @@
 
 // Depends
 var path = require('path');
-var SvgStore = require('../index');
+var SvgStore = require('../src/svgstore');
 
 module.exports = function(_path) {
   // define local variables
@@ -11,7 +11,7 @@ module.exports = function(_path) {
 
   return {
     entry: {
-      app: path.join(_path, 'platform', 'static', 'js', 'index.js'),
+      app: path.join(_path, 'platform', 'static', 'js', 'index.js')
     },
     output: {
       path: distPath,
@@ -23,12 +23,12 @@ module.exports = function(_path) {
       extensions: ['', '.js'],
     },
     plugins: [
-      new SvgStore(path.join(sourcePath, 'svg', '**/*.svg'), path.join('svg'), {
-        name: '[hash].sprite.svg',
-        chunk: 'app',
+      // create svgStore instance object
+      new SvgStore.Options({
+        // svgo options
         svgoOptions: {
           plugins: [
-            {removeTitle: true}
+            { removeTitle: true }
           ]
         }
       })

@@ -11,7 +11,7 @@ before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
 script:
-  - "node_modules/.bin/mocha test/index.js"
+  - "node_modules/.bin/_mocha -R spec ./src/__tests__/index.js"
 addons:
   code_climate:
       repo_token: 29b2c943849c33562af12b70563d86e95c073e04c7510e9da5d9711cf3233b17

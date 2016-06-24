@@ -1,6 +1,0 @@
-mixin parseObject(obj)
-  each child in obj
-    if child !== null && child.type === 'text'
-      | <![CDATA[#{child.data}]]>
-    else if child !== null && typeof child.children === 'object'
-      | #[#{child.name}&attributes(child.attribs) #[+parseObject(child.children)]]

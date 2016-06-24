@@ -21,36 +21,41 @@ npm i webpack-svgstore-plugin --save-dev
 var SvgStore = require('webpack-svgstore-plugin');
 
 module.exports = {
-  entry: {
-    app: path.join(_path, 'platform', 'static', 'js', 'index.js'),
-  },
   plugins: [
-    new SvgStore(
-      //=========> input path
-      [
-        path.join(sourcePath, 'svg', '**/*.svg'),
-        '!' + path.join(sourcePath, 'svg', 'excludeFolder', '**/*.svg'),
-      ],
-      //=========> output path
-      'svg',
-      //=========> options
-    {
-        name: '[hash].sprite.svg',
-        chunk: 'app',
-        baseUrl: '//path-to-cdn:port/',
-        prefix: 'myprefix-',
-        template: path.join('root', 'templates', 'layout.jade'),
-        svgoOptions: {
-          plugins: [
-            { removeTitle: true }
-          ]
-        }
+    // create svgStore instance object
+    new SvgStore({
+      // svgo options
+      svgoOptions: {
+        plugins: [
+          { removeTitle: true }
+        ]
       }
-    )
+    })
   ]
 }
 ```
-#### 2) html code for happy using
+
+#### 2) put function mark at your chunk
+```javascript
+// plugin will find marks and build sprite
+
+var __svg__ = { path: './assets/svg/**/*.svg', name: 'assets/svg/[hash].logos.svg' };
+// will overwrite to var __svg__ = { filename: "assets/svg/1466687804854.logos.svg" };
+
+// also you can use next variables for sprite compile
+// var __sprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].icons.svg' };
+// var __svgstore__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].stuff.svg' };
+// var __svgsprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].1logos.svg' };
+
+// require basic or custom sprite loader
+require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svg__);
+```
+
+Dear friend, as you know, last version has integrated ajax sprite loader.
+Right now, you can override that.
+Or create custom ajax load function.
+
+#### 3) html code for happy using
 
 ```html
   <svg class="svg-icon">
@@ -66,10 +71,6 @@ module.exports = {
 - path to output folder, begins with webpack `publicPath`
 
 #### options
-- `name` - sprite name 
-- `chunk` - add xhr to entry point chunk (optional) 
-- `baseUrl` - server where the sprites are stored, for example a CDN (optional)
-- `prefix` - add prefix to svg id's (optional, default: `'icon-'`)
 - `template` - add custom jade template layout (optional)
 - `svgoOptions` - options for [svgo](https://github.com/svg/svgo) (optional, default: `{}`)
 

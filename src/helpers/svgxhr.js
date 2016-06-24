@@ -5,7 +5,15 @@
  * @see: https://www.npmjs.com/package/webpack-svgstore-plugin
  * @return {[type]}     [description]
  */
-function svgXHR(url, baseUrl) {
+var svgXHR = function(options) {
+  var url = false;
+  var baseUrl = undefined;
+
+  options && options.filename
+    ? url = options.filename
+    : null;
+
+  if (!url) return false;
   var _ajax = new XMLHttpRequest();
   var _fullPath;
 
@@ -22,16 +30,14 @@ function svgXHR(url, baseUrl) {
   }
 
   _fullPath = (baseUrl + '/' + url).replace(/([^:]\/)\/+/g, '$1');
-
   _ajax.open('GET', _fullPath, true);
-
-  _ajax.onprogress = function(){};
-
+  _ajax.onprogress = function() {};
   _ajax.onload = function() {
     var div = document.createElement('div');
     div.innerHTML = _ajax.responseText;
     document.body.insertBefore(div, document.body.childNodes[0]);
   };
-
   _ajax.send();
-}
+};
+
+module.exports = svgXHR;
