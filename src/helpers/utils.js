@@ -107,15 +107,29 @@ var _parseSVG = function(arr, id) {
 var _defs = function(id, dom, data) {
   // lets find defs into dom
   var defs = _.filter(dom.children, { name: 'defs' });
- 
-  // check childrens
+  var parseChilds = function(item, data) {
+    item.forEach(function(child) {
+      switch (child.name) {
+        case 'use': {
+          child.attribs['xlink:href'] = ['#' + id, child.attribs['xlink:href'].replace('#', '') ].join('-');
+        } break;
+
+        default:
+          child.attribs && child.attribs.id
+            ? child.attribs.id = [id, child.attribs.id].join('-')
+            : null;
+      }
+
+      if (child && child.children.length > 0) {
+        data.push(child);
+        parseChilds(child.children, data);
+      }
+    });
+  };
+
   defs.forEach(function(item) {
     if (item.children && item.children.length > 0) {
-      // mutable attribute
-      item.children.forEach(function(_data) {
-        _data.attribs.id = [id, _data.attribs.id || 'icon-id'].join('-');
-        data.push(_data);
-      });
+      parseChilds(item.children, data);
     }
   });
 
@@ -162,12 +176,7 @@ var _symbols = function(id, dom, data, prefix) {
  * @return {string}          [description]
  */
 var _convertFilenameToId = function(filename) {
-  var _name = filename;
-  var dotPos = filename.indexOf('.');
-  if (dotPos > -1) {
-    _name = filename.substring(0, dotPos);
-  }
-  return _name.toLowerCase();
+  return filename.split('.').join('-').toLowerCase();
 };
 
 /**
@@ -250,44 +259,6 @@ var _parseFiles = function(files, options) {
   });
 
   return data;
-};
-
-/**
- * Check files have changed
- * @param  {[path]}
- * @return {bool}
- */
-var _filesChanged = function(files) {
-  var result = false;
-  try {
-    for (var i = 0; i < files.length; i++) {
-      var filepath = files[i];
-      var fstat = fs.statSync(filepath);
-      if (fstat.mtime > (fileCache[filepath] || 0)) {
-        fileCache[filepath] = fstat.mtime;
-        result = true;
-      }
-    }
-  } catch (e) {
-    result = true;
-  }
-  return result;
-};
-
-/**
- * Prepare svgXHR function
- * @param  {[type]} sprites [description]
- * @param  {[type]} baseUrl [description]
- * @return {[type]}         [description]
- */
-module.exports.svgXHR = function(filename, baseUrl) {
-  var wrapper = fs.readFileSync(path.join(__dirname, 'svgxhr.js'), 'utf-8');
-
-  baseUrl = (typeof baseUrl !== 'undefined') 
-    ? ', \''+ baseUrl +'\''
-    : '';
-  wrapper += 'document.addEventListener(\'DOMContentLoaded\', svgXHR(\'' + filename + '\''+ baseUrl +'), false);';
-  return wrapper;
 };
 
 /**
@@ -386,10 +357,3 @@ module.exports.minify = _minify;
  * @return {[type]}       [description]
  */
 module.exports.createSprite = _createSprite;
-
-/**
- * Check files have changed
- * @param  {[path]}
- * @return {bool}
- */
-module.exports.filesChanged = _filesChanged;

@@ -142,28 +142,11 @@ describe('utils.convertFilenameToId', function() {
   });
 
   it('check function result #1 sprite.svg', function() {
-    assert.equal(utils.convertFilenameToId('sprite.svg'), 'sprite');
+    assert.equal(utils.convertFilenameToId('sprite.svg'), 'sprite-svg');
   });
 
   it('check function result #1 cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg', function() {
-    assert.equal(utils.convertFilenameToId('cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'), 'cdbf2bdb4f64b7f94b4779d2320918d9');
-  });
-});
-
-describe('utils.filesChanged', function() {
-  var assert = chai.assert;
-
-  it('should return true for new file', function() {
-    assert.isTrue(utils.filesChanged([rawFilePath]));
-  });
-
-  it('should return false if file hasn\'t changed', function() {
-    assert.isFalse(utils.filesChanged([rawFilePath]));
-  });
-
-  it('should return true if file has changed', function() {
-    fs.utimesSync(rawFilePath, Date.now(), Date.now());
-    assert.isTrue(utils.filesChanged([rawFilePath]));
+    assert.equal(utils.convertFilenameToId('cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'), 'cdbf2bdb4f64b7f94b4779d2320918d9-sprite-svg');
   });
 });
 
