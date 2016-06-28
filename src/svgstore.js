@@ -74,26 +74,32 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
   // save file to fs
   compiler.plugin('emit', function(compilation, callback) {
-    async.forEach(Object.keys(tasks), function(key, callback1) {
-      async.forEach(tasks[key], function(task, callback2) {
+    async.forEach(Object.keys(tasks), function(key, callback) {
+      async.forEach(tasks[key], function(task, callback) {
         utils.filesMap(path.join(task.context, task.path || ''), function(files) {
           // fileContent
           var fileContent = utils.createSprite(
             utils.parseFiles(files, options),
             options.template
           );
+
           // add sprite to assets
           compilation.assets[task.fileName] = {
             size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
             source: function() { return new Buffer(fileContent); }
           };
-          callback2();
+          // done
+          callback();
         });
-        callback1();
-      }, callback);
-    });
+      }.bind(this), callback);
+    }.bind(this), callback);
+  }.bind(this));
+
+  compiler.plugin('done', function() {
+    tasks = {};
   });
 };
+
 
 /**
  * Return function

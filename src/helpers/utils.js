@@ -120,8 +120,9 @@ var _defs = function(id, dom, data) {
             : null;
       }
 
-      if (child && child.children.length > 0) {
-        data.push(child);
+      data.push(child);
+
+      if (child && child.children.length > 0) {        
         parseChilds(child.children, data);
       }
     });
