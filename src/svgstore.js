@@ -17,6 +17,7 @@ var _ = require('lodash');
 var path = require('path');
 var utils = require('./helpers/utils');
 var ConstDependency = require('webpack/lib/dependencies/ConstDependency');
+var async = require('async');
 
 /**
  * Constructor
@@ -73,26 +74,25 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
   // save file to fs
   compiler.plugin('emit', function(compilation, callback) {
-    Object.keys(tasks).forEach(function(key) {
-      tasks[key].forEach(function(task) {
+    async.forEach(Object.keys(tasks), function(key, callback1) {
+      async.forEach(tasks[key], function(task, callback2) {
         utils.filesMap(path.join(task.context, task.path || ''), function(files) {
           // fileContent
           var fileContent = utils.createSprite(
             utils.parseFiles(files, options),
             options.template
           );
-
           // add sprite to assets
           compilation.assets[task.fileName] = {
             size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
             source: function() { return new Buffer(fileContent); }
           };
+          callback2();
         });
-      });
-    });
+        callback1();
 
-    tasks = {};
-    callback();
+      }, callback);
+    });
   });
 };
 
