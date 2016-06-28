@@ -90,7 +90,6 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           callback2();
         });
         callback1();
-
       }, callback);
     });
   });
