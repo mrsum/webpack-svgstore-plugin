@@ -113,17 +113,19 @@ var _defs = function(id, dom, data) {
         case 'use': {
           child.attribs['xlink:href'] = ['#' + id, child.attribs['xlink:href'].replace('#', '') ].join('-');
         } break;
-
         default:
           child.attribs && child.attribs.id
             ? child.attribs.id = [id, child.attribs.id].join('-')
             : null;
       }
 
-      data.push(child);
-
       if (child && child.children.length > 0) {        
+        data.push(child);
         parseChilds(child.children, data);
+      }
+
+      if (child && child.attribs.id) {
+        data.push(child);
       }
     });
   };
