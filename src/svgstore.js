@@ -46,13 +46,21 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       fileName: '[hash].sprite.svg',
       context: this.state.current.context
     };
+    var pathArray = [];
     var replacement = false;
     var dep = false;
     var timeStamp = this.state.current.buildTimestamp;
     expr.init.properties.forEach(function(prop) {
+      var elements = prop.value.elements;
+      // check path for elements array
+      if (prop.key.name === 'path' && elements && elements.length) {
+        elements.forEach(function(item) {
+          pathArray.push(item.value);
+        });
+      }
       switch (prop.key.name) {
         case 'name': data.fileName = utils.hash(timeStamp, prop.value.value); break;
-        case 'path': data.path = prop.value.value; break;
+        case 'path': data.path = elements ? pathArray : prop.value.value; break;
         default: break;
       }
     });
@@ -76,7 +84,14 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   compiler.plugin('emit', function(compilation, callback) {
     async.forEach(Object.keys(tasks), function(key, callback) {
       async.forEach(tasks[key], function(task, callback) {
-        utils.filesMap(path.join(task.context, task.path || ''), function(files) {
+        var paths = [];
+        var taskPath = task.path;
+        if (taskPath instanceof Array) {
+          taskPath.forEach(function(item) {
+            paths.push(path.join(task.context, item));
+          });
+        }
+        utils.filesMap(paths.length ? paths : path.join(task.context, task.path || ''), function(files) {
           // fileContent
           var fileContent = utils.createSprite(
             utils.parseFiles(files, options),
