@@ -51,9 +51,10 @@ var __svg__ = { path: './assets/svg/**/*.svg', name: 'assets/svg/[hash].logos.sv
 require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svg__);
 ```
 
-Dear friend, as you know, last version has integrated ajax sprite loader.
+##### Dear friends...
+As you know, last version has integrated ajax sprite loader.
 Right now, you can override that.
-Or create custom ajax load function.
+Or create your own sprite ajax loader function.
 
 #### 3) html code for happy using
 
@@ -63,12 +64,6 @@ Or create custom ajax load function.
   </svg>
 ```
 ## Plugin settings
-
-#### input path
-- path to folder with svgs, use [globby](https://github.com/sindresorhus/globby) patterns
-
-#### output path
-- path to output folder, begins with webpack `publicPath`
 
 #### options
 - `template` - add custom jade template layout (optional)
