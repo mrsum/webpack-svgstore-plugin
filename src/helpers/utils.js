@@ -5,12 +5,11 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
+var crypto = require('crypto');
 var pug = require('pug');
 var Svgo = require('svgo');
 var globby = require('globby');
 var parse = require('htmlparser2');
-
-var fileCache = {};
 
 /**
  * Create sprite
@@ -119,7 +118,7 @@ var _defs = function(id, dom, data) {
             : null;
       }
 
-      if (child && child.children.length > 0) {        
+      if (child && child.children.length > 0) {
         data.push(child);
         parseChilds(child.children, data);
       }
@@ -265,16 +264,24 @@ var _parseFiles = function(files, options) {
 };
 
 /**
+ * [_hash description]
+ * @param  {[type]} buffer [description]
+ * @param  {[type]} name   [description]
+ * @return {[type]}        [description]
+ */
+var _hash = function(buffer, name) {
+  return name.indexOf('[hash]') >= 0
+    ? name.replace('[hash]', crypto.createHash('md5').update(buffer).digest('hex'))
+    : name;
+};
+
+/**
  * Create hash
  * @param  {[type]} buffer [description]
  * @param  {[type]} name   [description]
  * @return {[type]}        [description]
  */
-module.exports.hash = function(hash, name) {
-  return name.indexOf('[hash]') >= 0
-    ? name.replace('[hash]', hash)
-    : name;
-};
+module.exports.hash = _hash;
 
 /**
  * Deep log util

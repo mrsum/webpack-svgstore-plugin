@@ -73,8 +73,8 @@ describe('utils.hash', function() {
   });
 
   it('check hashsum #1', function() {
-    var fileName = '[hash].sprite.svg';
-    assert.equal(utils.hash('cdbf2bdb4f64b7f94b4779d2320918d9', fileName), 'cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg');
+    var content = '<span>hello svg</span>';
+    assert.equal(utils.hash(content, '[hash].sprite.svg'), 'cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg');
   });
 
   it('check hashsum #2', function() {
@@ -149,6 +149,7 @@ describe('utils.convertFilenameToId', function() {
     assert.equal(utils.convertFilenameToId('cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'), 'cdbf2bdb4f64b7f94b4779d2320918d9-sprite-svg');
   });
 });
+
 
 describe('plugin.WebpackSvgStore static functions', function() {
   var WebpackSvgStore;

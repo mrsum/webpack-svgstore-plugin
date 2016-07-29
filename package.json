@@ -23,6 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "async": "1.5.2",
+    "crypto": "0.0.3",
     "globby": "4.1.0",
     "htmlparser2": "3.9.1",
     "lodash": "3.10.1",

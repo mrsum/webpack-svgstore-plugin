@@ -41,17 +41,16 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   };
 
   var analyzeAst = function(expr) {
+    var dep = false;
     var data = {
       path: '/**/*.svg',
       fileName: '[hash].sprite.svg',
       context: this.state.current.context
     };
     var replacement = false;
-    var dep = false;
-    var timeStamp = this.state.current.buildTimestamp;
     expr.init.properties.forEach(function(prop) {
       switch (prop.key.name) {
-        case 'name': data.fileName = utils.hash(timeStamp, prop.value.value); break;
+        case 'name': data.fileName = prop.value.value; break;
         case 'path': data.path = prop.value.value; break;
         default: break;
       }
@@ -84,7 +83,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           );
 
           // add sprite to assets
-          compilation.assets[task.fileName] = {
+          compilation.assets[utils.hash(fileContent, task.fileName)] = {
             size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
             source: function() { return new Buffer(fileContent); }
           };
