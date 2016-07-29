@@ -1,3 +1,14 @@
+### 3.0.1
+
+- Long term caching
+
+### 3.0.0
+
+Attention! Major release!
+- Change Initialize logic
+- One instance for many sprites
+- Compiling via special mark variavle like ```__svg__```
+
 ### 2.2.2
 
 - Add default`xmlns:xlink` attribute to result svg
