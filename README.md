@@ -1,25 +1,22 @@
-# webpack-svgstore-plugin
+# webpack svgstore plugin
 ![webpack-svgstore-plugin](http://mrsum.ru/blog/content/images/2016/07/webpack-svgstore-logo.png)
+[![NPM](https://nodei.co/npm/webpack-svgstore-plugin.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/webpack-svgstore-plugin/)
 
+## Package info
 [![Build Status](https://travis-ci.org/mrsum/webpack-svgstore-plugin.svg?branch=master)](https://travis-ci.org/mrsum/webpack-svgstore-plugin)
 [![NPM version](https://badge.fury.io/js/webpack-svgstore-plugin.svg)](https://badge.fury.io/js/webpack-svgstore-plugin)
 [![Code Climate](https://codeclimate.com/github/mrsum/webpack-svgstore-plugin/badges/gpa.svg)](https://codeclimate.com/github/mrsum/webpack-svgstore-plugin)
 [![Test Coverage](https://codeclimate.com/github/mrsum/webpack-svgstore-plugin/badges/coverage.svg)](https://codeclimate.com/github/mrsum/webpack-svgstore-plugin/coverage)
-
-[![NPM](https://nodei.co/npm/webpack-svgstore-plugin.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/webpack-svgstore-plugin/)
 
 ## Installation
 ```bash
 npm i webpack-svgstore-plugin --save-dev
 ```
 ## Usage
-
 #### 1) require plugin
 ```javascript
 //webpack.config.js
-
 var SvgStore = require('webpack-svgstore-plugin');
-
 module.exports = {
   plugins: [
     // create svgStore instance object
@@ -69,6 +66,34 @@ Or create your own sprite ajax loader function.
 - `template` - add custom jade template layout (optional)
 - `svgoOptions` - options for [svgo](https://github.com/svg/svgo) (optional, default: `{}`)
 
+
+#### template
+Default PUG template looks like:
+```jade
+svg&attributes(svg)
+  
+  mixin parseObject(obj)
+    each child in obj
+      if child !== null && child.type === 'text'
+        | <![CDATA[#{child.data}]]>
+      else if child !== null && typeof child.children === 'object'
+        | #[#{child.name}&attributes(child.attribs) #[+parseObject(child.children)]]
+
+  if defs.length
+    defs
+      each def in defs
+        | #[#{def.name}&attributes(def.attribs)  #[+parseObject(def.children)]]
+
+  each symbol in symbols
+    | #[#{symbol.name}&attributes(symbol.attribs) #[+parseObject(symbol.children)]]
+```
+You can override template, via plugin settings:
+
+```
+new SvgStore({
+  template: '_path/to/your/template.pug'
+})
+```
 ## License
 
 NPM package available here: [webpack-svgstore-plugin](https://www.npmjs.com/package/webpack-svgstore-plugin)

@@ -1,3 +1,8 @@
+### 3.0.2
+
+- Minor readme change
+- Logo change
+
 ### 3.0.1
 
 - Long term caching
