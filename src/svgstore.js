@@ -56,6 +56,8 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       }
     });
 
+    data.fileName = utils.hash(data.fileName, this.state.current.buildTimestamp);
+
     replacement = expr.id.name + ' = { filename: "' + data.fileName + '" }';
     dep = new ConstDependency(replacement, expr.range);
     dep.loc = expr.loc;
@@ -83,7 +85,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           );
 
           // add sprite to assets
-          compilation.assets[utils.hash(fileContent, task.fileName)] = {
+          compilation.assets[task.fileName] = {
             size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
             source: function() { return new Buffer(fileContent); }
           };
