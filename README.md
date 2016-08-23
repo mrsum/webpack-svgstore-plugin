@@ -43,7 +43,7 @@ var __svg__ = { path: './assets/svg/**/*.svg', name: 'assets/svg/[hash].logos.sv
 // var __svgstore__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].stuff.svg' };
 // var __svgsprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].1logos.svg' };
 ```
-*_All sprites will put relative ```publicPath``` into ```webpack.config.js```_*
+*_All sprites will put relative ```publicPath``` string from ```webpack.config.js```_*
 
 
 #### loading sprite via XMLHttpRequest
@@ -75,6 +75,49 @@ require('webpack-svgstore-plugin/src/helpers/svgxhr')({
   <use xlink:href="#icon-name"></use>
 </svg>
 ```
+
+## Example
+```javascript
+// webpack.config.js
+'use strict';
+
+// Depends
+var path = require('path');
+var SvgStore = require('../src/svgstore');
+
+module.exports = function(path) {
+  // define local variables
+  var distPath = path.join(_path, 'platform', 'dist');
+  var sourcePath = path.join(_path, 'platform', 'static');
+
+  return {
+    entry: {
+      app: path.join(_path, 'platform', 'static', 'js', 'index.js')
+    },
+    output: {
+      path: distPath,
+      filename: '[chunkhash].[name].js',
+      chunkFilename: '[chunkhash].[id].js',
+      publicPath: '/platform/'
+    },
+    resolve: {
+      extensions: ['', '.js'],
+    },
+    plugins: [
+      // create svgStore instance object
+      new SvgStore.Options({
+        // svgo options
+        svgoOptions: {
+          plugins: [
+            { removeTitle: true }
+          ]
+        }
+      })
+    ]
+  };
+};
+```
+
 ## Plugin settings
 
 #### options
