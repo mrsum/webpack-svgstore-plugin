@@ -71,7 +71,8 @@ WebpackSvgStore.prototype.apply = function(compiler) {
        * @return {[type]}      [description]
        */
       var fillTasks = function(expr, data) {
-        utils.filesMap(path.join(data.context, data.path || ''), function(files) {
+        var spriteFolder = path.join(data.context, data.path || '');
+        utils.filesMap(spriteFolder, function(files) {
           var dep;
           var replacement;
           var fileName = data.fileName;
@@ -79,6 +80,11 @@ WebpackSvgStore.prototype.apply = function(compiler) {
             utils.parseFiles(files, options),
             options.template
           );
+
+          // check files in current folder
+          files.length <= 0
+            ? data.state.compilation.errors.push('No files in: ' + spriteFolder + ' folder')
+            : null;
 
           // if filename has [hash]
           fileName.indexOf('[hash]') >= 0
