@@ -37,18 +37,12 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   var options = this.options;
 
   /**
-   * [onRun description]
    * @param  {[type]}   unused [description]
    * @param  {Function} done   [description]
    * @return {[type]}          [description]
    */
   function run(unused, done) {
     function analyzeAst(resolve) {
-      var data = {
-        path: '/**/*.svg',
-        fileName: '[hash].sprite.svg'
-      };
-
       /**
        * Filing properties
        * @param  {[type]} expr [description]
@@ -78,17 +72,26 @@ WebpackSvgStore.prototype.apply = function(compiler) {
        */
       var fillTasks = function(expr, data) {
         utils.filesMap(path.join(data.context, data.path || ''), function(files) {
+          var dep;
+          var replacement;
+          var fileName = data.fileName;
           var fileContent = utils.createSprite(
             utils.parseFiles(files, options),
             options.template
           );
-          var fileName = utils.hash(data.fileName, CRC32.bstr(fileContent));
-          var replacement = expr.id.name + ' = { filename: "' + fileName + '" }';
-          var dep = new ConstDependency(replacement, expr.range);
 
+          // if filename has [hash]
+          fileName.indexOf('[hash]') >= 0
+            ? fileName = utils.hash(data.fileName, CRC32.bstr(fileContent))
+            : null;
+
+          replacement = expr.id.name + ' = { filename: "' + fileName + '" }';
+          dep = new ConstDependency(replacement, expr.range);
+          // put expression location
           dep.loc = expr.loc;
+          // add task for replacement
           data.state.current.addDependency(dep);
-
+          // push task for emit event
           tasks.push({ content: fileContent, name: fileName });
         });
       };
@@ -96,8 +99,16 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       resolve();
 
       return function(expr) {
+        var data = {
+          path: '/**/*.svg',
+          fileName: '[hash].sprite.svg'
+        };
+        // fill data
         data = fillProps.bind(this)(expr, data);
+
+        // fill tasks
         fillTasks.bind(this)(expr, data);
+
         return true;
       };
     }
