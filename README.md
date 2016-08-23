@@ -12,8 +12,8 @@
 ```bash
 npm i webpack-svgstore-plugin --save-dev
 ```
-## Usage
-#### 1) require plugin
+## FAQ
+#### require plugin
 ```javascript
 //webpack.config.js
 var SvgStore = require('webpack-svgstore-plugin');
@@ -21,9 +21,9 @@ module.exports = {
   plugins: [
     // create svgStore instance object
     new SvgStore({
-      // svgo options
       svgoOptions: {
         plugins: [
+          // put svgo options for your own project
           { removeTitle: true }
         ]
       }
@@ -32,33 +32,48 @@ module.exports = {
 }
 ```
 
-#### 2) put function mark at your chunk
+#### generate sprite from folder
 ```javascript
 // plugin will find marks and build sprite
-
 var __svg__ = { path: './assets/svg/**/*.svg', name: 'assets/svg/[hash].logos.svg' };
-// will overwrite to var __svg__ = { filename: "assets/svg/1466687804854.logos.svg" };
 
+// will overwrite to var __svg__ = { filename: "assets/svg/1466687804854.logos.svg" };
 // also you can use next variables for sprite compile
 // var __sprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].icons.svg' };
 // var __svgstore__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].stuff.svg' };
 // var __svgsprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].1logos.svg' };
+```
+*_All sprites will put relative ```publicPath``` into ```webpack.config.js```_*
 
+
+#### loading sprite via XMLHttpRequest
+```javascript
 // require basic or custom sprite loader
 require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svg__);
 ```
+*_After loading you can see empty ```<div>``` into body page_*
 
-##### Dear friends...
-As you know, last version has integrated ajax sprite loader.
-Right now, you can override that.
-Or create your own sprite ajax loader function.
 
-#### 3) html code for happy using
+#### different domains
+```javascript
+// if you are using CDN or different domain
+require('webpack-svgstore-plugin/src/helpers/svgxhr')({
+  filename: 'http://cdn.example.com/' + __svg__.filename
+});
+
+// es6
+require('webpack-svgstore-plugin/src/helpers/svgxhr')({
+  filename: `http://cdn.example.com/${__svg__.filename}`
+});
+
+```
+
+#### sprite icon using
 
 ```html
-  <svg class="svg-icon">
-    <use xlink:href="#icon-name"></use>
-  </svg>
+<svg class="svg-icon">
+  <use xlink:href="#icon-name"></use>
+</svg>
 ```
 ## Plugin settings
 
@@ -67,35 +82,11 @@ Or create your own sprite ajax loader function.
 - `svgoOptions` - options for [svgo](https://github.com/svg/svgo) (optional, default: `{}`)
 
 
-#### template
-Default PUG template looks like:
-```jade
-svg&attributes(svg)
-  
-  mixin parseObject(obj)
-    each child in obj
-      if child !== null && child.type === 'text'
-        | <![CDATA[#{child.data}]]>
-      else if child !== null && typeof child.children === 'object'
-        | #[#{child.name}&attributes(child.attribs) #[+parseObject(child.children)]]
-
-  if defs.length
-    defs
-      each def in defs
-        | #[#{def.name}&attributes(def.attribs)  #[+parseObject(def.children)]]
-
-  each symbol in symbols
-    | #[#{symbol.name}&attributes(symbol.attribs) #[+parseObject(symbol.children)]]
-```
-You can override template, via plugin settings:
-
-```
+```javascript
 new SvgStore({
-  template: '_path/to/your/template.pug'
+  template: '_path/to/your/template.pug' // path to your own template
+  prefix: 'icon' // default prefix
 })
 ```
 ## License
-
-NPM package available here: [webpack-svgstore-plugin](https://www.npmjs.com/package/webpack-svgstore-plugin)
-
 MIT © [Chernobrov Mike](http://mrsum.ru), [Gordey Levchenko](https://github.com/lgordey)

@@ -85,6 +85,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           var fileName = utils.hash(data.fileName, CRC32.bstr(fileContent));
           var replacement = expr.id.name + ' = { filename: "' + fileName + '" }';
           var dep = new ConstDependency(replacement, expr.range);
+
           dep.loc = expr.loc;
           data.state.current.addDependency(dep);
 
