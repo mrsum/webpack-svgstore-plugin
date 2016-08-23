@@ -138,14 +138,18 @@ WebpackSvgStore.prototype.apply = function(compiler) {
   compiler.plugin('watch-run', run);
 
   compiler.plugin('emit', function(compilation, done) {
-    tasks.forEach(function(file) {
-      // add sprite to assets
+    new Promise(function(resolve) {
+      resolve(tasks);
+    })
+    .each(function(file) {
       compilation.assets[file.name] = {
         size: function() { return Buffer.byteLength(file.content, 'utf8'); },
         source: function() { return new Buffer(file.content); }
       };
+    })
+    .then(function() {
+      done();
     });
-    done();
   });
 
   compiler.plugin('done', function() {
