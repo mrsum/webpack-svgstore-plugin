@@ -49,19 +49,19 @@ WebpackSvgStore.prototype.apply = function(compiler) {
        * @param  {[type]} data [description]
        * @return {[type]}      [description]
        */
-      var fillProps = function(expr, data) {
+      var fillProps = function(expr, props) {
         expr.init.properties.forEach(function(prop) {
           switch (prop.key.name) {
-            case 'name': data.fileName = prop.value.value; break;
-            case 'path': data.path = prop.value.value; break;
+            case 'name': props.fileName = prop.value.value; break;
+            case 'path': props.path = prop.value.value; break;
             default: break;
           }
         });
 
-        data.state = this.state;
-        data.context = this.state.current.context;
+        props.state = this.state;
+        props.context = this.state.current.context;
 
-        return data;
+        return props;
       };
 
       /**
@@ -70,12 +70,12 @@ WebpackSvgStore.prototype.apply = function(compiler) {
        * @param  {[type]} data [description]
        * @return {[type]}      [description]
        */
-      var fillTasks = function(expr, data) {
-        var spriteFolder = path.join(data.context, data.path || '');
+      var fillTasks = function(expr, props) {
+        var spriteFolder = path.join(props.context, props.path || '');
         utils.filesMap(spriteFolder, function(files) {
           var dep;
           var replacement;
-          var fileName = data.fileName;
+          var fileName = props.fileName;
           var fileContent = utils.createSprite(
             utils.parseFiles(files, options),
             options.template
@@ -83,12 +83,12 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
           // check files in current folder
           files.length <= 0
-            ? data.state.compilation.errors.push('No files in: ' + spriteFolder + ' folder')
+            ? props.state.compilation.errors.push('No files in: ' + spriteFolder + ' folder')
             : null;
 
           // if filename has [hash]
           fileName.indexOf('[hash]') >= 0
-            ? fileName = utils.hash(data.fileName, CRC32.bstr(fileContent))
+            ? fileName = utils.hash(props.fileName, CRC32.bstr(fileContent))
             : null;
 
           replacement = expr.id.name + ' = { filename: "' + fileName + '" }';
@@ -96,7 +96,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
           // put expression location
           dep.loc = expr.loc;
           // add task for replacement
-          data.state.current.addDependency(dep);
+          props.state.current.addDependency(dep);
           // push task for emit event
           tasks.push({ content: fileContent, name: fileName });
         });
@@ -105,15 +105,15 @@ WebpackSvgStore.prototype.apply = function(compiler) {
       resolve();
 
       return function(expr) {
-        var data = {
+        var props = {
           path: '/**/*.svg',
           fileName: '[hash].sprite.svg'
         };
         // fill data
-        data = fillProps.bind(this)(expr, data);
+        props = fillProps.bind(this)(expr, props);
 
         // fill tasks
-        fillTasks.bind(this)(expr, data);
+        fillTasks.bind(this)(expr, props);
 
         return true;
       };
