@@ -10,7 +10,7 @@ var describe = mocha.describe;
 
 
 var Plugin = require('../svgstore');
-var utils = require('../helpers/utils');
+var utils = require('../lib/utils');
 var configPath = path.join(__dirname, '..', '..', 'webpack.config.js');
 var config = require(configPath);
 
@@ -184,4 +184,3 @@ describe('plugin.WebpackSvgStore side effect testing: issue-51', function() {
     runAbsolutePathsExample(done);
   });
 });
-

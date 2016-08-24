@@ -25,6 +25,7 @@ module.exports = function(_path) {
     plugins: [
       // create svgStore instance object
       new SvgStore.Options({
+        prefix: 'icon-2-',
         // svgo options
         svgoOptions: {
           plugins: [

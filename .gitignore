@@ -5,3 +5,4 @@ platform/dist/
 platform/static/min/
 sprites/
 *.log
+*.bak
