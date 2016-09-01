@@ -58,7 +58,7 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
     data.fileName = utils.hash(data.fileName, this.state.current.buildTimestamp);
 
-    replacement = expr.id.name + ' = { filename: "' + data.fileName + '" }';
+    replacement = expr.id.name + ' = { filename: ' + "__webpack_require__.p +" + '"' + data.fileName + '" }';
     dep = new ConstDependency(replacement, expr.range);
     dep.loc = expr.loc;
     this.state.current.addDependency(dep);
