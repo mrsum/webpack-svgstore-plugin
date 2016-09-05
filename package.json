@@ -28,7 +28,7 @@
     "htmlparser2": "3.9.1",
     "lodash": "3.10.1",
     "pug": "0.1.0",
-    "svgo": "0.6.6"
+    "svgo": "0.7.0"
   },
   "devDependencies": {
     "chai": "3.5.0",
