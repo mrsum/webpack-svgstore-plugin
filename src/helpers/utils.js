@@ -118,12 +118,12 @@ var _defs = function(id, dom, data) {
             : null;
       }
 
-      if (child && child.children.length > 0) {
+      if (child && child.children && child.children.length > 0) {
         data.push(child);
         parseChilds(child.children, data);
       }
 
-      if (child && child.attribs.id) {
+      if (child && child.attribs && child.attribs.id) {
         data.push(child);
       }
     });
