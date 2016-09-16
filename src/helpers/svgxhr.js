@@ -33,6 +33,9 @@ var svgXHR = function(options) {
   _ajax.open('GET', _fullPath, true);
   _ajax.onprogress = function() {};
   _ajax.onload = function() {
+    if(!_ajax.responseText || _ajax.responseText.substr(0, 4) !== "<svg") {
+      throw Error("Invalid SVG Response");
+    }
     var div = document.createElement('div');
     div.innerHTML = _ajax.responseText;
     document.body.insertBefore(div, document.body.childNodes[0]);
