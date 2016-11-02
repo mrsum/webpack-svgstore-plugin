@@ -19,9 +19,6 @@ module.exports = function(_path) {
       chunkFilename: '[chunkhash].[id].js',
       publicPath: '/platform/'
     },
-    resolve: {
-      extensions: ['', '.js'],
-    },
     plugins: [
       // create svgStore instance object
       new SvgStore.Options({
