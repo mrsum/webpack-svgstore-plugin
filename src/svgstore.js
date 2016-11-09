@@ -1,7 +1,7 @@
 'use strict';
 
 // Defaults
-var _options = {
+const defaults = {
   svg: {
     xmlns: 'http://www.w3.org/2000/svg',
     style: 'position:absolute; width: 0; height: 0'
@@ -13,11 +13,10 @@ var _options = {
 };
 
 // Depends
-var _ = require('lodash');
-var path = require('path');
-var utils = require('./helpers/utils');
-var ConstDependency = require('webpack/lib/dependencies/ConstDependency');
-var async = require('async');
+const path = require('path');
+const utils = require('./helpers/utils');
+const async = require('async');
+const ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 
 /**
  * Constructor
@@ -26,33 +25,39 @@ var async = require('async');
  * @param {object} options [description]
  * @return {object}
  */
-var WebpackSvgStore = function(options) {
-  this.options = _.merge({}, _options, options);
+const WebpackSvgStore = function (options) {
+  this.options = Object.assign({}, defaults, options);
   return this;
 };
 
-WebpackSvgStore.prototype.apply = function(compiler) {
-  var tasks = {};
-  var options = this.options;
-  var parseRepl = function(file, value) {
+WebpackSvgStore.prototype.apply = function (compiler) {
+  let tasks = {};
+  const options = this.options;
+  const parseRepl = (file, value) => {
     tasks[file]
       ? tasks[file].push(value)
-      : function() { tasks[file] = []; tasks[file].push(value); }();
+      : (() => { tasks[file] = []; tasks[file].push(value); })();
   };
 
-  var analyzeAst = function(expr) {
-    var dep = false;
-    var data = {
+  const analyzeAst = function (expr) {
+    let dep = false;
+    const data = {
       path: '/**/*.svg',
       fileName: '[hash].sprite.svg',
       context: this.state.current.context
     };
-    var replacement = false;
-    expr.init.properties.forEach(function(prop) {
+    let replacement = '';
+
+    expr.init.properties.forEach((prop) => {
       switch (prop.key.name) {
-        case 'name': data.fileName = prop.value.value; break;
-        case 'path': data.path = prop.value.value; break;
-        default: break;
+        case 'name':
+          data.fileName = prop.value.value;
+          break;
+        case 'path':
+          data.path = prop.value.value;
+          break;
+        default:
+          break;
       }
     });
 
@@ -68,35 +73,31 @@ WebpackSvgStore.prototype.apply = function(compiler) {
 
   // AST parser
   compiler.parser.plugin('var __svg__', analyzeAst);
-  compiler.parser.plugin('var __sprite__', analyzeAst);
-  compiler.parser.plugin('var __svgstore__', analyzeAst);
-  compiler.parser.plugin('var __svgsprite__', analyzeAst);
-  compiler.parser.plugin('var __webpack_svgstore__', analyzeAst);
 
   // save file to fs
-  compiler.plugin('emit', function(compilation, callback) {
-    async.forEach(Object.keys(tasks), function(key, callback) {
-      async.forEach(tasks[key], function(task, callback) {
-        utils.filesMap(path.join(task.context, task.path || ''), function(files) {
+  compiler.plugin('emit', (compilation, callback) => {
+    async.forEach(Object.keys(tasks), (key, callback) => {
+      async.forEach(tasks[key], (task, callback) => {
+        utils.filesMap(path.join(task.context, task.path || ''), (files) => {
           // fileContent
-          var fileContent = utils.createSprite(
+          const fileContent = utils.createSprite(
             utils.parseFiles(files, options),
             options.template
           );
 
           // add sprite to assets
           compilation.assets[task.fileName] = {
-            size: function() { return Buffer.byteLength(fileContent, 'utf8'); },
-            source: function() { return new Buffer(fileContent); }
+            size: () => Buffer.byteLength(fileContent, 'utf8'),
+            source: () => new Buffer(fileContent)
           };
           // done
           callback();
         });
-      }.bind(this), callback);
-    }.bind(this), callback);
-  }.bind(this));
+      }, callback);
+    }, callback);
+  });
 
-  compiler.plugin('done', function() {
+  compiler.plugin('done', () => {
     tasks = {};
   });
 };

@@ -1,15 +1,14 @@
 'use strict';
 
 // Depends
-var _ = require('lodash');
-var fs = require('fs');
-var path = require('path');
-var util = require('util');
-var crypto = require('crypto');
-var pug = require('pug');
-var Svgo = require('svgo');
-var globby = require('globby');
-var parse = require('htmlparser2');
+const filter = require('lodash/filter');
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+const pug = require('pug');
+const Svgo = require('svgo');
+const globby = require('globby');
+const parse = require('htmlparser2');
 
 /**
  * Create sprite
@@ -17,7 +16,7 @@ var parse = require('htmlparser2');
  * @param  {string} template
  * @return {string}
  */
-var _createSprite = function(data, template) {
+function _createSprite(data, template) {
   return pug.renderFile(template, data);
 };
 
@@ -27,7 +26,7 @@ var _createSprite = function(data, template) {
  * @param  {integer}  depth   Depth level
  * @return {void}
  */
-var _log = function(subject, depth) {
+function _log(subject, depth) {
   console.log(util.inspect(subject, {
     showHidden: true, depth: depth || 2
   }));
@@ -39,7 +38,7 @@ var _log = function(subject, depth) {
  * @param  {string} id
  * @return {void}
  */
-var _fixIds = function(obj, id) {
+function _fixIds(obj, id) {
   // add id
   if (obj.attribs && obj.attribs.id) {
     obj.attribs.id = [id, obj.attribs.id].join('-');
@@ -56,10 +55,11 @@ var _fixIds = function(obj, id) {
  * @param  {string} id
  * @return {void}
  */
-var _fixUrls = function(obj, id) {
-  var key;
-  var match;
-  var json = obj.attribs;
+function _fixUrls(obj, id) {
+  let key;
+  let match;
+  const json = obj.attribs;
+
   if (json) {
     for (key in json) {
       if (json.hasOwnProperty(key)) {
@@ -78,9 +78,10 @@ var _fixUrls = function(obj, id) {
  * @param  {[type]} id    [description]
  * @return {[type]}       [description]
  */
-var _parseSVG = function(arr, id) {
-  var data = [];
-  arr.forEach(function(obj) {
+function _parseSVG(arr, id) {
+  const data = [];
+
+  arr.forEach((obj) => {
     if (obj) {
       // add unic ids to urls
       _fixUrls(obj, id);
@@ -103,11 +104,11 @@ var _parseSVG = function(arr, id) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-var _defs = function(id, dom, data) {
+function _defs(id, dom, data) {
   // lets find defs into dom
-  var defs = _.filter(dom.children, { name: 'defs' });
-  var parseChilds = function(item, data) {
-    item.forEach(function(child) {
+  const defs = filter(dom.children, { name: 'defs' });
+  const parseChilds = function(item, data) {
+    item.forEach((child) => {
       switch (child.name) {
         case 'use': {
           child.attribs['xlink:href'] = ['#' + id, child.attribs['xlink:href'].replace('#', '') ].join('-');
@@ -129,7 +130,7 @@ var _defs = function(id, dom, data) {
     });
   };
 
-  defs.forEach(function(item) {
+  defs.forEach((item) => {
     if (item.children && item.children.length > 0) {
       parseChilds(item.children, data);
     }
@@ -144,9 +145,9 @@ var _defs = function(id, dom, data) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-var _symbols = function(id, dom, data, prefix) {
+function _symbols(id, dom, data, prefix) {
   // create symbol object
-  var symbol = {
+  const symbol = {
     type: 'tag',
     name: 'symbol',
     attribs: {
@@ -159,9 +160,7 @@ var _symbols = function(id, dom, data, prefix) {
   };
 
   // add dom children without defs and titles
-  symbol.children = _.filter(dom.children, function(obj) {
-    return obj.name !== 'defs' && obj.name !== 'title';
-  });
+  symbol.children = filter(dom.children, (obj) => obj.name !== 'defs' && obj.name !== 'title');
 
   // go through the svg element
   _parseSVG(symbol.children, id);
@@ -177,7 +176,7 @@ var _symbols = function(id, dom, data, prefix) {
  * @param  {string} filename [description]
  * @return {string}          [description]
  */
-var _convertFilenameToId = function(filename) {
+function _convertFilenameToId(filename) {
   return filename.split('.').join('-').toLowerCase();
 };
 
@@ -186,10 +185,8 @@ var _convertFilenameToId = function(filename) {
  * @param  {string} input Destination path
  * @return {array}        Array of paths
  */
-var _filesMap = function(input, cb) {
-  var data = input;
-
-  globby(data).then(function(fileList) {
+function _filesMap(input, cb) {
+  globby(input).then(function(fileList) {
     cb(fileList);
   });
 };
@@ -199,8 +196,9 @@ var _filesMap = function(input, cb) {
  * @param  {[type]} dom [description]
  * @return {[type]}     [description]
  */
-var _parseDomObject = function(data, filename, dom, prefix) {
-  var id = _convertFilenameToId(filename);
+function _parseDomObject(data, filename, dom, prefix) {
+  const id = _convertFilenameToId(filename);
+
   if (dom && dom[0]) {
     _defs(id, dom[0], data.defs);
     _symbols(id, dom[0], data.symbols, prefix);
@@ -215,45 +213,48 @@ var _parseDomObject = function(data, filename, dom, prefix) {
  * @param  {integer}  loop  loop count
  * @return {[type]}         minified source
  */
-var _minify = function(file, svgoOptions) {
-  var min = new Svgo(svgoOptions);
-  var source = file;
+ function _minify(sourceFile, svgoOptions) {
+  const min = new Svgo(svgoOptions);
+  let resultFile;
 
   function svgoCallback(result) {
-    source = result.data;
+    resultFile = result.data;
   }
 
-  min.optimize(source, svgoCallback);
+  min.optimize(sourceFile, svgoCallback);
 
-  return source;
+  return resultFile;
 };
 
 /**
  * [parseFiles description]
  * @return {[type]} [description]
  */
-var _parseFiles = function(files, options) {
-  var self = this;
-  var data = {
+function _parseFiles(files, options) {
+  let data = {
     svg: options.svg,
     defs: [],
     symbols: []
   };
 
   // each over files
-  files.forEach(function(file) {
+  files.forEach((file) => {
     // load and minify
-    var buffer = _minify(fs.readFileSync(file, 'utf8'), options.svgoOptions);
+    const buffer = _minify(fs.readFileSync(file, 'utf8'), options.svgoOptions);
     // get filename for id generation
-    var filename = path.basename(file, '.svg');
+    const filename = path.basename(file, '.svg');
 
-    var handler = new parse.DomHandler(function(error, dom) {
-      if (error) self.log(error);
-      else data = _parseDomObject(data, filename, dom, options.prefix);
+    const handler = new parse.DomHandler((error, dom) => {
+      if (error) {
+        this.log(error);
+        return;
+      }
+
+      data = _parseDomObject(data, filename, dom, options.prefix);
     });
 
     // lets create parser instance
-    var Parser = new parse.Parser(handler, {
+    const Parser = new parse.Parser(handler, {
       xmlMode: true
     });
     Parser.write(buffer);
@@ -269,101 +270,24 @@ var _parseFiles = function(files, options) {
  * @param  {[type]} name   [description]
  * @return {[type]}        [description]
  */
-var _hash = function(str, hash) {
+function _hash(str, hash) {
   return str.indexOf('[hash]') >= 0
     ? str.replace('[hash]', hash)
     : str;
 };
 
-/**
- * Create hash
- * @param  {[type]} buffer [description]
- * @param  {[type]} name   [description]
- * @return {[type]}        [description]
- */
-module.exports.hash = _hash;
-
-/**
- * Deep log util
- * @param  {[type]} subject [description]
- * @return {[type]}         [description]
- */
-module.exports.log = _log;
-
-/**
- * Parse file with htmlparser
- * @return {[type]} [description]
- */
-module.exports.parseFiles = _parseFiles;
-
-/**
- * Build files map
- * @param  {string} input Destination path
- * @return {array}        Array of paths
- */
-module.exports.filesMap = _filesMap;
-
-/**
- * Parse dom objects
- * @param  {[type]} dom [description]
- * @return {[type]}     [description]
- */
-module.exports.parseDomObject = _parseDomObject;
-
-/**
- * Fixing id inside each selector
- * @param  {[type]} subject [description]
- * @return {[type]}         [description]
- */
-module.exports.fixIds = _fixIds;
-
-/**
- * Fixing url inside each svg
- * @param  {[type]} subject [description]
- * @return {[type]}         [description]
- */
-module.exports.fixUrls = _fixUrls;
-
-/**
- * Simple SVG parser
- * @param  {[type]} subject [description]
- * @return {[type]}         [description]
- */
-module.exports.parseSVG = _parseSVG;
-
-/**
- * [convertFilenameToId description]
- * @type {[type]}
- */
-module.exports.convertFilenameToId = _convertFilenameToId;
-
-/**
- * Defs parser
- * @param  {[type]} id   [description]
- * @param  {[type]} data [description]
- * @return {[type]}      [description]
- */
-module.exports.defs = _defs;
-
-/**
- * Symbols parser
- * @param  {[type]} id   [description]
- * @param  {[type]} data [description]
- * @return {[type]}      [description]
- */
-module.exports.symbols = _symbols;
-
-/**
- * Minify via SVGO
- * @param  {string}   file  filename
- * @param  {integer}  loop  loop count
- * @return {[type]}         minified source
- */
-module.exports.minify = _minify;
-
-/**
- * Sprite creation
- * @param  {[type]} files [description]
- * @return {[type]}       [description]
- */
-module.exports.createSprite = _createSprite;
+module.exports = {
+  hash: _hash,
+  log: _log,
+  parseFiles: _parseFiles,
+  filesMap: _filesMap,
+  parseDomObject: _parseDomObject,
+  fixIds: _fixIds,
+  fixUrls: _fixUrls,
+  parseSVG: _parseSVG,
+  convertFilenameToId: _convertFilenameToId,
+  defs: _defs,
+  symbols: _symbols,
+  minify: _minify,
+  createSprite: _createSprite
+};
