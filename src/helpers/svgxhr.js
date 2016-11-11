@@ -17,10 +17,6 @@ var svgXHR = function(options) {
   var _ajax = new XMLHttpRequest();
   var _fullPath;
 
-  if (typeof XDomainRequest !== 'undefined') {
-    _ajax = new XDomainRequest();
-  }
-
   if (typeof baseUrl === 'undefined') {
     if (typeof window.baseUrl !== 'undefined') {
       baseUrl = window.baseUrl;
