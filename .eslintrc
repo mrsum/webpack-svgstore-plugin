@@ -1,3 +1,13 @@
 {
-  "extends": "eslint-config-rambler"
+  "root": true,
+
+  "env": {
+      "node": true,
+      "browser": true,
+      "commonjs": true,
+      "jquery": true,
+      "es6": true
+  },
+
+  "extends": "eslint:recommended"
 }

@@ -4,6 +4,7 @@
 const defaults = {
   svg: {
     xmlns: 'http://www.w3.org/2000/svg',
+    'xmlns:xlink': "http://www.w3.org/1999/xlink",
     style: 'position:absolute; width: 0; height: 0'
   },
   svgoOptions: {},
@@ -63,7 +64,7 @@ WebpackSvgStore.prototype.apply = function (compiler) {
 
     data.fileName = utils.hash(data.fileName, this.state.current.buildTimestamp);
 
-    replacement = expr.id.name + ' = { filename: "' + data.fileName + '" }';
+    replacement = `${expr.id.name} = { filename: "${data.fileName}" }`;
     dep = new ConstDependency(replacement, expr.range);
     dep.loc = expr.loc;
     this.state.current.addDependency(dep);
