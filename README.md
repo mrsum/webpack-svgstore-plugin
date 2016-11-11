@@ -1,5 +1,14 @@
-# webpack svgstore plugin
-![webpack-svgstore-plugin](http://mrsum.ru/blog/content/images/2016/07/webpack-svgstore-logo.png)
+# WEBPACK PLUGIN
+
+```
+███████╗██╗   ██╗ ██████╗     ███████╗████████╗ ██████╗ ██████╗ ███████╗
+██╔════╝██║   ██║██╔════╝     ██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██╔════╝
+███████╗██║   ██║██║  ███╗    ███████╗   ██║   ██║   ██║██████╔╝█████╗  
+╚════██║╚██╗ ██╔╝██║   ██║    ╚════██║   ██║   ██║   ██║██╔══██╗██╔══╝  
+███████║ ╚████╔╝ ╚██████╔╝    ███████║   ██║   ╚██████╔╝██║  ██║███████╗
+╚══════╝  ╚═══╝   ╚═════╝     ╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝                                                                     
+```
+
 [![NPM](https://nodei.co/npm/webpack-svgstore-plugin.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/webpack-svgstore-plugin/)
 
 ## Package info
@@ -12,6 +21,11 @@
 ```bash
 npm i webpack-svgstore-plugin --save-dev
 ```
+
+## Webpack configuration
+
+[EXAMPLE here](https://github.com/mrsum/webpack-svgstore-plugin/tree/develop/platform)
+
 ## Usage
 #### 1) require plugin
 ```javascript
@@ -26,23 +40,24 @@ module.exports = {
         plugins: [
           { removeTitle: true }
         ]
-      }
+      },
+      prefix: 'icon'
     })
   ]
 }
 ```
 
-#### 2) put function mark at your chunk
+#### 2) Put function mark at your chunk
 ```javascript
 // plugin will find marks and build sprite
 
-var __svg__ = { path: './assets/svg/**/*.svg', name: 'assets/svg/[hash].logos.svg' };
+var __svg__           = { path: './assets/svg/**/*.svg', name: 'assets/svg/[hash].logos.svg' };
 // will overwrite to var __svg__ = { filename: "assets/svg/1466687804854.logos.svg" };
 
 // also you can use next variables for sprite compile
-// var __sprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].icons.svg' };
-// var __svgstore__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].stuff.svg' };
-// var __svgsprite__ = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].1logos.svg' };
+// var __sprite__     = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].icons.svg' };
+// var __svgstore__   = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].stuff.svg' };
+// var __svgsprite__  = { path: './assets/svg/minify/*.svg', name: 'assets/svg/[hash].1logos.svg' };
 
 // require basic or custom sprite loader
 require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svg__);
@@ -53,7 +68,7 @@ As you know, last version has integrated ajax sprite loader.
 Right now, you can override that.
 Or create your own sprite ajax loader function.
 
-#### 3) html code for happy using
+#### 3) HTML code for happy using
 
 ```html
   <svg class="svg-icon">
@@ -67,33 +82,6 @@ Or create your own sprite ajax loader function.
 - `svgoOptions` - options for [svgo](https://github.com/svg/svgo) (optional, default: `{}`)
 
 
-#### template
-Default PUG template looks like:
-```jade
-svg&attributes(svg)
-  
-  mixin parseObject(obj)
-    each child in obj
-      if child !== null && child.type === 'text'
-        | <![CDATA[#{child.data}]]>
-      else if child !== null && typeof child.children === 'object'
-        | #[#{child.name}&attributes(child.attribs) #[+parseObject(child.children)]]
-
-  if defs.length
-    defs
-      each def in defs
-        | #[#{def.name}&attributes(def.attribs)  #[+parseObject(def.children)]]
-
-  each symbol in symbols
-    | #[#{symbol.name}&attributes(symbol.attribs) #[+parseObject(symbol.children)]]
-```
-You can override template, via plugin settings:
-
-```
-new SvgStore({
-  template: '_path/to/your/template.pug'
-})
-```
 ## License
 
 NPM package available here: [webpack-svgstore-plugin](https://www.npmjs.com/package/webpack-svgstore-plugin)
