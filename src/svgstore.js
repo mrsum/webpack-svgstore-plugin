@@ -8,100 +8,101 @@ const defaults = {
     style: 'position:absolute; width: 0; height: 0'
   },
   svgoOptions: {},
-  name: 'sprite.[hash].svg',
   prefix: 'icon-',
-  template: __dirname + '/templates/layout.pug'
+  template: __dirname + '/templates/layout.pug',
+  path: '',
+  fileName: 'sprite.[hash].svg'
 };
 
 // Depends
+const _ = require('lodash');
 const path = require('path');
 const utils = require('./helpers/utils');
-const async = require('async');
 const ConstDependency = require('webpack/lib/dependencies/ConstDependency');
+const async = require('async');
 
-/**
- * Constructor
- * @param {string} input   [description]
- * @param {string} output  [description]
- * @param {object} options [description]
- * @return {object}
- */
-const WebpackSvgStore = function (options) {
-  this.options = Object.assign({}, defaults, options);
-  return this;
-};
+class WebpackSvgStore {
 
-WebpackSvgStore.prototype.apply = function (compiler) {
-  let tasks = {};
-  const options = this.options;
-  const parseRepl = (file, value) => {
-    tasks[file]
-      ? tasks[file].push(value)
-      : (() => { tasks[file] = []; tasks[file].push(value); })();
+  /**
+   * Constructor
+   * @param {string} input   [description]
+   * @param {string} output  [description]
+   * @param {object} options [description]
+   * @return {object}
+   */
+  constructor(options) {
+    this.tasks = {};
+    this.options = _.merge({}, defaults, options);
   };
 
-  const analyzeAst = function (expr) {
-    let dep = false;
-    const data = {
-      path: '/**/*.svg',
-      fileName: '[hash].sprite.svg',
-      context: this.state.current.context
-    };
-    let replacement = '';
+  parseRepl(file, value) {
+    this.tasks[file] ? this.tasks[file].push(value) : (() => {
+      this.tasks[file] = [];
+      this.tasks[file].push(value);
+    })();
+  }
 
-    expr.init.properties.forEach((prop) => {
-      switch (prop.key.name) {
-        case 'name':
-          data.fileName = prop.value.value;
-          break;
-        case 'path':
-          data.path = prop.value.value;
-          break;
-        default:
-          break;
-      }
+  analyzeAst() {
+    let self = this;
+    return function (expr) {
+      const data = {
+        path: self.options.path,
+        fileName: self.options.fileName,
+        context: this.state.current.context
+      };
+
+      data.fileName = utils.hash(data.fileName, this.state.current.buildTimestamp);
+      let replacement = expr.name + ' = "' + data.fileName + '"';
+      let dep = new ConstDependency(replacement, expr.range);
+      dep.loc = expr.loc;
+      this.state.current.addDependency(dep);
+      // parse repl
+      self.parseRepl(this.state.current.request, data);
+    };
+  }
+
+  apply(compiler) {
+    // AST parser
+    compiler.plugin('compilation', (compilation, data) => {
+      let analzyerFunc = this.analyzeAst();
+      data.normalModuleFactory.plugin('parser', (parser) => {
+        parser.plugin('var __svg__', analzyerFunc);
+      })
     });
 
-    data.fileName = utils.hash(data.fileName, this.state.current.buildTimestamp);
 
-    replacement = `${expr.id.name} = { filename: "${data.fileName}" }`;
-    dep = new ConstDependency(replacement, expr.range);
-    dep.loc = expr.loc;
-    this.state.current.addDependency(dep);
-    // parse repl
-    parseRepl(this.state.current.request, data);
-  };
+    // save file to fs
+    compiler.plugin('emit', (compilation, callback) => {
+      async.forEach(Object.keys(this.tasks),
+        (key, outerCallback) => {
+          async.forEach(this.tasks[key],
+            (task, callback) => {
+              utils.filesMap(path.join(task.context, task.path || ''), (files) => {
+                // fileContent
+                const fileContent = utils.createSprite(
+                  utils.parseFiles(files, this.options), this.options.template);
 
-  // AST parser
-  compiler.parser.plugin('var __svg__', analyzeAst);
+                // add sprite to assets
+                compilation.assets[task.fileName] = {
+                  size: function () {
+                    return Buffer.byteLength(fileContent, 'utf8');
+                  },
+                  source: function () {
+                    return new Buffer(fileContent);
+                  }
+                };
+                // done
+                callback();
+              });
+            }, outerCallback);
+        }, callback);
+    });
 
-  // save file to fs
-  compiler.plugin('emit', (compilation, callback) => {
-    async.forEach(Object.keys(tasks), (key, callback) => {
-      async.forEach(tasks[key], (task, callback) => {
-        utils.filesMap(path.join(task.context, task.path || ''), (files) => {
-          // fileContent
-          const fileContent = utils.createSprite(
-            utils.parseFiles(files, options),
-            options.template
-          );
-
-          // add sprite to assets
-          compilation.assets[task.fileName] = {
-            size: () => Buffer.byteLength(fileContent, 'utf8'),
-            source: () => new Buffer(fileContent)
-          };
-          // done
-          callback();
-        });
-      }, callback);
-    }, callback);
-  });
-
-  compiler.plugin('done', () => {
-    tasks = {};
-  });
-};
+    compiler.plugin('done', () => {
+      this.tasks = {};
+    });
+  }
+}
 
 
 /**

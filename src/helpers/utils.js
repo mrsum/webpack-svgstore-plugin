@@ -18,7 +18,7 @@ const parse = require('htmlparser2');
  */
 function _createSprite(data, template) {
   return pug.renderFile(template, data);
-};
+}
 
 /**
  * Depth log
@@ -30,7 +30,7 @@ function _log(subject, depth) {
   console.log(util.inspect(subject, {
     showHidden: true, depth: depth || 2
   }));
-};
+}
 
 /**
  * Fix ids
@@ -47,7 +47,7 @@ function _fixIds(obj, id) {
   if (obj.name === 'use') {
     obj.attribs['xlink:href'] = ['#' + id, obj.attribs['xlink:href'].replace('#', '')].join('-');
   }
-};
+}
 
 /**
  * Fix urls
@@ -70,7 +70,7 @@ function _fixUrls(obj, id) {
       }
     }
   }
-};
+}
 
 /**
  * Svg parser
@@ -96,7 +96,7 @@ function _parseSVG(arr, id) {
   });
 
   return data;
-};
+}
 
 /**
  * Defs parser
@@ -137,7 +137,7 @@ function _defs(id, dom, data) {
   });
 
   return data;
-};
+}
 
 /**
  * Symbols parser
@@ -169,7 +169,7 @@ function _symbols(id, dom, data, prefix) {
   data.push(symbol);
 
   return data;
-};
+}
 
 /**
  * Convert filename to id
@@ -178,7 +178,7 @@ function _symbols(id, dom, data, prefix) {
  */
 function _convertFilenameToId(filename) {
   return filename.split('.').join('-').toLowerCase();
-};
+}
 
 /**
  * Build files map
@@ -189,7 +189,7 @@ function _filesMap(input, cb) {
   globby(input).then(function(fileList) {
     cb(fileList);
   });
-};
+}
 
 /**
  * Parse dom objects
@@ -205,7 +205,7 @@ function _parseDomObject(data, filename, dom, prefix) {
   }
 
   return data;
-};
+}
 
 /**
  * Minify via SVGO
@@ -224,7 +224,7 @@ function _parseDomObject(data, filename, dom, prefix) {
   min.optimize(sourceFile, svgoCallback);
 
   return resultFile;
-};
+}
 
 /**
  * [parseFiles description]
@@ -262,7 +262,7 @@ function _parseFiles(files, options) {
   });
 
   return data;
-};
+}
 
 /**
  * [_hash description]
@@ -274,7 +274,7 @@ function _hash(str, hash) {
   return str.indexOf('[hash]') >= 0
     ? str.replace('[hash]', hash)
     : str;
-};
+}
 
 module.exports = {
   hash: _hash,

@@ -1,6 +1,6 @@
 {
   "name": "webpack-svgstore-plugin",
-  "version": "3.0.5",
+  "version": "4.0.0",
   "description": "Webpack svgstore plugin",
   "main": "src/svgstore.js",
   "scripts": {
@@ -18,27 +18,32 @@
     {
       "name": "Gordey Levchenko",
       "email": "levchenko.gordey@gmail.com"
+    },
+    {
+      "name": "Artem Malko",
+      "email": "artem.malko@gmail.com"
     }
   ],
   "license": "MIT",
   "dependencies": {
-    "async": "2.1.2",
-    "globby": "6.0.0",
-    "htmlparser2": "3.9.2",
-    "lodash": "4.16.6",
+    "async": "^2.1.2",
+    "globby": "^6.0.0",
+    "htmlparser2": "^3.9.2",
+    "lodash": "^4.16.6",
     "pug": "2.0.0-alpha6",
-    "svgo": "0.7.1"
+    "svgo": "^0.7.1"
   },
   "devDependencies": {
     "chai": "3.5.0",
-    "codeclimate-test-reporter": "0.4.0",
-    "eslint-config-rambler": "0.2.5",
-    "istanbul": "0.4.5",
-    "mocha": "3.1.2",
-    "webpack": "1.13.1"
+    "codeclimate-test-reporter": "^0.4.0",
+    "eslint-config-rambler": "^0.2.5",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.1.2",
+    "path": "^0.12.7",
+    "webpack": "2.1.0-beta.25"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mrsum/webpack-svgstore-plugin"
+    "url": "https://github.com/artem-malko/webpack-svgstore-plugin"
   }
 }
