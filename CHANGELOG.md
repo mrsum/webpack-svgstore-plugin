@@ -1,3 +1,7 @@
+### 3.0.6
+
+- Update dependencies to last versions
+
 ### 3.0.2
 
 - Minor readme change
