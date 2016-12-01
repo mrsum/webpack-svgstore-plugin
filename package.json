@@ -1,6 +1,6 @@
 {
   "name": "webpack-svgstore-plugin",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Webpack svgstore plugin",
   "main": "src/svgstore.js",
   "scripts": {
@@ -22,22 +22,21 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "async": "1.5.2",
-    "crypto": "0.0.3",
-    "globby": "4.1.0",
-    "htmlparser2": "3.9.1",
-    "lodash": "3.10.1",
-    "pug": "0.1.0",
-    "svgo": "0.7.0"
+    "async": "2.1.4",
+    "globby": "6.1.0",
+    "htmlparser2": "3.9.2",
+    "lodash": "4.17.2",
+    "pug": "2.0.0-beta6",
+    "svgo": "0.7.1"
   },
   "devDependencies": {
     "chai": "3.5.0",
-    "codeclimate-test-reporter": "0.1.1",
-    "eslint-config-rambler": "0.2.2",
-    "istanbul": "0.4.3",
-    "mocha": "2.5.3",
-    "path": "0.11.14",
-    "webpack": "1.13.1"
+    "codeclimate-test-reporter": "0.4.0",
+    "eslint-config-rambler": "0.2.5",
+    "istanbul": "0.4.5",
+    "mocha": "3.2.0",
+    "path": "0.12.7",
+    "webpack": "1.13.3"
   },
   "repository": {
     "type": "git",

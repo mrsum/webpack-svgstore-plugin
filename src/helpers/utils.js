@@ -5,7 +5,6 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
-var crypto = require('crypto');
 var pug = require('pug');
 var Svgo = require('svgo');
 var globby = require('globby');
