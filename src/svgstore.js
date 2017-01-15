@@ -17,6 +17,7 @@ const _ = require('lodash');
 const path = require('path');
 const utils = require('./helpers/utils');
 const ConstDependency = require('webpack/lib/dependencies/ConstDependency');
+const NullFactory = require('webpack/lib/NullFactory');
 const async = require('async');
 
 class WebpackSvgStore {
@@ -33,56 +34,58 @@ class WebpackSvgStore {
     this.options = _.merge({}, defaults, options);
   };
 
-  parseRepl(file, value) {
+  addTask(file, value) {
     this.tasks[file] ? this.tasks[file].push(value) : (() => {
-      this.tasks[file] = [];
-      this.tasks[file].push(value);
-    })();
+        this.tasks[file] = [];
+        this.tasks[file].push(value);
+      })();
   }
 
-  analyzeAst() {
-    let self = this;
-    return function (expr) {
-      const data = {
-        path: '/**/*.svg',
-        fileName: '[hash].sprite.svg',
-        context: this.state.current.context
-      };
-
-      expr.init.properties.forEach(function (prop) {
-        switch (prop.key.name) {
-          case 'name':
-            data.fileName = prop.value.value;
-            break;
-          case 'path':
-            data.path = prop.value.value;
-            break;
-          default:
-            break;
-        }
-      });
-
-      data.fileName = utils.hash(data.fileName, this.state.current.buildTimestamp);
-      let replacement = expr.id.name + ' = { filename: ' + "__webpack_require__.p +" + '"' + data.fileName + '" }';
-      let dep = new ConstDependency(replacement, expr.range);
-      dep.loc = expr.loc;
-      this.state.current.addDependency(dep);
-      // parse repl
-      self.parseRepl(this.state.current.request, data);
+  createTaskContext(expr, parser) {
+    const data = {
+      path: '/**/*.svg',
+      fileName: '[hash].sprite.svg',
+      context: parser.state.current.context
     };
+
+    expr.init.properties.forEach(function (prop) {
+      switch (prop.key.name) {
+        case 'name':
+          data.fileName = prop.value.value;
+          break;
+        case 'path':
+          data.path = prop.value.value;
+          break;
+        default:
+          break;
+      }
+    });
+
+    data.fileName = utils.hash(data.fileName, parser.state.current.buildTimestamp);
+    let replacement = expr.id.name + ' = { filename: ' + "__webpack_require__.p +" + '"' + data.fileName + '" }';
+    let dep = new ConstDependency(replacement, expr.range);
+    dep.loc = expr.loc;
+    parser.state.current.addDependency(dep);
+    // parse repl
+    this.addTask(parser.state.current.request, data);
   }
 
   apply(compiler) {
     // AST parser
     compiler.plugin('compilation', (compilation, data) => {
-      let analzyerFunc = this.analyzeAst();
+      
+      compilation.dependencyFactories.set(ConstDependency, new NullFactory());
+      compilation.dependencyTemplates.set(ConstDependency, new ConstDependency.Template());
+      
       data.normalModuleFactory.plugin('parser', (parser, options) => {
-        parser.plugin('var __svg__', analzyerFunc);
-        parser.plugin('var __sprite__', analzyerFunc);
-        parser.plugin('var __svgstore__', analzyerFunc);
-        parser.plugin('var __svgsprite__', analzyerFunc);
-        parser.plugin('var __webpack_svgstore__', analzyerFunc);
-      })
+        parser.plugin('statement', (expr) => {
+          if (!expr.declarations || !expr.declarations.length) return;
+          const thisExpr = expr.declarations[0];
+          if (thisExpr.id.name === "__svg__") {
+            return this.createTaskContext(thisExpr, parser);
+          }
+        });
+      });
     });
 
 

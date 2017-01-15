@@ -1,6 +1,6 @@
 {
   "name": "webpack-svgstore-plugin",
-  "version": "3.0.6",
+  "version": "4.0.0",
   "description": "Webpack svgstore plugin",
   "main": "src/svgstore.js",
   "scripts": {
@@ -15,6 +15,10 @@
     {
       "name": "Mike Chernobrov",
       "email": "me@mrsum.ru"
+    },
+    {
+      "name": "Nadav Sinai",
+      "email": "ns@nadavsinai.com"
     },
     {
       "name": "Gordey Levchenko",
@@ -37,7 +41,7 @@
     "istanbul": "0.4.5",
     "mocha": "3.2.0",
     "path": "0.12.7",
-    "webpack": "2.1.0-beta.27"
+    "webpack": "2.2.0-rc.3"
   },
   "repository": {
     "type": "git",
