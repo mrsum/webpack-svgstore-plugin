@@ -118,7 +118,6 @@ var _defs = function(id, dom, data) {
       }
 
       if (child && child.children && child.children.length > 0) {
-        data.push(child);
         parseChilds(child.children, data);
       }
 
