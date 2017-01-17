@@ -2,7 +2,6 @@
 
 // Depends
 const filter = require('lodash/filter');
-const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const pug = require('pug');
@@ -74,9 +73,9 @@ function _fixUrls(obj, id) {
 
 /**
  * Svg parser
- * @param  {[type]} arr   [description]
- * @param  {[type]} id    [description]
- * @return {[type]}       [description]
+ * @param  {Array} arr
+ * @param  {String} id
+ * @return {Array}
  */
 function _parseSVG(arr, id) {
   const data = [];
@@ -100,18 +99,19 @@ function _parseSVG(arr, id) {
 
 /**
  * Defs parser
- * @param  {[type]} id   [description]
- * @param  {[type]} data [description]
- * @return {[type]}      [description]
+ * @param  {String} id      Current svg-file name
+ * @param  {Object} dom     Dom model of file
+ * @param  {Array}  data    Mutable data (result)
+ * @return {Arry}
  */
 function _defs(id, dom, data) {
   // lets find defs into dom
   const defs = filter(dom.children, { name: 'defs' });
-  const parseChilds = function(item, data) {
+  const parseChilds = function (item, data) {
     item.forEach((child) => {
       switch (child.name) {
         case 'use': {
-          child.attribs['xlink:href'] = ['#' + id, child.attribs['xlink:href'].replace('#', '') ].join('-');
+          child.attribs['xlink:href'] = ['#' + id, child.attribs['xlink:href'].replace('#', '')].join('-');
         } break;
         default:
           child.attribs && child.attribs.id
@@ -141,9 +141,11 @@ function _defs(id, dom, data) {
 
 /**
  * Symbols parser
- * @param  {[type]} id   [description]
- * @param  {[type]} data [description]
- * @return {[type]}      [description]
+ * @param  {String} id      Current svg-file name
+ * @param  {Object} dom     Dom model of file
+ * @param  {Array}  data    Mutable data (result)
+ * @param {String} prefix  Prefix from config for each icon
+ * @return {Array}
  */
 function _symbols(id, dom, data, prefix) {
   // create symbol object
@@ -185,10 +187,8 @@ function _convertFilenameToId(filename) {
  * @param  {string} input Destination path
  * @return {array}        Array of paths
  */
-function _filesMap(input, cb) {
-  globby(input).then(function(fileList) {
-    cb(fileList);
-  });
+function _filesMapSync(input) {
+  return globby.sync(input);
 }
 
 /**
@@ -213,7 +213,7 @@ function _parseDomObject(data, filename, dom, prefix) {
  * @param  {integer}  loop  loop count
  * @return {[type]}         minified source
  */
- function _minify(sourceFile, svgoOptions) {
+function _minify(sourceFile, svgoOptions) {
   const min = new Svgo(svgoOptions);
   let resultFile;
 
@@ -228,9 +228,10 @@ function _parseDomObject(data, filename, dom, prefix) {
 
 /**
  * [parseFiles description]
- * @return {[type]} [description]
+ * @param  {Object} filesMap Map of fileName and its content
+ * @return {Object} Data to render
  */
-function _parseFiles(files, options) {
+function _parseFiles(filesMap, options) {
   let data = {
     svg: options.svg,
     defs: [],
@@ -238,19 +239,18 @@ function _parseFiles(files, options) {
   };
 
   // each over files
-  files.forEach((file) => {
+  Object.keys(filesMap).forEach((fullFileName) => {
     // load and minify
-    const buffer = _minify(fs.readFileSync(file, 'utf8'), options.svgoOptions);
+    const buffer = _minify(filesMap[fullFileName], options.svgoOptions);
     // get filename for id generation
-    const filename = path.basename(file, '.svg');
-
+    const fileName = path.basename(fullFileName, '.svg');
     const handler = new parse.DomHandler((error, dom) => {
       if (error) {
         this.log(error);
         return;
       }
 
-      data = _parseDomObject(data, filename, dom, options.prefix);
+      data = _parseDomObject(data, fileName, dom, options.prefix);
     });
 
     // lets create parser instance
@@ -264,23 +264,10 @@ function _parseFiles(files, options) {
   return data;
 }
 
-/**
- * [_hash description]
- * @param  {[type]} buffer [description]
- * @param  {[type]} name   [description]
- * @return {[type]}        [description]
- */
-function _hash(str, hash) {
-  return str.indexOf('[hash]') >= 0
-    ? str.replace('[hash]', hash)
-    : str;
-}
-
 module.exports = {
-  hash: _hash,
   log: _log,
   parseFiles: _parseFiles,
-  filesMap: _filesMap,
+  filesMapSync: _filesMapSync,
   parseDomObject: _parseDomObject,
   fixIds: _fixIds,
   fixUrls: _fixUrls,

@@ -5,7 +5,7 @@ const defaults = {
   svg: {
     xmlns: 'http://www.w3.org/2000/svg',
     'xmlns:xlink': "http://www.w3.org/1999/xlink",
-    style: 'position:absolute; width: 0; height: 0'
+    style: 'position:absolute; width:0; height:0'
   },
   svgoOptions: {},
   prefix: 'icon-',
@@ -20,51 +20,55 @@ const path = require('path');
 const utils = require('./helpers/utils');
 const ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 const async = require('async');
+const fs = require('fs');
+const crypto = require('crypto');
 
 class WebpackSvgStore {
 
   /**
    * Constructor
-   * @param {string} input   [description]
-   * @param {string} output  [description]
    * @param {object} options [description]
    * @return {object}
    */
   constructor(options) {
-    this.tasks = {};
     this.options = _.merge({}, defaults, options);
+    this.svgFilesMap = {};
+    this.generatedFileName = '';
   };
-
-  parseRepl(file, value) {
-    this.tasks[file] ? this.tasks[file].push(value) : (() => {
-      this.tasks[file] = [];
-      this.tasks[file].push(value);
-    })();
-  }
 
   analyzeAst() {
     let self = this;
     return function (expr) {
-      const data = {
+      const buildData = {
         path: self.options.path,
         fileName: self.options.fileName,
         context: this.state.current.context
       };
 
-      data.fileName = utils.hash(data.fileName, this.state.current.buildTimestamp);
-      let replacement = expr.name + ' = "' + data.fileName + '"';
-      let dep = new ConstDependency(replacement, expr.range);
+      // Create SVG-files map [filename: its content] and generate hash for result sprite-file name
+      const svgFileNames = utils.filesMapSync(path.join(buildData.context, buildData.path || ''));
+      const svgFilesContent = svgFileNames.reduce(function (accContent, fileName) {
+        const fileContent = fs.readFileSync(fileName, 'utf8');
+        self.svgFilesMap[fileName] = fileContent;
+        accContent += fileContent;
+        return accContent;
+      }, '');
+      const hash = crypto.createHash('md5').update(svgFilesContent).digest('hex').substr(0, 15);
+
+      self.generatedFileName = utils.hash(buildData.fileName, hash);
+      const replacement = `${expr.name} = "${self.generatedFileName}"`;
+      const dep = new ConstDependency(replacement, expr.range);
+
       dep.loc = expr.loc;
       this.state.current.addDependency(dep);
-      // parse repl
-      self.parseRepl(this.state.current.request, data);
     };
   }
 
   apply(compiler) {
     // AST parser
     compiler.plugin('compilation', (compilation, data) => {
-      let analzyerFunc = this.analyzeAst();
+      const analzyerFunc = this.analyzeAst();
+
       data.normalModuleFactory.plugin('parser', (parser) => {
         parser.plugin('var __svg__', analzyerFunc);
       })
@@ -73,33 +77,22 @@ class WebpackSvgStore {
 
     // save file to fs
     compiler.plugin('emit', (compilation, callback) => {
-      async.forEach(Object.keys(this.tasks),
-        (key, outerCallback) => {
-          async.forEach(this.tasks[key],
-            (task, callback) => {
-              utils.filesMap(path.join(task.context, task.path || ''), (files) => {
-                // fileContent
-                const fileContent = utils.createSprite(
-                  utils.parseFiles(files, this.options), this.options.template);
+      const fileContent = utils.createSprite(
+        utils.parseFiles(this.svgFilesMap, this.options),
+        this.options.template
+      );
 
-                // add sprite to assets
-                compilation.assets[task.fileName] = {
-                  size: function () {
-                    return Buffer.byteLength(fileContent, 'utf8');
-                  },
-                  source: function () {
-                    return new Buffer(fileContent);
-                  }
-                };
-                // done
-                callback();
-              });
-            }, outerCallback);
-        }, callback);
-    });
+      // add sprite to assets
+      compilation.assets[this.generatedFileName] = {
+        size: function () {
+          return Buffer.byteLength(fileContent, 'utf8');
+        },
+        source: function () {
+          return new Buffer(fileContent);
+        }
+      };
 
-    compiler.plugin('done', () => {
-      this.tasks = {};
+      callback();
     });
   }
 }
