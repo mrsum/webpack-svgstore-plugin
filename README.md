@@ -22,7 +22,7 @@
 npm i webpack-svgstore-plugin --save-dev
 ```
 
-## We are not maintain version for node.js 0.12 more
+## We do not maintain a version for node.js 0.12 anymore
 Only:
 - "6.0"
 - "4.0"
