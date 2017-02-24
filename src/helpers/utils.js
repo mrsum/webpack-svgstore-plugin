@@ -5,7 +5,6 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
-var crypto = require('crypto');
 var pug = require('pug');
 var Svgo = require('svgo');
 var globby = require('globby');
@@ -119,7 +118,6 @@ var _defs = function(id, dom, data) {
       }
 
       if (child && child.children && child.children.length > 0) {
-        data.push(child);
         parseChilds(child.children, data);
       }
 
