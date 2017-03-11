@@ -24,6 +24,7 @@ npm i webpack-svgstore-plugin --save-dev
 
 ## We are not maintain version for node.js 0.12 more
 Only:
+- "7.0+"
 - "6.0"
 - "4.0"
 
@@ -75,10 +76,16 @@ Right now, you can override that.
 Or create your own sprite ajax loader function.
 
 #### 3) HTML code for happy using
-
+HTML:
 ```html
   <svg class="svg-icon">
     <use xlink:href="#icon-name"></use>
+  </svg>
+```
+React JSX:
+```html
+  <svg className='svg-icon'>
+    <use xlinkHref='#icon-name' />
   </svg>
 ```
 ## Plugin settings
