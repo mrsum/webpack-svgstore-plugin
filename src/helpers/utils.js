@@ -1,14 +1,15 @@
 'use strict';
 
 // Depends
-var _ = require('lodash');
-var fs = require('fs');
-var path = require('path');
-var util = require('util');
-var pug = require('pug');
-var Svgo = require('svgo');
-var globby = require('globby');
-var parse = require('htmlparser2');
+const _ = require('lodash');
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+const crypto = require('crypto');
+const pug = require('pug');
+const Svgo = require('svgo');
+const globby = require('globby');
+const parse = require('htmlparser2');
 
 /**
  * Create sprite
@@ -16,7 +17,7 @@ var parse = require('htmlparser2');
  * @param  {string} template
  * @return {string}
  */
-var _createSprite = function(data, template) {
+const _createSprite = function(data, template) {
   return pug.renderFile(template, data);
 };
 
@@ -26,7 +27,7 @@ var _createSprite = function(data, template) {
  * @param  {integer}  depth   Depth level
  * @return {void}
  */
-var _log = function(subject, depth) {
+const _log = function(subject, depth) {
   console.log(util.inspect(subject, {
     showHidden: true, depth: depth || 2
   }));
@@ -38,7 +39,7 @@ var _log = function(subject, depth) {
  * @param  {string} id
  * @return {void}
  */
-var _fixIds = function(obj, id) {
+const _fixIds = function(obj, id) {
   // add id
   if (obj.attribs && obj.attribs.id) {
     obj.attribs.id = [id, obj.attribs.id].join('-');
@@ -55,10 +56,10 @@ var _fixIds = function(obj, id) {
  * @param  {string} id
  * @return {void}
  */
-var _fixUrls = function(obj, id) {
-  var key;
-  var match;
-  var json = obj.attribs;
+const _fixUrls = function(obj, id) {
+  let key;
+  let match;
+  const json = obj.attribs;
   if (json) {
     for (key in json) {
       if (json.hasOwnProperty(key)) {
@@ -77,8 +78,8 @@ var _fixUrls = function(obj, id) {
  * @param  {[type]} id    [description]
  * @return {[type]}       [description]
  */
-var _parseSVG = function(arr, id) {
-  var data = [];
+const _parseSVG = function(arr, id) {
+  const data = [];
   arr.forEach(function(obj) {
     if (obj) {
       // add unic ids to urls
@@ -102,10 +103,10 @@ var _parseSVG = function(arr, id) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-var _defs = function(id, dom, data) {
+const _defs = function(id, dom, data) {
   // lets find defs into dom
-  var defs = _.filter(dom.children, { name: 'defs' });
-  var parseChilds = function(item, data) {
+  const defs = _.filter(dom.children, { name: 'defs' });
+  const parseChilds = function(item, data) {
     item.forEach(function(child) {
       switch (child.name) {
         case 'use': {
@@ -142,9 +143,9 @@ var _defs = function(id, dom, data) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-var _symbols = function(id, dom, data, prefix) {
+const _symbols = function(id, dom, data, prefix) {
   // create symbol object
-  var symbol = {
+  const symbol = {
     type: 'tag',
     name: 'symbol',
     attribs: {
@@ -175,7 +176,7 @@ var _symbols = function(id, dom, data, prefix) {
  * @param  {string} filename [description]
  * @return {string}          [description]
  */
-var _convertFilenameToId = function(filename) {
+const _convertFilenameToId = function(filename) {
   return filename.split('.').join('-').toLowerCase();
 };
 
@@ -184,8 +185,8 @@ var _convertFilenameToId = function(filename) {
  * @param  {string} input Destination path
  * @return {array}        Array of paths
  */
-var _filesMap = function(input, cb) {
-  var data = input;
+const _filesMap = function(input, cb) {
+  const data = input;
 
   globby(data).then(function(fileList) {
     cb(fileList);
@@ -197,8 +198,8 @@ var _filesMap = function(input, cb) {
  * @param  {[type]} dom [description]
  * @return {[type]}     [description]
  */
-var _parseDomObject = function(data, filename, dom, prefix) {
-  var id = _convertFilenameToId(filename);
+const _parseDomObject = function(data, filename, dom, prefix) {
+  const id = _convertFilenameToId(filename);
   if (dom && dom[0]) {
     _defs(id, dom[0], data.defs);
     _symbols(id, dom[0], data.symbols, prefix);
@@ -213,9 +214,9 @@ var _parseDomObject = function(data, filename, dom, prefix) {
  * @param  {integer}  loop  loop count
  * @return {[type]}         minified source
  */
-var _minify = function(file, svgoOptions) {
-  var min = new Svgo(svgoOptions);
-  var source = file;
+const _minify = function(file, svgoOptions) {
+  const min = new Svgo(svgoOptions);
+  let source = file;
 
   function svgoCallback(result) {
     source = result.data;
@@ -230,9 +231,9 @@ var _minify = function(file, svgoOptions) {
  * [parseFiles description]
  * @return {[type]} [description]
  */
-var _parseFiles = function(files, options) {
-  var self = this;
-  var data = {
+const _parseFiles = function(files, options) {
+  const self = this;
+  let data = {
     svg: options.svg,
     defs: [],
     symbols: []
@@ -241,17 +242,17 @@ var _parseFiles = function(files, options) {
   // each over files
   files.forEach(function(file) {
     // load and minify
-    var buffer = _minify(fs.readFileSync(file, 'utf8'), options.svgoOptions);
+    const buffer = _minify(fs.readFileSync(file, 'utf8'), options.svgoOptions);
     // get filename for id generation
-    var filename = path.basename(file, '.svg');
+    const filename = path.basename(file, '.svg');
 
-    var handler = new parse.DomHandler(function(error, dom) {
+    const handler = new parse.DomHandler(function(error, dom) {
       if (error) self.log(error);
       else data = _parseDomObject(data, filename, dom, options.prefix);
     });
 
     // lets create parser instance
-    var Parser = new parse.Parser(handler, {
+    const Parser = new parse.Parser(handler, {
       xmlMode: true
     });
     Parser.write(buffer);
@@ -267,7 +268,7 @@ var _parseFiles = function(files, options) {
  * @param  {[type]} name   [description]
  * @return {[type]}        [description]
  */
-var _hash = function(str, hash) {
+const _hash = function(str, hash) {
   return str.indexOf('[hash]') >= 0
     ? str.replace('[hash]', hash)
     : str;
