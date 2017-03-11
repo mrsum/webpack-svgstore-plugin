@@ -30,7 +30,7 @@ Only:
 
 
 ## Webpack version support
-Use webpack-svgstore-plugin@3.x.x for Webpack 1.x.x
+Use webpack-svgstore-plugin@3.x.x for Webpack 1.x.x  
 Use webpack-svgstore-plugin@4.x.x for Webpack 2.x.x
 
 
