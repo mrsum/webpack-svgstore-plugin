@@ -28,8 +28,12 @@ var svgXHR = function(options) {
       baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
     }
   }
+  if (url.indexOf('http') === 0) {
+    _fullPath = url.replace(/([^:]\/)\/+/g, '$1');
+  } else {
+    _fullPath = (baseUrl + '/' + url).replace(/([^:]\/)\/+/g, '$1');
+  }
 
-  _fullPath = (baseUrl + '/' + url).replace(/([^:]\/)\/+/g, '$1');
   _ajax.open('GET', _fullPath, true);
   _ajax.onprogress = function() {};
   _ajax.onload = function() {
