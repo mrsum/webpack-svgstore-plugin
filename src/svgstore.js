@@ -2,6 +2,7 @@
 
 // Defaults
 const defaults = {
+  symbol: '__svg__',
   svg: {
     xmlns: 'http://www.w3.org/2000/svg',
     style: 'position:absolute; width: 0; height: 0'
@@ -81,7 +82,7 @@ class WebpackSvgStore {
         parser.plugin('statement', (expr) => {
           if (!expr.declarations || !expr.declarations.length) return;
           const thisExpr = expr.declarations[0];
-          if (thisExpr.id.name === "__svg__") {
+          if (thisExpr.id.name === this.options.symbol) {
             return this.createTaskContext(thisExpr, parser);
           }
         });
