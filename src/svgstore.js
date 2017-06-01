@@ -32,6 +32,10 @@ class WebpackSvgStore {
   constructor(options) {
     this.tasks = {};
     this.options = _.merge({}, defaults, options);
+
+    if (this.options.path && !path.isAbsolute(this.options.path)) {
+      throw new Error('[webpack-svgstore-plugin] Validation Error: path should be absolute when passed as plugin option')
+    }
   };
 
   addTask(file, value) {
@@ -43,9 +47,9 @@ class WebpackSvgStore {
 
   createTaskContext(expr, parser) {
     const data = {
-      path: '/**/*.svg',
-      fileName: '[hash].sprite.svg',
-      context: parser.state.current.context
+      path: this.options.path || '/**/*.svg',
+      fileName: this.options.name || '[hash].sprite.svg',
+      context: this.options.path ? '' : parser.state.current.context
     };
 
     expr.init.properties.forEach(function (prop) {
@@ -73,10 +77,10 @@ class WebpackSvgStore {
   apply(compiler) {
     // AST parser
     compiler.plugin('compilation', (compilation, data) => {
-      
+
       compilation.dependencyFactories.set(ConstDependency, new NullFactory());
       compilation.dependencyTemplates.set(ConstDependency, new ConstDependency.Template());
-      
+
       data.normalModuleFactory.plugin('parser', (parser, options) => {
         parser.plugin('statement', (expr) => {
           if (!expr.declarations || !expr.declarations.length) return;
