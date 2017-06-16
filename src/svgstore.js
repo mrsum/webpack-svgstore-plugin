@@ -81,7 +81,13 @@ class WebpackSvgStore {
         parser.plugin('statement', (expr) => {
           if (!expr.declarations || !expr.declarations.length) return;
           const thisExpr = expr.declarations[0];
-          if (thisExpr.id.name === "__svg__") {
+          if ([
+            '__svg__',
+            '__sprite__',
+            '__svgstore__',
+            '__svgsprite__',
+            '__webpack_svgstore__'
+          ].indexOf(thisExpr.id.name) > -1) {
             return this.createTaskContext(thisExpr, parser);
           }
         });

@@ -19,7 +19,7 @@ module.exports = function(_path) {
       publicPath: '/platform/'
     },
     resolve: {
-      extensions: ['', '.js'],
+      extensions: ['.js']
     },
     plugins: [
       // create svgStore instance object

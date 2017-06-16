@@ -4,5 +4,6 @@ coverage/
 platform/dist/
 platform/static/min/
 sprites/
+.idea/
 *.log
 *.lock
