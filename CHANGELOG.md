@@ -1,3 +1,11 @@
+### 4.0.1
+
+- Fix missing sprite variables
+
+### 4.0.0
+
+- Support webpack v2
+
 ### 3.0.6
 
 - Update dependencies to last versions
