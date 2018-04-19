@@ -1,3 +1,7 @@
+### 4.0.2
+
+- Insert sprite on DOMContentLoaded
+
 ### 4.0.1
 
 - Fix missing sprite variables
