@@ -41,7 +41,10 @@ var svgXHR = function(options) {
     }
     var div = document.createElement('div');
     div.innerHTML = _ajax.responseText;
-    document.body.insertBefore(div, document.body.childNodes[0]);
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.insertBefore(div, document.body.childNodes[0]);
+    });
   };
   _ajax.send();
 };
