@@ -42,6 +42,7 @@ Use webpack-svgstore-plugin@4.x.x for Webpack 2.x.x
 #### 1) require plugin
 ```javascript
 //webpack.config.js
+var path = require('path');
 var SvgStore = require('webpack-svgstore-plugin');
 module.exports = {
   plugins: [
@@ -53,7 +54,8 @@ module.exports = {
           { removeTitle: true }
         ]
       },
-      prefix: 'icon'
+      prefix: 'icon',
+      path: path.join(__dirname, '../src/assets/**/*.svg')
     })
   ]
 }
@@ -98,6 +100,8 @@ React JSX:
 #### options
 - `template` - add custom jade template layout (optional)
 - `svgoOptions` - options for [svgo](https://github.com/svg/svgo) (optional, default: `{}`)
+- `path` - absolute path to SVG files (optional, default: your function mark path or `/**/*.svg`)
+- `name` - name of the resulting file (optional, default: your function mark name or `[hash].sprite.svg`)
 
 
 ## License
