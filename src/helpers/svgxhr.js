@@ -1,3 +1,5 @@
+const ready = require('../helpers/utils').ready
+
 /**
  * Load svg via ajax
  * @param  {string} url path to svg sprite
@@ -42,7 +44,7 @@ var svgXHR = function(options) {
     var div = document.createElement('div');
     div.innerHTML = _ajax.responseText;
     
-    document.addEventListener('DOMContentLoaded', function() {
+    ready(function() {
       document.body.insertBefore(div, document.body.childNodes[0]);
     });
   };
