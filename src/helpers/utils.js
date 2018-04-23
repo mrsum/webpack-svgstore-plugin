@@ -277,18 +277,18 @@ const _hash = function(str, hash) {
 
 /**
  * jQuery like $.ready function.
- * 
+ *
  * @param {Function} fn
  * @return void
  */
 const _ready = function(callback) {
   if (
-      document.readyState === "complete" ||
-      (document.readyState !== "loading" && !document.documentElement.doScroll)
+      document.readyState === 'complete' ||
+      (document.readyState !== 'loading' && !document.documentElement.doScroll)
   ) {
     callback();
   } else {
-    document.addEventListener("DOMContentLoaded", callback);
+    document.addEventListener('DOMContentLoaded', callback);
   }
 };
 

@@ -1,4 +1,4 @@
-const ready = require('../helpers/utils').ready
+const ready = require('../helpers/utils').ready;
 
 /**
  * Load svg via ajax
@@ -35,15 +35,15 @@ var svgXHR = function(options) {
   _ajax.open('GET', _fullPath, true);
   _ajax.onprogress = function() {};
   _ajax.onload = function() {
-    if(!_ajax.responseText || _ajax.responseText.substr(0, 4) !== "<svg") {
-      throw Error("Invalid SVG Response");
+    if (!_ajax.responseText || _ajax.responseText.substr(0, 4) !== '<svg') {
+      throw Error('Invalid SVG Response');
     }
-    if(_ajax.status < 200 || _ajax.status >= 300) {
+    if (_ajax.status < 200 || _ajax.status >= 300) {
       return;
     }
     var div = document.createElement('div');
     div.innerHTML = _ajax.responseText;
-    
+
     ready(function() {
       document.body.insertBefore(div, document.body.childNodes[0]);
     });
