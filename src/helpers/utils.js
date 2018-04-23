@@ -274,31 +274,6 @@ const _hash = function(str, hash) {
     : str;
 };
 
-
-/**
- * jQuery like $.ready function.
- *
- * @param {Function} fn
- * @return void
- */
-const _ready = function(callback) {
-  if (
-      document.readyState === 'complete' ||
-      (document.readyState !== 'loading' && !document.documentElement.doScroll)
-  ) {
-    callback();
-  } else {
-    document.addEventListener('DOMContentLoaded', callback);
-  }
-};
-
-/**
- * jQuery like $.ready function.
- * @param {Function} fn
- * @return void
- */
-module.exports.ready = _ready;
-
 /**
  * Create hash
  * @param  {[type]} buffer [description]
