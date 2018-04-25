@@ -1,3 +1,7 @@
+### 4.0.3
+
+- Adding `ready` helper, fixes DOMContentLoaded & script race condition
+
 ### 4.0.2
 
 - Insert sprite on DOMContentLoaded
