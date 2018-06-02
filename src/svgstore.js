@@ -61,10 +61,10 @@ class WebpackSvgStore {
       }
     });
 
-    utils.filesMap(path.join(data.context, data.path || ''), (files) => {
-      data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
-      data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
-    });
+    const files = utils.filesMapSync(path.join(data.context, data.path || ''));
+    
+    data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
+    data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
 
     let replacement = expr.id.name + ' = { filename: ' + "__webpack_require__.p +" + '"' + data.fileName + '" }';
     let dep = new ConstDependency(replacement, expr.range);

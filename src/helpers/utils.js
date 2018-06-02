@@ -194,6 +194,15 @@ const _filesMap = function(input, cb) {
 };
 
 /**
+ * Build files map sync
+ * @param  {string} input Destination path
+ * @return {array}        Array of paths
+ */
+const _filesMapSync = function(input) {
+  return globby.sync(input);
+};
+
+/**
  * Parse dom objects
  * @param  {[type]} dom [description]
  * @return {[type]}     [description]
@@ -320,6 +329,14 @@ module.exports.parseFiles = _parseFiles;
  * @return {array}        Array of paths
  */
 module.exports.filesMap = _filesMap;
+
+
+/**
+ * Build files map sync
+ * @param  {string} input Destination path
+ * @return {array}        Array of paths
+ */
+module.exports.filesMapSync = _filesMapSync;
 
 /**
  * Parse dom objects
