@@ -18,6 +18,7 @@ const path = require('path');
 const utils = require('./helpers/utils');
 const ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 const NullFactory = require('webpack/lib/NullFactory');
+const { ConcatSource } = require('webpack-sources');
 const async = require('async');
 
 class WebpackSvgStore {
@@ -29,10 +30,12 @@ class WebpackSvgStore {
    * @param {object} options [description]
    * @return {object}
    */
-  constructor(options) {
+  constructor(options = {}) {
     this.tasks = {};
     this.options = _.merge({}, defaults, options);
-  };
+    this.fileNameToInject = options.fileNameToInject;
+    this.injectMode = 'injectMode' in options ? options.injectMode === true : Boolean(this.fileNameToInject);
+  }
 
   addTask(file, value) {
     this.tasks[file] ? this.tasks[file].push(value) : (() => {
@@ -106,6 +109,29 @@ class WebpackSvgStore {
                 const fileContent = utils.createSprite(
                   utils.parseFiles(files, this.options), this.options.template);
 
+
+                if (this.injectMode) {
+                  if (!this.fileNameToInject) {
+                    this.fileNameToInject = _.get(compilation, 'options.output.filename');
+                  }
+                  if (compilation.assets[this.fileNameToInject]) {
+                    const injectCode = (svg) => '\n(function(){' +
+                      'domReady(function(){' +
+                        'var d=document.createElement(\'div\');d.innerHTML=\'' + svg + '\';' +
+                        'document.body.insertBefore(d,document.body.childNodes[0]);' +
+                      '});' +
+                      'function domReady(callback){' +
+                        'if(document.readyState===\'complete\'||(document.readyState!==\'loading\'&&!document.documentElement.doScroll)){' +
+                          'callback();' +
+                        '}else{' +
+                          'document.addEventListener(\'DOMContentLoaded\',callback);' +
+                        '}' +
+                      '}' +
+                    '})();'.replace(/\s{2,}/g, '');
+
+                    compilation.assets[this.fileNameToInject] = new ConcatSource(compilation.assets[this.fileNameToInject], injectCode(fileContent));
+                  }
+                } else {
                 // add sprite to assets
                 compilation.assets[task.fileName] = {
                   size: function () {
@@ -115,6 +141,7 @@ class WebpackSvgStore {
                     return new Buffer(fileContent);
                   }
                 };
+                }
                 // done
                 callback();
               });

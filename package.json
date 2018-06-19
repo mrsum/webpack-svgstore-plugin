@@ -27,7 +27,9 @@
     "htmlparser2": "3.9.2",
     "lodash": "4.17.2",
     "pug": "2.0.0-beta6",
-    "svgo": "0.7.1"
+    "svgo": "0.7.1",
+    "webpack": "^4.12.0",
+    "webpack-sources": "^1.1.0"
   },
   "devDependencies": {
     "chai": "3.5.0",
@@ -35,8 +37,7 @@
     "eslint-config-rambler": "0.2.5",
     "istanbul": "0.4.5",
     "mocha": "3.2.0",
-    "path": "0.12.7",
-    "webpack": "2.2.1"
+    "path": "0.12.7"
   },
   "repository": {
     "type": "git",
