@@ -30,10 +30,11 @@ class WebpackSvgStore {
    * @param {object} options [description]
    * @return {object}
    */
-  constructor(options) {
+  constructor(options = {}) {
     this.tasks = {};
     this.options = _.merge({}, defaults, options);
-    this.injectMode = _.get(options, 'injectMode') === true;
+    this.fileNameToInject = options.fileNameToInject;
+    this.injectMode = 'injectMode' in options ? options.injectMode === true : Boolean(this.fileNameToInject);
   }
 
   addTask(file, value) {
@@ -110,8 +111,10 @@ class WebpackSvgStore {
 
 
                 if (this.injectMode) {
-                  const output = _.get(compilation, 'options.output.filename');
-                  if (output && compilation.assets[output]) {
+                  if (!this.fileNameToInject) {
+                    this.fileNameToInject = _.get(compilation, 'options.output.filename');
+                  }
+                  if (compilation.assets[this.fileNameToInject]) {
                     const injectCode = (svg) => '\n(function(){' +
                       'domReady(function(){' +
                         'var d=document.createElement(\'div\');d.innerHTML=\'' + svg + '\';' +
@@ -126,7 +129,7 @@ class WebpackSvgStore {
                       '}' +
                     '})();'.replace(/\s{2,}/g, '');
 
-                    compilation.assets[output] = new ConcatSource(compilation.assets[output], injectCode(fileContent));
+                    compilation.assets[this.fileNameToInject] = new ConcatSource(compilation.assets[this.fileNameToInject], injectCode(fileContent));
                   }
                 } else {
                 // add sprite to assets
