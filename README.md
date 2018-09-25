@@ -22,16 +22,12 @@
 npm i webpack-svgstore-plugin --save-dev
 ```
 
-## We do not maintain a version for node.js 0.12 anymore
-Only:
-- "7.0+"
-- "6.0"
-- "4.0"
-
-
 ## Webpack version support
 Use webpack-svgstore-plugin@3.x.x for Webpack 1.x.x  
-Use webpack-svgstore-plugin@4.x.x for Webpack 2.x.x
+Use webpack-svgstore-plugin@4.x.x for Webpack 2.x.x,3.x.x,4.x.x. 
+## Node.js version support
+#### We do not maintain a version for node.js 0.12 anymore
+  Tested to work with with node.js 4.x,6.x,7.x,8.x
 
 
 ## Webpack configuration
@@ -104,4 +100,4 @@ React JSX:
 
 NPM package available here: [webpack-svgstore-plugin](https://www.npmjs.com/package/webpack-svgstore-plugin)
 
-MIT © [Chernobrov Mike](http://mrsum.ru), [Gordey Levchenko](https://github.com/lgordey)
+MIT © [Chernobrov Mike](http://mrsum.ru), [Gordey Levchenko](https://github.com/lgordey) , [Nadav Sinai](https://github.com/nadavsinai)
