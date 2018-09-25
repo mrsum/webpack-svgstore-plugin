@@ -1,13 +1,13 @@
 {
   "name": "webpack-svgstore-plugin",
-  "version": "4.0.3",
+  "version": "4.1.0",
   "description": "Webpack svgstore plugin",
   "main": "src/svgstore.js",
   "scripts": {
-    "test": "NODE_ENV=platform ./node_modules/.bin/_mocha ./src/__tests__/index.js",
-    "code:coverage": "NODE_ENV=platform ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./src/__tests__/index.js && npm run code:report",
-    "code:report": "CODECLIMATE_REPO_TOKEN=29b2c943849c33562af12b70563d86e95c073e04c7510e9da5d9711cf3233b17 ./node_modules/.bin/codeclimate-test-reporter < coverage/lcov.info",
-    "build": "rm -rf platform/dist/* && NODE_ENV=platform webpack --progress --colors --bail"
+    "test": "cross-env NODE_ENV=platform mocha ./src/__tests__/index.js",
+    "code:coverage": "cross-env NODE_ENV=platform istanbul cover ./node_modules/mocha/bin/_mocha ./src/__tests__/index.js && npm run code:report",
+    "code:report": "cross-env CODECLIMATE_REPO_TOKEN=29b2c943849c33562af12b70563d86e95c073e04c7510e9da5d9711cf3233b17 ./node_modules/.bin/codeclimate-test-reporter < coverage/lcov.info",
+    "build": "rimraf platform/dist/* && cross-env NODE_ENV=platform webpack -p --progress --colors --bail"
   },
   "author": "me@mrsum.ru",
   "contributors": [
@@ -16,27 +16,34 @@
       "email": "me@mrsum.ru"
     },
     {
+      "name": "Nadav Sinai",
+      "email": "ns@nadavsinai.com"
+    },
+    {
       "name": "Gordey Levchenko",
       "email": "levchenko.gordey@gmail.com"
     }
   ],
   "license": "MIT",
   "dependencies": {
-    "async": "2.1.4",
-    "globby": "6.1.0",
+    "async": "^2.6.1",
+    "globby": "^8.0.1",
     "htmlparser2": "3.9.2",
-    "lodash": "4.17.2",
-    "pug": "2.0.0-beta6",
-    "svgo": "0.7.1"
+    "lodash": "^4.17.11",
+    "pug": "^2.0.3",
+    "svgo": "^1.1.1"
   },
   "devDependencies": {
-    "chai": "3.5.0",
-    "codeclimate-test-reporter": "0.4.0",
-    "eslint-config-rambler": "0.2.5",
+    "chai": "^4.1.2",
+    "codeclimate-test-reporter": "^0.5.0",
+    "cross-env": "^5.2.0",
+    "eslint-config-rambler": "^0.3.1",
     "istanbul": "0.4.5",
-    "mocha": "3.2.0",
+    "mocha": "5.2.0",
     "path": "0.12.7",
-    "webpack": "2.2.1"
+    "rimraf": "^2.6.2",
+    "webpack": "4.20.0",
+    "webpack-cli": "^3.1.1"
   },
   "repository": {
     "type": "git",

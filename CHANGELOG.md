@@ -1,3 +1,9 @@
+### 4.1.0
+
+- Support webpack v4 (backwards compatible)
+- Update dependencies to last versions
+- (dev) build on windows
+
 ### 4.0.3
 
 - Adding `ready` helper, fixes DOMContentLoaded & script race condition

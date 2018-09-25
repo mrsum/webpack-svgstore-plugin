@@ -20,6 +20,19 @@ const ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 const NullFactory = require('webpack/lib/NullFactory');
 const async = require('async');
 
+function compatAddPlugin(tappable, hookName, callback, async = false, forType = null) {
+  const method = (async) ? 'tapAsync' : 'tap';
+  if (tappable.hooks) {
+    if (forType) {
+      tappable.hooks[hookName][method](forType, WebpackSvgStore.name, callback);
+    } else {
+      tappable.hooks[hookName][method](WebpackSvgStore.name, callback);
+    }
+  } else {
+    tappable.plugin(hookName, callback);
+  }
+}
+
 class WebpackSvgStore {
 
   /**
@@ -36,10 +49,11 @@ class WebpackSvgStore {
 
   addTask(file, value) {
     this.tasks[file] ? this.tasks[file].push(value) : (() => {
-        this.tasks[file] = [];
-        this.tasks[file].push(value);
-      })();
+      this.tasks[file] = [];
+      this.tasks[file].push(value);
+    })();
   }
+
 
   createTaskContext(expr, parser) {
     const data = {
@@ -72,13 +86,11 @@ class WebpackSvgStore {
 
   apply(compiler) {
     // AST parser
-    compiler.plugin('compilation', (compilation, data) => {
-      
+    compatAddPlugin(compiler, 'compilation', (compilation, data) => {
       compilation.dependencyFactories.set(ConstDependency, new NullFactory());
       compilation.dependencyTemplates.set(ConstDependency, new ConstDependency.Template());
-      
-      data.normalModuleFactory.plugin('parser', (parser, options) => {
-        parser.plugin('statement', (expr) => {
+      compatAddPlugin(data.normalModuleFactory, 'parser', (parser) => {
+        compatAddPlugin(parser, 'statement', (expr) => {
           if (!expr.declarations || !expr.declarations.length) return;
           const thisExpr = expr.declarations[0];
           if ([
@@ -91,43 +103,42 @@ class WebpackSvgStore {
             return this.createTaskContext(thisExpr, parser);
           }
         });
+      }, false, 'javascript/auto');
+
+
+      // save file to fs
+      compatAddPlugin(compiler, 'emit', (compilation, callback) => {
+        async.forEach(Object.keys(this.tasks),
+          (key, outerCallback) => {
+            async.forEach(this.tasks[key],
+              (task, callback) => {
+                utils.filesMap(path.join(task.context, task.path || ''), (files) => {
+                  // fileContent
+                  const fileContent = utils.createSprite(
+                    utils.parseFiles(files, this.options), this.options.template);
+
+                  // add sprite to assets
+                  compilation.assets[task.fileName] = {
+                    size: function () {
+                      return Buffer.byteLength(fileContent, 'utf8');
+                    },
+                    source: function () {
+                      return new Buffer(fileContent);
+                    }
+                  };
+                  // done
+                  callback();
+                });
+              }, outerCallback);
+          }, callback);
+      }, true);
+
+      compatAddPlugin(compiler, 'done', () => {
+        this.tasks = {};
       });
-    });
-
-
-    // save file to fs
-    compiler.plugin('emit', (compilation, callback) => {
-      async.forEach(Object.keys(this.tasks),
-        (key, outerCallback) => {
-          async.forEach(this.tasks[key],
-            (task, callback) => {
-              utils.filesMap(path.join(task.context, task.path || ''), (files) => {
-                // fileContent
-                const fileContent = utils.createSprite(
-                  utils.parseFiles(files, this.options), this.options.template);
-
-                // add sprite to assets
-                compilation.assets[task.fileName] = {
-                  size: function () {
-                    return Buffer.byteLength(fileContent, 'utf8');
-                  },
-                  source: function () {
-                    return new Buffer(fileContent);
-                  }
-                };
-                // done
-                callback();
-              });
-            }, outerCallback);
-        }, callback);
-    });
-
-    compiler.plugin('done', () => {
-      this.tasks = {};
     });
   }
 }
-
 
 /**
  * Return function
