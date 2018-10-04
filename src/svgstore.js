@@ -123,7 +123,7 @@ class WebpackSvgStore {
                       return Buffer.byteLength(fileContent, 'utf8');
                     },
                     source: function () {
-                      return new Buffer(fileContent);
+                      return Buffer.from(fileContent);
                     }
                   };
                   // done
