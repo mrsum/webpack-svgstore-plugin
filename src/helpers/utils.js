@@ -17,7 +17,7 @@ const parse = require('htmlparser2');
  * @param  {string} template
  * @return {string}
  */
-const _createSprite = function(data, template) {
+const _createSprite = function (data, template) {
   return pug.renderFile(template, data);
 };
 
@@ -27,7 +27,7 @@ const _createSprite = function(data, template) {
  * @param  {integer}  depth   Depth level
  * @return {void}
  */
-const _log = function(subject, depth) {
+const _log = function (subject, depth) {
   console.log(util.inspect(subject, {
     showHidden: true, depth: depth || 2
   }));
@@ -39,7 +39,7 @@ const _log = function(subject, depth) {
  * @param  {string} id
  * @return {void}
  */
-const _fixIds = function(obj, id) {
+const _fixIds = function (obj, id) {
   // add id
   if (obj.attribs && obj.attribs.id) {
     obj.attribs.id = [id, obj.attribs.id].join('-');
@@ -56,7 +56,7 @@ const _fixIds = function(obj, id) {
  * @param  {string} id
  * @return {void}
  */
-const _fixUrls = function(obj, id) {
+const _fixUrls = function (obj, id) {
   let key;
   let match;
   const json = obj.attribs;
@@ -78,9 +78,8 @@ const _fixUrls = function(obj, id) {
  * @param  {[type]} id    [description]
  * @return {[type]}       [description]
  */
-const _parseSVG = function(arr, id) {
-  const data = [];
-  arr.forEach(function(obj) {
+const _parseSVG = function (arr, id) {
+  arr.forEach(function (obj) {
     if (obj) {
       // add unic ids to urls
       _fixUrls(obj, id);
@@ -90,11 +89,8 @@ const _parseSVG = function(arr, id) {
       if (obj.children && obj.children.length > 0) {
         _parseSVG(obj.children, id);
       }
-      data.push(obj, id);
     }
   });
-
-  return data;
 };
 
 /**
@@ -103,15 +99,16 @@ const _parseSVG = function(arr, id) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-const _defs = function(id, dom, data) {
+const _defs = function (id, dom, data) {
   // lets find defs into dom
-  const defs = _.filter(dom.children, { name: 'defs' });
-  const parseChilds = function(item, data) {
-    item.forEach(function(child) {
+  const defs = _.filter(dom.children, {name: 'defs'});
+  const parseChilds = function (item, data) {
+    item.forEach(function (child) {
       switch (child.name) {
         case 'use': {
-          child.attribs['xlink:href'] = ['#' + id, child.attribs['xlink:href'].replace('#', '') ].join('-');
-        } break;
+          child.attribs['xlink:href'] = ['#' + id, child.attribs['xlink:href'].replace('#', '')].join('-');
+        }
+          break;
         default:
           child.attribs && child.attribs.id
             ? child.attribs.id = [id, child.attribs.id].join('-')
@@ -128,7 +125,7 @@ const _defs = function(id, dom, data) {
     });
   };
 
-  defs.forEach(function(item) {
+  defs.forEach(function (item) {
     if (item.children && item.children.length > 0) {
       parseChilds(item.children, data);
     }
@@ -143,13 +140,13 @@ const _defs = function(id, dom, data) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-const _symbols = function(id, dom, data, prefix) {
+const _symbols = function (id, dom, data, prefix) {
   // create symbol object
   const symbol = {
     type: 'tag',
     name: 'symbol',
     attribs: {
-      viewBox: dom.attribs ? dom.attribs.viewBox: null,
+      viewBox: dom.attribs ? dom.attribs.viewBox : null,
       id: prefix + id
     },
     next: null,
@@ -158,7 +155,7 @@ const _symbols = function(id, dom, data, prefix) {
   };
 
   // add dom children without defs and titles
-  symbol.children = _.filter(dom.children, function(obj) {
+  symbol.children = _.filter(dom.children, function (obj) {
     return obj.name !== 'defs' && obj.name !== 'title';
   });
 
@@ -176,7 +173,7 @@ const _symbols = function(id, dom, data, prefix) {
  * @param  {string} filename [description]
  * @return {string}          [description]
  */
-const _convertFilenameToId = function(filename) {
+const _convertFilenameToId = function (filename) {
   return filename.split('.').join('-').toLowerCase();
 };
 
@@ -185,12 +182,8 @@ const _convertFilenameToId = function(filename) {
  * @param  {string} input Destination path
  * @return {array}        Array of paths
  */
-const _filesMap = function(input, cb) {
-  const data = input;
-
-  globby(data).then(function(fileList) {
-    cb(fileList);
-  });
+const _filesMap = function (data) {
+  return globby(data);
 };
 
 /**
@@ -198,7 +191,7 @@ const _filesMap = function(input, cb) {
  * @param  {[type]} dom [description]
  * @return {[type]}     [description]
  */
-const _parseDomObject = function(data, filename, dom, prefix) {
+const _parseDomObject = function (data, filename, dom, prefix) {
   const id = _convertFilenameToId(filename);
   if (dom && dom[0]) {
     _defs(id, dom[0], data.defs);
@@ -214,7 +207,7 @@ const _parseDomObject = function(data, filename, dom, prefix) {
  * @param  {integer}  loop  loop count
  * @return {[type]}         minified source
  */
-const _minify = function(file, svgoOptions) {
+const _minify = function (file, svgoOptions) {
   const min = new Svgo(svgoOptions);
   let source = file;
 
@@ -231,7 +224,7 @@ const _minify = function(file, svgoOptions) {
  * [parseFiles description]
  * @return {[type]} [description]
  */
-const _parseFiles = function(files, options) {
+const _parseFiles = function (files, options) {
   const self = this;
   let data = {
     svg: options.svg,
@@ -240,13 +233,13 @@ const _parseFiles = function(files, options) {
   };
 
   // each over files
-  files.forEach(function(file) {
+  files.forEach(function (file) {
     // load and minify
     const buffer = _minify(fs.readFileSync(file, 'utf8'), options.svgoOptions);
     // get filename for id generation
     const filename = path.basename(file, '.svg');
 
-    const handler = new parse.DomHandler(function(error, dom) {
+    const handler = new parse.DomHandler(function (error, dom) {
       if (error) self.log(error);
       else data = _parseDomObject(data, filename, dom, options.prefix);
     });
@@ -268,7 +261,7 @@ const _parseFiles = function(files, options) {
  * @param  {[type]} name   [description]
  * @return {[type]}        [description]
  */
-const _hash = function(str, hash) {
+const _hash = function (str, hash) {
   return str.indexOf('[hash]') >= 0
     ? str.replace('[hash]', hash)
     : str;

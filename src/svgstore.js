@@ -21,7 +21,7 @@ const NullFactory = require('webpack/lib/NullFactory');
 const async = require('async');
 
 function compatAddPlugin(tappable, hookName, callback, async = false, forType = null) {
-  const method = (async) ? 'tapAsync' : 'tap';
+  const method = (async) ? 'tapPromise' : 'tap';
   if (tappable.hooks) {
     if (forType) {
       tappable.hooks[hookName][method](forType, WebpackSvgStore.name, callback);
@@ -107,30 +107,18 @@ class WebpackSvgStore {
 
 
       // save file to fs
-      compatAddPlugin(compiler, 'emit', (compilation, callback) => {
-        async.forEach(Object.keys(this.tasks),
-          (key, outerCallback) => {
-            async.forEach(this.tasks[key],
-              (task, callback) => {
-                utils.filesMap(path.join(task.context, task.path || ''), (files) => {
-                  // fileContent
-                  const fileContent = utils.createSprite(
-                    utils.parseFiles(files, this.options), this.options.template);
-
-                  // add sprite to assets
-                  compilation.assets[task.fileName] = {
-                    size: function () {
-                      return Buffer.byteLength(fileContent, 'utf8');
-                    },
-                    source: function () {
-                      return Buffer.from(fileContent);
-                    }
-                  };
-                  // done
-                  callback();
-                });
-              }, outerCallback);
-          }, callback);
+      compatAddPlugin(compiler, 'emit', (compilation) => {
+        return Promise.all(Object.keys(this.tasks).map(async (key) => {
+          const tasksJobs = this.tasks[key];
+          return Promise.all(tasksJobs.map(async task => {
+            const glob = path.join(task.context, task.path || '');
+            const files = await utils.filesMap(glob);
+            const content = utils.parseFiles(files, this.options);
+            const fileContent = utils.createSprite(content, this.options.template);
+            // add sprite to assets
+            compilation.assets[task.fileName] = {size: () => Buffer.byteLength(fileContent, 'utf8'), source: () => Buffer.from(fileContent)};
+          }))
+        }));
       }, true);
 
       compatAddPlugin(compiler, 'done', () => {
