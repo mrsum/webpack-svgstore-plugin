@@ -194,6 +194,15 @@ const _filesMap = function(input, cb) {
 };
 
 /**
+ * Build files map sync
+ * @param  {string} input Destination path
+ * @return {array}        Array of paths
+ */
+const _filesMapSync = function(input) {
+  return globby.sync(input);
+};
+
+/**
  * Parse dom objects
  * @param  {[type]} dom [description]
  * @return {[type]}     [description]
@@ -275,12 +284,31 @@ const _hash = function(str, hash) {
 };
 
 /**
+ * [_hashByString description]
+ * @param {string} str
+ * @return {[type]} [description]
+ */
+const _hashByString = function(str) {
+  const sha = crypto.createHash('md5');
+  sha.update(str);
+  
+  return sha.digest('hex');
+};
+
+/**
  * Create hash
  * @param  {[type]} buffer [description]
  * @param  {[type]} name   [description]
  * @return {[type]}        [description]
  */
 module.exports.hash = _hash;
+
+/**
+ * Create md5 hash by string
+ * @param {string} str
+ * @return {string} hash
+ */
+module.exports.hashByString = _hashByString;
 
 /**
  * Deep log util
@@ -301,6 +329,14 @@ module.exports.parseFiles = _parseFiles;
  * @return {array}        Array of paths
  */
 module.exports.filesMap = _filesMap;
+
+
+/**
+ * Build files map sync
+ * @param  {string} input Destination path
+ * @return {array}        Array of paths
+ */
+module.exports.filesMapSync = _filesMapSync;
 
 /**
  * Parse dom objects

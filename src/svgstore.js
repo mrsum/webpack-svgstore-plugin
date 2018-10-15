@@ -61,7 +61,11 @@ class WebpackSvgStore {
       }
     });
 
-    data.fileName = utils.hash(data.fileName, parser.state.current.buildTimestamp);
+    const files = utils.filesMapSync(path.join(data.context, data.path || ''));
+    
+    data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
+    data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
+
     let replacement = expr.id.name + ' = { filename: ' + "__webpack_require__.p +" + '"' + data.fileName + '" }';
     let dep = new ConstDependency(replacement, expr.range);
     dep.loc = expr.loc;
@@ -101,23 +105,17 @@ class WebpackSvgStore {
         (key, outerCallback) => {
           async.forEach(this.tasks[key],
             (task, callback) => {
-              utils.filesMap(path.join(task.context, task.path || ''), (files) => {
-                // fileContent
-                const fileContent = utils.createSprite(
-                  utils.parseFiles(files, this.options), this.options.template);
-
-                // add sprite to assets
-                compilation.assets[task.fileName] = {
-                  size: function () {
-                    return Buffer.byteLength(fileContent, 'utf8');
-                  },
-                  source: function () {
-                    return new Buffer(fileContent);
-                  }
-                };
-                // done
-                callback();
-              });
+              // add sprite to assets
+              compilation.assets[task.fileName] = {
+                size: function () {
+                  return Buffer.byteLength(task.fileContent, 'utf8');
+                },
+                source: function () {
+                  return new Buffer(task.fileContent);
+                }
+              };
+              // done
+              callback();
             }, outerCallback);
         }, callback);
     });
