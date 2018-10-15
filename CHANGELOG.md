@@ -1,3 +1,7 @@
+### 4.1.0
+
+- Implement `hash` by svg sprite content
+
 ### 4.0.3
 
 - Adding `ready` helper, fixes DOMContentLoaded & script race condition
