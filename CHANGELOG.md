@@ -1,8 +1,14 @@
+### 5.0.0
+  - Code refactor for better performance and maintainablity 
+  BREAKING CHANGE: 
+   - node.js 7.6.1+ is needed
 ### 4.1.0
 
 - Support webpack v4 (backwards compatible)
 - Update dependencies to last versions
 - (dev) build on windows
+- Implement `hash` by svg sprite content
+
 
 ### 4.0.3
 

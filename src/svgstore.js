@@ -75,7 +75,11 @@ class WebpackSvgStore {
       }
     });
 
-    data.fileName = utils.hash(data.fileName, parser.state.current.buildTimestamp);
+    const files = utils.filesMapSync(path.join(data.context, data.path || ''));
+    
+    data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
+    data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
+
     let replacement = expr.id.name + ' = { filename: ' + "__webpack_require__.p +" + '"' + data.fileName + '" }';
     let dep = new ConstDependency(replacement, expr.range);
     dep.loc = expr.loc;
@@ -105,7 +109,6 @@ class WebpackSvgStore {
         });
       }, false, 'javascript/auto');
 
-
       // save file to fs
       compatAddPlugin(compiler, 'emit', (compilation) => {
         return Promise.all(Object.keys(this.tasks).map(async (key) => {
@@ -120,6 +123,7 @@ class WebpackSvgStore {
           }))
         }));
       }, true);
+
 
       compatAddPlugin(compiler, 'done', () => {
         this.tasks = {};
