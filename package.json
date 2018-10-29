@@ -26,7 +26,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "async": "^2.6.1",
     "globby": "^8.0.1",
     "htmlparser2": "3.9.2",
     "lodash": "^4.17.11",

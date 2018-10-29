@@ -18,7 +18,6 @@ const path = require('path');
 const utils = require('./helpers/utils');
 const ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 const NullFactory = require('webpack/lib/NullFactory');
-const async = require('async');
 
 function compatAddPlugin(tappable, hookName, callback, async = false, forType = null) {
   const method = (async) ? 'tapPromise' : 'tap';
@@ -32,6 +31,14 @@ function compatAddPlugin(tappable, hookName, callback, async = false, forType = 
     tappable.plugin(hookName, callback);
   }
 }
+
+const allowedMagicVariables = [
+  '__svg__',
+  '__sprite__',
+  '__svgstore__',
+  '__svgsprite__',
+  '__webpack_svgstore__'
+];
 
 class WebpackSvgStore {
 
@@ -76,7 +83,7 @@ class WebpackSvgStore {
     });
 
     const files = utils.filesMapSync(path.join(data.context, data.path || ''));
-    
+
     data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
     data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
 
@@ -97,39 +104,38 @@ class WebpackSvgStore {
         compatAddPlugin(parser, 'statement', (expr) => {
           if (!expr.declarations || !expr.declarations.length) return;
           const thisExpr = expr.declarations[0];
-          if ([
-            '__svg__',
-            '__sprite__',
-            '__svgstore__',
-            '__svgsprite__',
-            '__webpack_svgstore__'
-          ].indexOf(thisExpr.id.name) > -1) {
+          if (allowedMagicVariables.indexOf(thisExpr.id.name) > -1) {
             return this.createTaskContext(thisExpr, parser);
           }
         });
       }, false, 'javascript/auto');
 
       // save file to fs
-      compatAddPlugin(compiler, 'emit', (compilation) => {
-        return Promise.all(Object.keys(this.tasks).map(async (key) => {
-          const tasksJobs = this.tasks[key];
-          return Promise.all(tasksJobs.map(async task => {
-            const glob = path.join(task.context, task.path || '');
-            const files = await utils.filesMap(glob);
-            const content = utils.parseFiles(files, this.options);
-            const fileContent = utils.createSprite(content, this.options.template);
-            // add sprite to assets
-            compilation.assets[task.fileName] = {size: () => Buffer.byteLength(fileContent, 'utf8'), source: () => Buffer.from(fileContent)};
-          }))
-        }));
+      compatAddPlugin(compilation, 'additionalAssets', () => {
+        const taskKeysArr = Object.keys(this.tasks);
+        if (taskKeysArr.length === 0) return Promise.resolve();
+        else {
+          return Promise.all(taskKeysArr.map(async (key) => {
+            const tasksJobs = this.tasks[key];
+            return Promise.all(tasksJobs.map(async task => {
+              // add sprite to assets
+              compilation.assets[task.fileName] = {
+                size: () => Buffer.byteLength(task.fileContent, 'utf8'),
+                source: () => Buffer.from(task.fileContent)
+              };
+            }))
+          }));
+        }
       }, true);
 
-
-      compatAddPlugin(compiler, 'done', () => {
+      compatAddPlugin(compilation, 'afterSeal', () => {
         this.tasks = {};
       });
+
     });
+
   }
+
 }
 
 /**
