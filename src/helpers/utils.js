@@ -177,23 +177,6 @@ const _convertFilenameToId = function (filename) {
   return filename.split('.').join('-').toLowerCase();
 };
 
-/**
- * Build files map
- * @param  {string} input Destination path
- * @return {array}        Array of paths
- */
-const _filesMap = function (data) {
-  return globby(data);
-};
-
-/**
- * Build files map sync
- * @param  {string} input Destination path
- * @return {array}        Array of paths
- */
-const _filesMapSync = function(input) {
-  return globby.sync(input);
-};
 
 /**
  * Parse dom objects
@@ -316,12 +299,6 @@ module.exports.log = _log;
  */
 module.exports.parseFiles = _parseFiles;
 
-/**
- * Build files map
- * @param  {string} input Destination path
- * @return {array}        Array of paths
- */
-module.exports.filesMap = _filesMap;
 
 
 /**
@@ -329,7 +306,7 @@ module.exports.filesMap = _filesMap;
  * @param  {string} input Destination path
  * @return {array}        Array of paths
  */
-module.exports.filesMapSync = _filesMapSync;
+module.exports.filesMapSync = globby.sync;
 
 /**
  * Parse dom objects
