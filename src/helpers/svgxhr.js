@@ -15,6 +15,21 @@ const svgXHR = function (options) {
   }
   const ajax = new XMLHttpRequest();
 
+  if (options.addBaseUrl){
+    let baseUrl;
+    if (typeof baseUrl === 'undefined') {
+      if (typeof window.baseUrl !== 'undefined') {
+        baseUrl = window.baseUrl;
+      } else {
+        baseUrl =
+          window.location.protocol +
+          '//' +
+          window.location.hostname +
+          (window.location.port ? ':' + window.location.port : '');
+      }
+    }
+    url = baseUrl+ '/' + url;
+  }
   const fullPath = url.replace(/([^:]\/)\/+/g, '$1');
 
   ajax.open('GET', fullPath, true);
