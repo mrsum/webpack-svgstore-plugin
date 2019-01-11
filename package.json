@@ -22,10 +22,10 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "async": "2.1.4",
+    "async": "2.6.1",
     "globby": "6.1.0",
     "htmlparser2": "3.9.2",
-    "lodash": "4.17.2",
+    "lodash": "4.17.11",
     "pug": "2.0.0-beta6",
     "svgo": "0.7.1"
   },
