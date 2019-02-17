@@ -18,7 +18,27 @@ const path = require('path');
 const utils = require('./helpers/utils');
 const ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 const NullFactory = require('webpack/lib/NullFactory');
-const async = require('async');
+
+function compatAddPlugin(tappable, hookName, callback, async = false, forType = null) {
+  const method = (async) ? 'tapPromise' : 'tap';
+  if (tappable.hooks) {
+    if (forType) {
+      tappable.hooks[hookName][method](forType, WebpackSvgStore.name, callback);
+    } else {
+      tappable.hooks[hookName][method](WebpackSvgStore.name, callback);
+    }
+  } else {
+    tappable.plugin(hookName, callback);
+  }
+}
+
+const allowedMagicVariables = [
+  '__svg__',
+  '__sprite__',
+  '__svgstore__',
+  '__svgsprite__',
+  '__webpack_svgstore__'
+];
 
 class WebpackSvgStore {
 
@@ -36,10 +56,11 @@ class WebpackSvgStore {
 
   addTask(file, value) {
     this.tasks[file] ? this.tasks[file].push(value) : (() => {
-        this.tasks[file] = [];
-        this.tasks[file].push(value);
-      })();
+      this.tasks[file] = [];
+      this.tasks[file].push(value);
+    })();
   }
+
 
   createTaskContext(expr, parser) {
     const data = {
@@ -62,7 +83,7 @@ class WebpackSvgStore {
     });
 
     const files = utils.filesMapSync(path.join(data.context, data.path || ''));
-    
+
     data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
     data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
 
@@ -76,56 +97,46 @@ class WebpackSvgStore {
 
   apply(compiler) {
     // AST parser
-    compiler.plugin('compilation', (compilation, data) => {
-      
+    compatAddPlugin(compiler, 'compilation', (compilation, data) => {
       compilation.dependencyFactories.set(ConstDependency, new NullFactory());
       compilation.dependencyTemplates.set(ConstDependency, new ConstDependency.Template());
-      
-      data.normalModuleFactory.plugin('parser', (parser, options) => {
-        parser.plugin('statement', (expr) => {
+      compatAddPlugin(data.normalModuleFactory, 'parser', (parser) => {
+        compatAddPlugin(parser, 'statement', (expr) => {
           if (!expr.declarations || !expr.declarations.length) return;
           const thisExpr = expr.declarations[0];
-          if ([
-            '__svg__',
-            '__sprite__',
-            '__svgstore__',
-            '__svgsprite__',
-            '__webpack_svgstore__'
-          ].indexOf(thisExpr.id.name) > -1) {
+          if (allowedMagicVariables.indexOf(thisExpr.id.name) > -1) {
             return this.createTaskContext(thisExpr, parser);
           }
         });
-      });
-    });
+      }, false, 'javascript/auto');
 
-
-    // save file to fs
-    compiler.plugin('emit', (compilation, callback) => {
-      async.forEach(Object.keys(this.tasks),
-        (key, outerCallback) => {
-          async.forEach(this.tasks[key],
-            (task, callback) => {
+      // save file to fs
+      compatAddPlugin(compilation, 'additionalAssets', () => {
+        const taskKeysArr = Object.keys(this.tasks);
+        if (taskKeysArr.length === 0) return Promise.resolve();
+        else {
+          return Promise.all(taskKeysArr.map(async (key) => {
+            const tasksJobs = this.tasks[key];
+            return Promise.all(tasksJobs.map(async task => {
               // add sprite to assets
               compilation.assets[task.fileName] = {
-                size: function () {
-                  return Buffer.byteLength(task.fileContent, 'utf8');
-                },
-                source: function () {
-                  return new Buffer(task.fileContent);
-                }
+                size: () => Buffer.byteLength(task.fileContent, 'utf8'),
+                source: () => Buffer.from(task.fileContent)
               };
-              // done
-              callback();
-            }, outerCallback);
-        }, callback);
+            }))
+          }));
+        }
+      }, true);
+
+      compatAddPlugin(compilation, 'afterSeal', () => {
+        this.tasks = {};
+      });
+
     });
 
-    compiler.plugin('done', () => {
-      this.tasks = {};
-    });
   }
-}
 
+}
 
 /**
  * Return function
