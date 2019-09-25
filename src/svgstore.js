@@ -4,7 +4,8 @@
 const defaults = {
   svg: {
     xmlns: 'http://www.w3.org/2000/svg',
-    style: 'position:absolute; width: 0; height: 0'
+    style: 'position:absolute; width: 0; height: 0',
+    'xmlns:xlink': 'http://www.w3.org/1999/xlink'
   },
   svgoOptions: {},
   name: 'sprite.[hash].svg',
@@ -62,7 +63,7 @@ class WebpackSvgStore {
     });
 
     const files = utils.filesMapSync(path.join(data.context, data.path || ''));
-    
+
     data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
     data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
 
@@ -77,10 +78,10 @@ class WebpackSvgStore {
   apply(compiler) {
     // AST parser
     compiler.plugin('compilation', (compilation, data) => {
-      
+
       compilation.dependencyFactories.set(ConstDependency, new NullFactory());
       compilation.dependencyTemplates.set(ConstDependency, new ConstDependency.Template());
-      
+
       data.normalModuleFactory.plugin('parser', (parser, options) => {
         parser.plugin('statement', (expr) => {
           if (!expr.declarations || !expr.declarations.length) return;
