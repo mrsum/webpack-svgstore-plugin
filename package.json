@@ -25,7 +25,7 @@
     "async": "2.1.4",
     "globby": "6.1.0",
     "htmlparser2": "3.9.2",
-    "lodash": "4.17.2",
+    "lodash": "4.17.15",
     "pug": "2.0.0-beta6",
     "svgo": "0.7.1"
   },
