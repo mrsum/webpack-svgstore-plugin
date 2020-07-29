@@ -7,7 +7,6 @@ var SvgStore = require('../src/svgstore');
 module.exports = function(_path) {
   // define local variables
   var distPath = path.join(_path, 'platform', 'dist');
-  var sourcePath = path.join(_path, 'platform', 'static');
 
   return {
     entry: {
@@ -20,7 +19,7 @@ module.exports = function(_path) {
       publicPath: '/platform/'
     },
     resolve: {
-      extensions: ['', '.js'],
+      extensions: ['.js']
     },
     plugins: [
       // create svgStore instance object

@@ -1,3 +1,27 @@
+### 4.1.0
+
+- Implement `hash` by svg sprite content
+
+### 4.0.3
+
+- Adding `ready` helper, fixes DOMContentLoaded & script race condition
+
+### 4.0.2
+
+- Insert sprite on DOMContentLoaded
+
+### 4.0.1
+
+- Fix missing sprite variables
+
+### 4.0.0
+
+- Support webpack v2
+
+### 3.0.6
+
+- Update dependencies to last versions
+
 ### 3.0.2
 
 - Minor readme change
