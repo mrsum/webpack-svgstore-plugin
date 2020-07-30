@@ -31,7 +31,7 @@ var svgXHR = function(options) {
     }
   }
 
-  _fullPath = (baseUrl + '/' + url).replace(/([^:]\/)\/+/g, '$1');
+  _fullPath = url.replace(/([^:]\/)\/+/g, '$1');
   _ajax.open('GET', _fullPath, true);
   _ajax.onprogress = function() {};
   _ajax.onload = function() {
