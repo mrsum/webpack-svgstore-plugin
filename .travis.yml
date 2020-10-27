@@ -1,7 +1,7 @@
 language: node_js
 node_js:
-  - "6.0"
-  - "4.0"
+  - "8.0"
+  - "10.0"
 env:
   global:
     - NODE_ENV=platform
