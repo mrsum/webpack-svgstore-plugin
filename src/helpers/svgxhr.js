@@ -1,9 +1,11 @@
 /**
  * Load svg via ajax
- * @param  {string} url path to svg sprite
  * @generator: svgstore-webpack-plugin
  * @see: https://www.npmjs.com/package/svgstore-webpack-plugin
- * @return {[type]}     [description]
+ * @return {boolean}     [description]
+ * @param {object} options
+ * @param {string} [options.filename]
+ * @param {boolean} [options.addBaseUrl]
  */
 const svgXHR = (options) => {
   let url;
@@ -49,8 +51,8 @@ const svgXHR = (options) => {
 /**
  * jQuery like $.ready function.
  *
- * @param {Function} fn
  * @return void
+ * @param callback
  */
 function domready(callback) {
   if (document.readyState === 'complete' || (document.readyState !== 'loading' && !document.documentElement.doScroll)) {
