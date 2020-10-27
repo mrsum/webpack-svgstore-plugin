@@ -1,12 +1,10 @@
-'use strict';
-
 // Depends
-var path = require('path');
-var SvgStore = require('../src/svgstore');
+const path = require('path');
+const SvgStore = require('../src/svgstore');
 
-module.exports = function(_path) {
+module.exports = function (_path) {
   // define local variables
-  var distPath = path.join(_path, 'platform', 'dist');
+  const distPath = path.join(_path, 'platform', 'dist');
 
   return {
     entry: {
@@ -26,9 +24,7 @@ module.exports = function(_path) {
       new SvgStore.Options({
         // svgo options
         svgoOptions: {
-          plugins: [
-            { removeTitle: true }
-          ]
+          plugins: [{ removeTitle: true }]
         }
       })
     ]

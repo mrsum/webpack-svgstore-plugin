@@ -1,42 +1,40 @@
 /**
  * Load svg via ajax
  * @param  {string} url path to svg sprite
- * @generator: webpack-svgstore-plugin
- * @see: https://www.npmjs.com/package/webpack-svgstore-plugin
+ * @generator: svgstore-webpack-plugin
+ * @see: https://www.npmjs.com/package/svgstore-webpack-plugin
  * @return {[type]}     [description]
  */
-const svgXHR = function (options) {
+const svgXHR = (options) => {
   let url;
 
-  url = (options && options.filename) ? options.filename : null;
+  url = options && options.filename ? options.filename : null;
 
   if (!url) {
     return false;
   }
   const ajax = new XMLHttpRequest();
 
-  if (options.addBaseUrl){
+  if (options.addBaseUrl) {
     let baseUrl;
     if (typeof baseUrl === 'undefined') {
       if (typeof window.baseUrl !== 'undefined') {
         baseUrl = window.baseUrl;
       } else {
-        baseUrl =
-          window.location.protocol +
-          '//' +
-          window.location.hostname +
-          (window.location.port ? ':' + window.location.port : '');
+        baseUrl = `${window.location.protocol}//${window.location.hostname}${
+          window.location.port ? `:${window.location.port}` : ''
+        }`;
       }
     }
-    url = baseUrl+ '/' + url;
+    url = `${baseUrl}/${url}`;
   }
   const fullPath = url.replace(/([^:]\/)\/+/g, '$1');
 
   ajax.open('GET', fullPath, true);
 
-  ajax.onload = function () {
-    if (!ajax.responseText || ajax.responseText.substr(0, 4) !== "<svg") {
-      throw Error("Invalid SVG Response");
+  ajax.onload = () => {
+    if (!ajax.responseText || ajax.responseText.substr(0, 4) !== '<svg') {
+      throw Error('Invalid SVG Response');
     }
     if (ajax.status < 200 || ajax.status >= 300) {
       return;
@@ -62,4 +60,4 @@ function domready(callback) {
   }
 }
 
-module.exports = svgXHR;
+export default svgXHR;

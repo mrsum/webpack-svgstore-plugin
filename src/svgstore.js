@@ -1,4 +1,9 @@
-'use strict';
+// Depends
+const _ = require('lodash');
+const path = require('path');
+const utils = require('./helpers/utils');
+const ConstDependency = require('webpack/lib/dependencies/ConstDependency');
+const NullFactory = require('webpack/lib/NullFactory');
 
 // Defaults
 const defaults = {
@@ -9,18 +14,11 @@ const defaults = {
   svgoOptions: {},
   name: 'sprite.[hash].svg',
   prefix: 'icon-',
-  template: __dirname + '/templates/layout.pug'
+  template: path.join(__dirname, 'templates', 'layout.pug')
 };
 
-// Depends
-const _ = require('lodash');
-const path = require('path');
-const utils = require('./helpers/utils');
-const ConstDependency = require('webpack/lib/dependencies/ConstDependency');
-const NullFactory = require('webpack/lib/NullFactory');
-
 function compatAddPlugin(tappable, hookName, callback, async = false, forType = null) {
-  const method = (async) ? 'tapPromise' : 'tap';
+  const method = async ? 'tapPromise' : 'tap';
   if (tappable.hooks) {
     if (forType) {
       tappable.hooks[hookName][method](forType, WebpackSvgStore.name, callback);
@@ -32,35 +30,27 @@ function compatAddPlugin(tappable, hookName, callback, async = false, forType = 
   }
 }
 
-const allowedMagicVariables = [
-  '__svg__',
-  '__sprite__',
-  '__svgstore__',
-  '__svgsprite__',
-  '__webpack_svgstore__'
-];
+const allowedMagicVariables = ['__svg__', '__sprite__', '__svgstore__', '__svgsprite__', '__webpack_svgstore__'];
 
 class WebpackSvgStore {
-
   /**
    * Constructor
-   * @param {string} input   [description]
-   * @param {string} output  [description]
    * @param {object} options [description]
    * @return {object}
    */
   constructor(options) {
     this.tasks = {};
     this.options = _.merge({}, defaults, options);
-  };
-
-  addTask(file, value) {
-    this.tasks[file] ? this.tasks[file].push(value) : (() => {
-      this.tasks[file] = [];
-      this.tasks[file].push(value);
-    })();
   }
 
+  addTask(file, value) {
+    this.tasks[file]
+      ? this.tasks[file].push(value)
+      : (() => {
+          this.tasks[file] = [];
+          this.tasks[file].push(value);
+        })();
+  }
 
   createTaskContext(expr, parser) {
     const data = {
@@ -87,8 +77,8 @@ class WebpackSvgStore {
     data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
     data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
 
-    let replacement = expr.id.name + ' = { filename: ' + "__webpack_require__.p +" + '"' + data.fileName + '" }';
-    let dep = new ConstDependency(replacement, expr.range);
+    const replacement = expr.id.name + ' = { filename: ' + '__webpack_require__.p +' + '"' + data.fileName + '" }';
+    const dep = new ConstDependency(replacement, expr.range);
     dep.loc = expr.loc;
     parser.state.current.addDependency(dep);
     // parse repl
@@ -100,42 +90,54 @@ class WebpackSvgStore {
     compatAddPlugin(compiler, 'compilation', (compilation, data) => {
       compilation.dependencyFactories.set(ConstDependency, new NullFactory());
       compilation.dependencyTemplates.set(ConstDependency, new ConstDependency.Template());
-      compatAddPlugin(data.normalModuleFactory, 'parser', (parser) => {
-        compatAddPlugin(parser, 'statement', (expr) => {
-          if (!expr.declarations || !expr.declarations.length) return;
-          const thisExpr = expr.declarations[0];
-          if (allowedMagicVariables.indexOf(thisExpr.id.name) > -1) {
-            return this.createTaskContext(thisExpr, parser);
-          }
-        });
-      }, false, 'javascript/auto');
+      compatAddPlugin(
+        data.normalModuleFactory,
+        'parser',
+        (parser) => {
+          compatAddPlugin(parser, 'statement', (expr) => {
+            if (!expr.declarations || !expr.declarations.length) return;
+            const thisExpr = expr.declarations[0];
+            if (allowedMagicVariables.indexOf(thisExpr.id.name) > -1) {
+              return this.createTaskContext(thisExpr, parser);
+            }
+          });
+        },
+        false,
+        'javascript/auto'
+      );
 
       // save file to fs
-      compatAddPlugin(compilation, 'additionalAssets', () => {
-        const taskKeysArr = Object.keys(this.tasks);
-        if (taskKeysArr.length === 0) return Promise.resolve();
-        else {
-          return Promise.all(taskKeysArr.map(async (key) => {
-            const tasksJobs = this.tasks[key];
-            return Promise.all(tasksJobs.map(async task => {
-              // add sprite to assets
-              compilation.assets[task.fileName] = {
-                size: () => Buffer.byteLength(task.fileContent, 'utf8'),
-                source: () => Buffer.from(task.fileContent)
-              };
-            }))
-          }));
-        }
-      }, true);
+      compatAddPlugin(
+        compilation,
+        'additionalAssets',
+        () => {
+          const taskKeysArr = Object.keys(this.tasks);
+          if (taskKeysArr.length === 0) return Promise.resolve();
+          else {
+            return Promise.all(
+              taskKeysArr.map(async (key) => {
+                const tasksJobs = this.tasks[key];
+                return Promise.all(
+                  tasksJobs.map(async (task) => {
+                    // add sprite to assets
+                    compilation.assets[task.fileName] = {
+                      size: () => Buffer.byteLength(task.fileContent, 'utf8'),
+                      source: () => Buffer.from(task.fileContent)
+                    };
+                  })
+                );
+              })
+            );
+          }
+        },
+        true
+      );
 
       compatAddPlugin(compilation, 'afterSeal', () => {
         this.tasks = {};
       });
-
     });
-
   }
-
 }
 
 /**

@@ -1,29 +1,25 @@
-'use strict';
-
 // Depends
-var fs = require('fs');
-var chai = require('chai');
-var path = require('path');
-var webpack = require('webpack');
-var mocha = require('mocha');
-var describe = mocha.describe;
+const fs = require('fs');
+const chai = require('chai');
+const path = require('path');
+const webpack = require('webpack');
+const mocha = require('mocha');
+const describe = mocha.describe;
 
+const Plugin = require('../svgstore');
+const utils = require('../helpers/utils');
+const configPath = path.join(__dirname, '..', '..', 'webpack.config.js');
+const config = require(configPath);
 
-var Plugin = require('../svgstore');
-var utils = require('../helpers/utils');
-var configPath = path.join(__dirname, '..', '..', 'webpack.config.js');
-var config = require(configPath);
-
-var rawFilePath = path.resolve(__dirname, './svg/test_svg.svg');
-var compiledFilePath = path.resolve(__dirname, './svg/compiled_svg.svg');
-
+const rawFilePath = path.resolve(__dirname, './svg/test_svg.svg');
+const compiledFilePath = path.resolve(__dirname, './svg/compiled_svg.svg');
 
 /**
  * Run example
  * @param  {Function} done [description]
  * @return {[type]}        [description]
  */
-var runRelativePathsExample = function (done) {
+const runRelativePathsExample = function (done) {
   webpack(config, function () {
     done();
   });
@@ -34,13 +30,17 @@ var runRelativePathsExample = function (done) {
  * @param  {Function} done [description]
  * @return {[type]}        [description]
  */
-var runAbsolutePathsExample = function (done) {
-  var instance = new Plugin(path.join(__dirname, '..', 'svg-source', '**/*.svg'), path.join(__dirname, '..', 'sprites'), {
-    name: 'issue51.[hash].sprite.svg',
-    chunk: false, // if chunk is equal to false,
-    prefix: 'icon-',
-    svgoOptions: {}
-  });
+const runAbsolutePathsExample = function (done) {
+  const instance = new Plugin(
+    path.join(__dirname, '..', 'svg-source', '**/*.svg'),
+    path.join(__dirname, '..', 'sprites'),
+    {
+      name: 'issue51.[hash].sprite.svg',
+      chunk: false, // if chunk is equal to false,
+      prefix: 'icon-',
+      svgoOptions: {}
+    }
+  );
 
   // @see https://github.com/mrsum/webpack-svgstore-plugin/issues/51
   // replace plugin config
@@ -51,30 +51,31 @@ var runAbsolutePathsExample = function (done) {
   });
 };
 
-
 describe('utils.log', function () {
-  var assert = chai.assert;
+  const assert = chai.assert;
 
   it('function is exists', function () {
     assert.typeOf(utils.log, 'function');
   });
 
   it('function is callable', function (done) {
-    utils.log({message: 'Hello from tests'}, 3);
+    utils.log({ message: 'Hello from tests' }, 3);
     done();
   });
 });
 
-
 describe('utils.hash', function () {
-  var assert = chai.assert;
+  const assert = chai.assert;
   it('function is exists', function () {
     assert.typeOf(utils.hash, 'function');
   });
 
   it('check hashsum #1', function () {
     // var content = '<span>hello svg</span>';
-    assert.equal(utils.hash('[hash].sprite.svg', 'cdbf2bdb4f64b7f94b4779d2320918d9'), 'cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg');
+    assert.equal(
+      utils.hash('[hash].sprite.svg', 'cdbf2bdb4f64b7f94b4779d2320918d9'),
+      'cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'
+    );
   });
 
   // it('check hashsum #2', function() {
@@ -85,17 +86,17 @@ describe('utils.hash', function () {
 });
 
 describe('utils.symbols', function () {
-  var assert = chai.assert;
+  const assert = chai.assert;
   it('function is exists', function () {
     assert.typeOf(utils.symbols, 'function');
   });
 });
 
 describe('utils.createSprite', function () {
-  var arr = [];
-  var assert = chai.assert;
-  var output = fs.readFileSync(compiledFilePath, 'utf-8');
-  var options = {
+  const arr = [];
+  const assert = chai.assert;
+  const output = fs.readFileSync(compiledFilePath, 'utf-8');
+  const options = {
     svg: {
       xmlns: 'http://www.w3.org/2000/svg',
       style: 'position:absolute; width: 0; height: 0'
@@ -107,7 +108,7 @@ describe('utils.createSprite', function () {
     ajaxWrapper: false,
     template: path.join(__dirname, '..', 'templates/layout.pug')
   };
-  var source;
+  let source;
 
   arr.push(rawFilePath);
 
@@ -120,7 +121,7 @@ describe('utils.createSprite', function () {
 });
 
 describe('utils.filesMapSync', function () {
-  var assert = chai.assert;
+  const assert = chai.assert;
 
   it('should contain filesMapSync function', function () {
     assert.typeOf(utils.filesMapSync, 'function');
@@ -134,7 +135,7 @@ describe('utils.filesMapSync', function () {
 });
 
 describe('utils.convertFilenameToId', function () {
-  var assert = chai.assert;
+  const assert = chai.assert;
   it('function is exists', function () {
     assert.typeOf(utils.convertFilenameToId, 'function');
   });
@@ -144,14 +145,16 @@ describe('utils.convertFilenameToId', function () {
   });
 
   it('check function result #1 cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg', function () {
-    assert.equal(utils.convertFilenameToId('cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'), 'cdbf2bdb4f64b7f94b4779d2320918d9-sprite-svg');
+    assert.equal(
+      utils.convertFilenameToId('cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'),
+      'cdbf2bdb4f64b7f94b4779d2320918d9-sprite-svg'
+    );
   });
 });
 
-
 describe('plugin.WebpackSvgStore static functions', function () {
-  var WebpackSvgStore;
-  var assert = chai.assert;
+  let WebpackSvgStore;
+  const assert = chai.assert;
 
   it('function is exists', function () {
     assert.typeOf(Plugin, 'function');
@@ -170,7 +173,6 @@ describe('plugin.WebpackSvgStore static functions', function () {
   });
 });
 
-
 describe('plugin.WebpackSvgStore', function () {
   it('should run without errors', function (done) {
     runRelativePathsExample(done);
@@ -182,4 +184,3 @@ describe('plugin.WebpackSvgStore side effect testing: issue-51', function () {
     runAbsolutePathsExample(done);
   });
 });
-

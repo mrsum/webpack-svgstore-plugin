@@ -1,3 +1,6 @@
+### 6.0.0
+  - Move to normal js code
+   
 ### 5.0.0
   - Code refactor for better performance and maintainablity 
   BREAKING CHANGE: 

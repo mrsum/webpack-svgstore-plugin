@@ -1,5 +1,3 @@
-'use strict';
-
 // Depends
 const _ = require('lodash');
 const fs = require('fs');
@@ -28,9 +26,12 @@ const _createSprite = function (data, template) {
  * @return {void}
  */
 const _log = function (subject, depth) {
-  console.log(util.inspect(subject, {
-    showHidden: true, depth: depth || 2
-  }));
+  console.log(
+    util.inspect(subject, {
+      showHidden: true,
+      depth: depth || 2
+    })
+  );
 };
 
 /**
@@ -101,18 +102,17 @@ const _parseSVG = function (arr, id) {
  */
 const _defs = function (id, dom, data) {
   // lets find defs into dom
-  const defs = _.filter(dom.children, {name: 'defs'});
+  const defs = _.filter(dom.children, { name: 'defs' });
   const parseChilds = function (item, data) {
     item.forEach(function (child) {
       switch (child.name) {
-        case 'use': {
-          child.attribs['xlink:href'] = ['#' + id, child.attribs['xlink:href'].replace('#', '')].join('-');
-        }
+        case 'use':
+          {
+            child.attribs['xlink:href'] = ['#' + id, child.attribs['xlink:href'].replace('#', '')].join('-');
+          }
           break;
         default:
-          child.attribs && child.attribs.id
-            ? child.attribs.id = [id, child.attribs.id].join('-')
-            : null;
+          child.attribs && child.attribs.id ? (child.attribs.id = [id, child.attribs.id].join('-')) : null;
       }
 
       if (child && child.children && child.children.length > 0) {
@@ -176,7 +176,6 @@ const _symbols = function (id, dom, data, prefix) {
 const _convertFilenameToId = function (filename) {
   return filename.split('.').join('-').toLowerCase();
 };
-
 
 /**
  * Parse dom objects
@@ -254,9 +253,7 @@ const _parseFiles = function (files, options) {
  * @return {[type]}        [description]
  */
 const _hash = function (str, hash) {
-  return str.indexOf('[hash]') >= 0
-    ? str.replace('[hash]', hash)
-    : str;
+  return str.indexOf('[hash]') >= 0 ? str.replace('[hash]', hash) : str;
 };
 
 /**
@@ -264,10 +261,10 @@ const _hash = function (str, hash) {
  * @param {string} str
  * @return {[type]} [description]
  */
-const _hashByString = function(str) {
+const _hashByString = function (str) {
   const sha = crypto.createHash('md5');
   sha.update(str);
-  
+
   return sha.digest('hex');
 };
 
@@ -298,8 +295,6 @@ module.exports.log = _log;
  * @return {[type]} [description]
  */
 module.exports.parseFiles = _parseFiles;
-
-
 
 /**
  * Build files map sync
