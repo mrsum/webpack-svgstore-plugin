@@ -76,13 +76,13 @@ class WebpackSvgStore {
 
   apply(compiler) {
     // AST parser
-    compiler.plugin('compilation', (compilation, data) => {
+    compiler.hooks.compilation.tap('webpack-svgstore-plugin', (compilation, data) => {
       
       compilation.dependencyFactories.set(ConstDependency, new NullFactory());
       compilation.dependencyTemplates.set(ConstDependency, new ConstDependency.Template());
       
-      data.normalModuleFactory.plugin('parser', (parser, options) => {
-        parser.plugin('statement', (expr) => {
+      data.normalModuleFactory.hooks.parser.for("javascript/auto").tap('UseStrictPlugin', (parser, options) => {
+        parser.hooks.statement.tap('webpack-svgstore-plugin', (expr) => {
           if (!expr.declarations || !expr.declarations.length) return;
           const thisExpr = expr.declarations[0];
           if ([
@@ -100,7 +100,7 @@ class WebpackSvgStore {
 
 
     // save file to fs
-    compiler.plugin('emit', (compilation, callback) => {
+    compiler.hooks.emit.tap('webpack-svgstore-plugin', (compilation, callback) => {
       async.forEach(Object.keys(this.tasks),
         (key, outerCallback) => {
           async.forEach(this.tasks[key],
@@ -120,7 +120,7 @@ class WebpackSvgStore {
         }, callback);
     });
 
-    compiler.plugin('done', () => {
+    compiler.hooks.done.tap('webpack-svgstore-plugin', () => {
       this.tasks = {};
     });
   }
