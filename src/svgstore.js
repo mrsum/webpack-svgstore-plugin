@@ -72,7 +72,7 @@ class WebpackSvgStore {
       }
     });
 
-    const files = utils.filesMapSync(path.join(data.context, data.path || ''));
+    const files = utils.filesMapSync(path.join(data.context, data.path || '').replace(/\\/g, '/'));
 
     data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
     data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
