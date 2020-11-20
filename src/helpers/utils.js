@@ -210,6 +210,7 @@ const _minify = (file, svgoOptions) => {
   }
 
   // TODO find out why we do not use promise here
+  // Promise has appeared since version 1.0.0, in version 0.7.1 it works fine
   min.optimize(source, svgoCallback);
 
   return source;
