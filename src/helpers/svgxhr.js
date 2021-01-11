@@ -38,7 +38,7 @@ var svgXHR = function(options) {
     if (!_ajax.responseText || _ajax.responseText.substr(0, 4) !== '<svg') {
       throw Error('Invalid SVG Response');
     }
-    if (_ajax.status < 200 || _ajax.status >= 300) {
+    if((_ajax.status < 200 || _ajax.status >= 300) && _ajax.status !== 0) {
       return;
     }
     var div = document.createElement('div');
