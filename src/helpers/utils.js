@@ -109,9 +109,9 @@ const _defs = function(id, dom, data) {
   const parseChilds = function(item, data) {
     item.forEach(function(child) {
       switch (child.name) {
-        case 'use': {
+        case 'use':
           child.attribs['xlink:href'] = ['#' + id, child.attribs['xlink:href'].replace('#', '') ].join('-');
-        } break;
+          break;
         default:
           child.attribs && child.attribs.id
             ? child.attribs.id = [id, child.attribs.id].join('-')
@@ -261,7 +261,7 @@ const _parseFiles = function(files, options) {
     });
 
     // lets create parser instance
-    const Parser = new parse.Parser(handler, {
+    const Parser = new htmlparser2.Parser(handler, {
       xmlMode: true
     });
     Parser.write(buffer);
