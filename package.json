@@ -1,5 +1,5 @@
 {
-  "name": "webpack-svgstore-plugin",
+  "name": "webpack-svgstore-plugin-v2",
   "version": "4.1.0",
   "description": "Webpack svgstore plugin",
   "main": "src/svgstore.js",
@@ -44,6 +44,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mrsum/webpack-svgstore-plugin"
+    "url": "https://github.com/HarisSpahija/webpack-svgstore-plugin"
   }
 }
