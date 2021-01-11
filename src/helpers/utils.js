@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const pug = require('pug');
 const Svgo = require('svgo');
 const globby = require('globby');
-const parse = require('htmlparser2');
+const htmlparser2 = require('htmlparser2');
 
 /**
  * Create sprite
@@ -255,7 +255,7 @@ const _parseFiles = function(files, options) {
     // get filename for id generation
     const filename = path.basename(file, '.svg');
 
-    const handler = new parse.DomHandler(function(error, dom) {
+    const handler = new htmlparser2.Parser(function(error, dom) {
       if (error) self.log(error);
       else data = _parseDomObject(data, filename, dom, options.prefix);
     });
