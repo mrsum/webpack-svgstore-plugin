@@ -1,3 +1,7 @@
+### 4.2.0
+
+- Hide sprite by default to improve accessibility
+
 ### 4.1.0
 
 - Implement `hash` by svg sprite content
