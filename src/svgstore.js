@@ -4,7 +4,7 @@
 const defaults = {
   svg: {
     xmlns: 'http://www.w3.org/2000/svg',
-    style: 'position:absolute; width: 0; height: 0'
+    style: 'position:absolute; width: 0; height: 0; display: none'
   },
   svgoOptions: {},
   name: 'sprite.[hash].svg',
