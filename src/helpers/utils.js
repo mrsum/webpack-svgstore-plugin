@@ -163,7 +163,11 @@ const _symbols = function(id, dom, data, options) {
 
   // add dom children without defs and titles
   symbol.children = _.filter(dom.children, function(obj) {
-    return (options.splitDefs && obj.name !== 'defs') && obj.name !== 'title';
+    if (options.splitDefs) {
+      return obj.name !== 'defs' && obj.name !== 'title';
+    }
+
+    return obj.name !== 'title';
   });
 
   // go through the svg element
