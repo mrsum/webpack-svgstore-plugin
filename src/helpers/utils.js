@@ -103,7 +103,11 @@ const _parseSVG = function(arr, id) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-const _defs = function(id, dom, data) {
+const _defs = function(id, dom, data, options) {
+  if (!options.splitDefs) {
+    return [];
+  }
+
   // lets find defs into dom
   const defs = _.filter(dom.children, { name: 'defs' });
   const parseChilds = function(item, data) {
@@ -210,10 +214,7 @@ const _filesMapSync = function(input) {
 const _parseDomObject = function(data, filename, dom, options) {
   const id = _convertFilenameToId(filename);
   if (dom && dom[0]) {
-    if(options.splitDefs) {
-      _defs(id, dom[0], data.defs);
-    }
-
+    _defs(id, dom[0], data.defs, options);
     _symbols(id, dom[0], data.symbols, options);
   }
 
