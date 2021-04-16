@@ -9,6 +9,7 @@ const defaults = {
   svgoOptions: {},
   name: 'sprite.[hash].svg',
   prefix: 'icon-',
+  splitDefs: true,
   template: __dirname + '/templates/layout.pug'
 };
 

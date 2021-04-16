@@ -53,6 +53,7 @@ module.exports = {
           { removeTitle: true }
         ]
       },
+      splitDefs: true,
       prefix: 'icon'
     })
   ]
@@ -97,6 +98,8 @@ React JSX:
 
 #### options
 - `template` - add custom jade template layout (optional)
+- `prefix` - prefix all icons with name (optional, default: `icon-`)
+- `splitDefs` - split defs from symbols (optional, default: true)
 - `svgoOptions` - options for [svgo](https://github.com/svg/svgo) (optional, default: `{}`)
 
 
