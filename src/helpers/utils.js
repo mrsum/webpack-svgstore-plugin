@@ -103,7 +103,11 @@ const _parseSVG = function(arr, id) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-const _defs = function(id, dom, data) {
+const _defs = function(id, dom, data, options) {
+  if (!options.splitDefs) {
+    return [];
+  }
+
   // lets find defs into dom
   const defs = _.filter(dom.children, { name: 'defs' });
   const parseChilds = function(item, data) {
@@ -143,14 +147,14 @@ const _defs = function(id, dom, data) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-const _symbols = function(id, dom, data, prefix) {
+const _symbols = function(id, dom, data, options) {
   // create symbol object
   const symbol = {
     type: 'tag',
     name: 'symbol',
     attribs: {
       viewBox: dom.attribs.viewBox,
-      id: prefix + id
+      id: options.prefix + id
     },
     next: null,
     prev: null,
@@ -159,7 +163,11 @@ const _symbols = function(id, dom, data, prefix) {
 
   // add dom children without defs and titles
   symbol.children = _.filter(dom.children, function(obj) {
-    return obj.name !== 'defs' && obj.name !== 'title';
+    if (options.splitDefs) {
+      return obj.name !== 'defs' && obj.name !== 'title';
+    }
+
+    return obj.name !== 'title';
   });
 
   // go through the svg element
@@ -207,11 +215,11 @@ const _filesMapSync = function(input) {
  * @param  {[type]} dom [description]
  * @return {[type]}     [description]
  */
-const _parseDomObject = function(data, filename, dom, prefix) {
+const _parseDomObject = function(data, filename, dom, options) {
   const id = _convertFilenameToId(filename);
   if (dom && dom[0]) {
-    _defs(id, dom[0], data.defs);
-    _symbols(id, dom[0], data.symbols, prefix);
+    _defs(id, dom[0], data.defs, options);
+    _symbols(id, dom[0], data.symbols, options);
   }
 
   return data;
@@ -257,7 +265,7 @@ const _parseFiles = function(files, options) {
 
     const handler = new parse.DomHandler(function(error, dom) {
       if (error) self.log(error);
-      else data = _parseDomObject(data, filename, dom, options.prefix);
+      else data = _parseDomObject(data, filename, dom, options);
     });
 
     // lets create parser instance

@@ -103,6 +103,7 @@ describe('utils.createSprite', function() {
     loop: 2,
     svgoOptions: {},
     prefix: 'icon-',
+    splitDefs: true,
     name: 'sprite.[hash].svg',
     ajaxWrapper: false,
     template: path.join(__dirname, '..', 'templates/layout.pug')
