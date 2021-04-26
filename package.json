@@ -5,9 +5,7 @@
   "main": "src/svgstore.js",
   "scripts": {
     "test": "NODE_ENV=platform ./node_modules/.bin/_mocha ./src/__tests__/index.js",
-    "code:coverage": "NODE_ENV=platform ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./src/__tests__/index.js && npm run code:report",
-    "code:report": "CODECLIMATE_REPO_TOKEN=29b2c943849c33562af12b70563d86e95c073e04c7510e9da5d9711cf3233b17 ./node_modules/.bin/codeclimate-test-reporter < coverage/lcov.info",
-    "build": "rm -rf platform/dist/* && NODE_ENV=platform webpack --progress --colors --bail"
+    "build": "rm -rf platform/dist/* && NODE_ENV=platform webpack"
   },
   "author": "me@mrsum.ru",
   "contributors": [
@@ -22,21 +20,19 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "async": "^2.1.4",
-    "globby": "6.1.0",
-    "htmlparser2": "3.9.2",
-    "lodash": "^4.17.21",
-    "pug": "^3.0.1",
-    "svgo": "^1.1.0"
+    "async": "3.2.0",
+    "globby": "11.0.3",
+    "htmlparser2": "6.1.0",
+    "lodash": "4.17.21",
+    "pug": "3.0.2",
+    "svgo": "0.7.1"
   },
   "devDependencies": {
-    "chai": "3.5.0",
-    "codeclimate-test-reporter": "0.4.0",
-    "eslint-config-rambler": "0.2.5",
-    "istanbul": "0.4.5",
-    "mocha": "3.2.0",
+    "chai": "4.3.4",
+    "mocha": "8.3.2",
     "path": "0.12.7",
-    "webpack": "2.2.1"
+    "webpack": "4.43.0",
+    "webpack-cli": "^4.6.0"
   },
   "repository": {
     "type": "git",
