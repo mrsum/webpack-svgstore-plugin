@@ -7,10 +7,9 @@ const path = require('path');
 const util = require('util');
 const crypto = require('crypto');
 const pug = require('pug');
-const Svgo = require('svgo');
 const globby = require('globby');
 const parse = require('htmlparser2');
-
+const { optimize } = require('svgo')
 /**
  * Create sprite
  * @param  {object} data
@@ -194,25 +193,6 @@ const _parseDomObject = function (data, filename, dom, prefix) {
 };
 
 /**
- * Minify via SVGO
- * @param  {string}   file  filename
- * @param  {integer}  loop  loop count
- * @return {[type]}         minified source
- */
-const _minify = function (file, svgoOptions) {
-  const min = new Svgo(svgoOptions);
-  let source = file;
-
-  function svgoCallback(result) {
-    source = result.data;
-  }
-
-  min.optimize(source, svgoCallback);
-
-  return source;
-};
-
-/**
  * [parseFiles description]
  * @return {[type]} [description]
  */
@@ -227,7 +207,7 @@ const _parseFiles = function (files, options) {
   // each over files
   files.forEach(function (file) {
     // load and minify
-    const buffer = _minify(fs.readFileSync(file, 'utf8'), options.svgoOptions);
+    const buffer = optimize(fs.readFileSync(file, 'utf8'), options.svgoOptions);
     // get filename for id generation
     const filename = path.basename(file, '.svg');
 
@@ -240,7 +220,7 @@ const _parseFiles = function (files, options) {
     const Parser = new parse.Parser(handler, {
       xmlMode: true
     });
-    Parser.write(buffer);
+    Parser.write(buffer.data);
     Parser.end();
   });
 
@@ -357,14 +337,6 @@ module.exports.defs = _defs;
  * @return {[type]}      [description]
  */
 module.exports.symbols = _symbols;
-
-/**
- * Minify via SVGO
- * @param  {string}   file  filename
- * @param  {integer}  loop  loop count
- * @return {[type]}         minified source
- */
-module.exports.minify = _minify;
 
 /**
  * Sprite creation

@@ -24,10 +24,9 @@ npm i webpack-svgstore-plugin --save-dev
 
 ## Webpack version support
 Use webpack-svgstore-plugin@3.x.x for Webpack 1.x.x  
-Use webpack-svgstore-plugin@4.x.x for Webpack 2.x.x,3.x.x,4.x.x. 
-## Node.js version support
-#### We do not maintain a version for node.js 0.12 anymore
-  Tested to work with with node.js 4.x,6.x,7.x,8.x
+Use webpack-svgstore-plugin@4.x.x for Webpack 2.x.x,3.x.x,4.x.x.
+Use webpack-svgstore-plugin@5.x.x for Webpack 2.x.x,3.x.x,4.x.x, node must be =>7.6
+Use webpack-svgstore-plugin@6.x.x for Webpack 5.x.x, node must be => 10.12
 
 
 ## Webpack configuration

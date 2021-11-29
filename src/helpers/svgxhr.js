@@ -1,14 +1,14 @@
 /**
  * Load svg via ajax
+ *
  * @param  {string} url path to svg sprite
  * @generator: webpack-svgstore-plugin
  * @see: https://www.npmjs.com/package/webpack-svgstore-plugin
  * @return {[type]}     [description]
  */
-const svgXHR = function (options) {
-  let url;
 
-  url = (options && options.filename) ? options.filename : null;
+function svgXHR(options) {
+  let url = (options && options.filename) ? options.filename : null;
 
   if (!url) {
     return false;
@@ -41,25 +41,11 @@ const svgXHR = function (options) {
     if (ajax.status < 200 || ajax.status >= 300) {
       return;
     }
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.innerHTML = ajax.responseText;
     document.body.insertBefore(div, document.body.childNodes[0]);
   };
   ajax.send();
-};
-
-/**
- * jQuery like $.ready function.
- *
- * @param {Function} fn
- * @return void
- */
-function domready(callback) {
-  if (document.readyState === 'complete' || (document.readyState !== 'loading' && !document.documentElement.doScroll)) {
-    callback();
-  } else {
-    document.addEventListener('DOMContentLoaded', callback);
-  }
 }
 
 module.exports = svgXHR;

@@ -127,7 +127,7 @@ describe('utils.filesMapSync', function () {
   });
 
   it('should callback filesMapSync function', function () {
-    const items = utils.filesMapSync(path.join(__dirname, 'svg', '**', '*.svg'));
+    const items = utils.filesMapSync('./svg/**/*.svg',{cwd:__dirname});
     assert.isArray(items);
     assert(items.length > 0, 'Files array must be more than 0');
   });
