@@ -1,25 +1,26 @@
-'use strict';
+"use strict";
 
 // Depends
-var path = require('path');
-var SvgStore = require('../src/svgstore');
+var path = require("path");
+var SvgStore = require("../src/svgstore");
 
 module.exports = function(_path) {
   // define local variables
-  var distPath = path.join(_path, 'platform', 'dist');
+  var distPath = path.join(_path, "platform", "dist");
 
   return {
+    mode: "production",
     entry: {
-      app: path.join(_path, 'platform', 'static', 'js', 'index.js')
+      app: path.join(_path, "platform", "static", "js", "index.js"),
     },
     output: {
       path: distPath,
-      filename: '[chunkhash].[name].js',
-      chunkFilename: '[chunkhash].[id].js',
-      publicPath: '/platform/'
+      filename: "[chunkhash].[name].js",
+      chunkFilename: "[chunkhash].[id].js",
+      publicPath: "/platform/",
     },
     resolve: {
-      extensions: ['.js']
+      extensions: [".js"],
     },
     plugins: [
       // create svgStore instance object
@@ -27,10 +28,10 @@ module.exports = function(_path) {
         // svgo options
         svgoOptions: {
           plugins: [
-            { removeTitle: true }
-          ]
-        }
-      })
-    ]
+            "removeTitle",
+          ],
+        },
+      }),
+    ],
   };
 };
