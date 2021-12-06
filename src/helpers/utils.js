@@ -173,7 +173,7 @@ const _symbols = function (id, dom, data, prefix) {
  * @return {string}          [description]
  */
 const _convertFilenameToId = function (filename) {
-  return filename.split('.').join('-').toLowerCase();
+  return filename.split('.').join('_').toLowerCase();
 };
 
 
