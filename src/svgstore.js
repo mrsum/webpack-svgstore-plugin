@@ -18,6 +18,7 @@ const path = require("path");
 const utils = require("./helpers/utils");
 const ConstDependency = require("webpack/lib/dependencies/ConstDependency");
 const NullFactory = require("webpack/lib/NullFactory");
+const RuntimeGlobals = require("webpack/lib/runtimeGlobals");
 
 const allowedMagicVariables = [
   "__svg__",
@@ -74,7 +75,7 @@ class WebpackSvgStore {
     data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
 
     let replacement = expr.id.name + " = { filename: " + "__webpack_require__.p +" + "\"" + data.fileName + "\" }";
-    let dep = new ConstDependency(replacement, expr.range);
+    let dep = new ConstDependency(replacement, expr,[RuntimeGlobals.publicPath]);
     dep.loc = expr.loc;
     parser.state.current.addDependency(dep);
     // parse repl
