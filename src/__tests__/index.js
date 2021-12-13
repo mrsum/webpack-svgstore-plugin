@@ -140,11 +140,11 @@ describe('utils.convertFilenameToId', function () {
   });
 
   it('check function result #1 sprite.svg', function () {
-    assert.equal(utils.convertFilenameToId('sprite.svg'), 'sprite-svg');
+    assert.equal(utils.convertFilenameToId('sprite.svg'), 'sprite_svg');
   });
 
   it('check function result #1 cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg', function () {
-    assert.equal(utils.convertFilenameToId('cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'), 'cdbf2bdb4f64b7f94b4779d2320918d9-sprite-svg');
+    assert.equal(utils.convertFilenameToId('cdbf2bdb4f64b7f94b4779d2320918d9.sprite.svg'), 'cdbf2bdb4f64b7f94b4779d2320918d9_sprite_svg');
   });
 });
 
