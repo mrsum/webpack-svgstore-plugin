@@ -9,13 +9,14 @@ module.exports = function(_path) {
   var distPath = path.join(_path, "platform", "dist");
 
   return {
-    mode: "production",
+    mode: "development",
+    devtool:'source-map',
     entry: {
       app: path.join(_path, "platform", "static", "js", "index.js"),
     },
     output: {
       path: distPath,
-      filename: "[chunkhash].[name].js",
+      filename: "[name].js",
       chunkFilename: "[chunkhash].[id].js",
       publicPath: "/platform/",
     },

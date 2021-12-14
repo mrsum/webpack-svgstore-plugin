@@ -74,9 +74,8 @@ class WebpackSvgStore {
     data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
     data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
 
-    let replacement = expr.id.name + " = { filename: " + "__webpack_require__.p +" + "\"" + data.fileName + "\" };";
-    let dep = new ConstDependency(replacement, expr.loc,[RuntimeGlobals.publicPath]);
-
+    let replacement = expr.id.name + " = { filename: " + "__webpack_require__.p +" + "\"" + data.fileName + "\" }";
+    let dep = new ConstDependency(replacement, expr.range,[RuntimeGlobals.publicPath]);
     parser.state.current.addDependency(dep);
     // parse repl
     this.addTask(parser.state.current.request, data);
@@ -86,8 +85,8 @@ class WebpackSvgStore {
     compiler.hooks["compilation"].tap(WebpackSvgStore.name, (compilation, data) => {
       compilation.dependencyFactories.set(ConstDependency, new NullFactory());
       compilation.dependencyTemplates.set(ConstDependency, new ConstDependency.Template());
-      data.normalModuleFactory.hooks["parser"].for("javascript/auto").tap(WebpackSvgStore.name, (parser) => {
-        parser.hooks["statement"].tap(WebpackSvgStore.name, (expr) => {
+      data.normalModuleFactory.hooks.parser.for("javascript/auto").tap(WebpackSvgStore.name, (parser) => {
+        parser.hooks.statement.tap(WebpackSvgStore.name, (expr) => {
           if (!expr.declarations || !expr.declarations.length) return;
           const thisExpr = expr.declarations[0];
           if (allowedMagicVariables.indexOf(thisExpr.id.name) > -1) {
