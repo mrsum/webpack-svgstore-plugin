@@ -74,7 +74,7 @@ class WebpackSvgStore {
     data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
     data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
 
-    let replacement = expr.id.name + " = { filename: " + "__webpack_require__.p +" + "\"" + data.fileName + "\" }";
+    let replacement = expr.id.name + " = { filename: " + "__webpack_require__.p +" + "\"" + data.fileName + "\" };";
     let dep = new ConstDependency(replacement, expr.range,[RuntimeGlobals.publicPath]);
     parser.state.current.addDependency(dep);
     // parse repl
