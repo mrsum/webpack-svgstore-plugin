@@ -18,7 +18,7 @@ const path = require("path");
 const utils = require("./helpers/utils");
 const ConstDependency = require("webpack/lib/dependencies/ConstDependency");
 const NullFactory = require("webpack/lib/NullFactory");
-const RuntimeGlobals = require("webpack/lib/runtimeGlobals");
+const RuntimeGlobals = require("webpack/lib/RuntimeGlobals");
 
 const allowedMagicVariables = [
   "__svg__",
