@@ -7,7 +7,7 @@ const path = require('path');
 const util = require('util');
 const crypto = require('crypto');
 const pug = require('pug');
-const globby = require('globby');
+const globby = require('glob');
 const parse = require('htmlparser2');
 const { optimize } = require('svgo')
 /**
