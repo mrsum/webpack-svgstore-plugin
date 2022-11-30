@@ -29,7 +29,6 @@ const allowedMagicVariables = [
 ];
 
 class WebpackSvgStore {
-
   /**
    * Constructor
    * @param {string} input   [description]
@@ -40,15 +39,16 @@ class WebpackSvgStore {
   constructor(options) {
     this.tasks = {};
     this.options = _.merge({}, defaults, options);
-  };
-
-  addTask(file, value) {
-    this.tasks[file] ? this.tasks[file].push(value) : (() => {
-      this.tasks[file] = [];
-      this.tasks[file].push(value);
-    })();
   }
 
+  addTask(file, value) {
+    this.tasks[file]
+      ? this.tasks[file].push(value)
+      : (() => {
+          this.tasks[file] = [];
+          this.tasks[file].push(value);
+        })();
+  }
 
   createTaskContext(expr, parser) {
     const data = {
@@ -57,7 +57,7 @@ class WebpackSvgStore {
       context: parser.state.current.context,
     };
 
-    expr.init.properties.forEach(function(prop) {
+    expr.init.properties.forEach(function (prop) {
       switch (prop.key.name) {
         case "name":
           data.fileName = prop.value.value;
@@ -69,58 +69,86 @@ class WebpackSvgStore {
           break;
       }
     });
-    let files = (data.path) ? utils.filesMapSync(data.path, {cwd: data.context}) : [];
-    files = files.map(filepath=>path.resolve(data.context,filepath));
-    data.fileContent = utils.createSprite(utils.parseFiles(files, this.options), this.options.template);
-    data.fileName = utils.hash(data.fileName, utils.hashByString(data.fileContent));
+    let files = data.path
+      ? utils.filesMapSync(data.path, { cwd: data.context })
+      : [];
+    files = files.map((filepath) => path.resolve(data.context, filepath));
+    data.fileContent = utils.createSprite(
+      utils.parseFiles(files, this.options),
+      this.options.template
+    );
+    data.fileName = utils.hash(
+      data.fileName,
+      utils.hashByString(data.fileContent)
+    );
 
-    let replacement = expr.id.name + " = { filename: " + "__webpack_require__.p +" + "\"" + data.fileName + "\" };";
-    let dep = new ConstDependency(replacement, expr.range,[RuntimeGlobals.publicPath]);
+    let replacement =
+      expr.id.name +
+      " = { filename: " +
+      "__webpack_require__.p +" +
+      '"' +
+      data.fileName +
+      '" };';
+    let dep = new ConstDependency(replacement, expr.range, [
+      RuntimeGlobals.publicPath,
+    ]);
     parser.state.current.addDependency(dep);
     // parse repl
     this.addTask(parser.state.current.request, data);
   }
   apply(compiler) {
     // AST parser
-    compiler.hooks["compilation"].tap(WebpackSvgStore.name, (compilation, data) => {
-      compilation.dependencyFactories.set(ConstDependency, new NullFactory());
-      compilation.dependencyTemplates.set(ConstDependency, new ConstDependency.Template());
-      data.normalModuleFactory.hooks.parser.for("javascript/auto").tap(WebpackSvgStore.name, (parser) => {
-        parser.hooks.statement.tap(WebpackSvgStore.name, (expr) => {
-          if (!expr.declarations || !expr.declarations.length) return;
-          const thisExpr = expr.declarations[0];
-          if (allowedMagicVariables.indexOf(thisExpr.id.name) > -1) {
-            return this.createTaskContext(thisExpr, parser);
+    compiler.hooks.compilation.tap(
+      WebpackSvgStore.name,
+      (compilation, data) => {
+        compilation.dependencyFactories.set(ConstDependency, new NullFactory());
+        compilation.dependencyTemplates.set(
+          ConstDependency,
+          new ConstDependency.Template()
+        );
+        data.normalModuleFactory.hooks.parser
+          .for("javascript/auto")
+          .tap(WebpackSvgStore.name, (parser) => {
+            parser.hooks.statement.tap(WebpackSvgStore.name, (expr) => {
+              if (!expr.declarations || !expr.declarations.length) return;
+              const thisExpr = expr.declarations[0];
+              if (allowedMagicVariables.indexOf(thisExpr.id.name) > -1) {
+                this.createTaskContext(thisExpr, parser);
+              }
+            });
+          });
+
+        // save file to fs
+        compilation.hooks["additionalAssets"].tapPromise(
+          WebpackSvgStore.name,
+          () => {
+            const taskKeysArr = Object.keys(this.tasks);
+            if (taskKeysArr.length === 0) return Promise.resolve();
+            else {
+              return Promise.all(
+                taskKeysArr.map(async (key) => {
+                  const tasksJobs = this.tasks[key];
+                  return Promise.all(
+                    tasksJobs.map(async (task) => {
+                      // add sprite to assets
+                      compilation.assets[task.fileName] = {
+                        size: () => Buffer.byteLength(task.fileContent, "utf8"),
+                        source: () => Buffer.from(task.fileContent),
+                      };
+                    })
+                  );
+                })
+              );
+            }
           }
-        });
-      });
+        );
+      }
+    );
 
-      // save file to fs
-      compilation.hooks["additionalAssets"].tapPromise(WebpackSvgStore.name, () => {
-        const taskKeysArr = Object.keys(this.tasks);
-        if (taskKeysArr.length === 0) return Promise.resolve();
-        else {
-          return Promise.all(taskKeysArr.map(async (key) => {
-            const tasksJobs = this.tasks[key];
-            return Promise.all(tasksJobs.map(async task => {
-              // add sprite to assets
-              compilation.assets[task.fileName] = {
-                size: () => Buffer.byteLength(task.fileContent, "utf8"),
-                source: () => Buffer.from(task.fileContent),
-              };
-            }));
-          }));
-        }
-      });
-
-      compilation.hooks["afterSeal"].tap(WebpackSvgStore.name, () => {
-        this.tasks = {};
-      });
-
+    compiler.hooks.done.tap(WebpackSvgStore.name, () => {
+      this.tasks = {};
     });
-
   }
-
 }
 
 /**
